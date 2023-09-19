@@ -1,1 +1,1 @@
-# fire-knot-cpu
+# red-knot-cpu
