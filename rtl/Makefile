@@ -1,5 +1,5 @@
 CPU     ?= x
-CPU_LIST = me32ls me32lm me32lp me32ep2 me32ep3 me32ep5
+CPU_LIST = me32ls me32lm me32lp me32ep2
 
 ifeq ($(filter $(CPU_LIST), $(CPU)),)
     ifeq ($(findstring $(MAKECMDGOALS), config|clean),)
