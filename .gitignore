@@ -1,1 +1,10 @@
+.vscode/
+
+# cpu
+.bsp/
+build/
+out/
+temp/
+
+# env
 env/
