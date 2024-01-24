@@ -1,0 +1,7 @@
+.vscode/
+
+# Mill
+.bsp/
+build/
+out/
+temp/
