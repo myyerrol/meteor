@@ -1,4 +1,4 @@
-package cpu.port
+package cpu.mem
 
 import chisel3._
 import chisel3.util._
@@ -18,20 +18,15 @@ class MemDualFake(val cTimeType: String) extends Module with ConfigInst {
         val oRdData = Output(UInt(DATA_WIDTH.W))
     })
 
-    val mMem = Mem(MEMS_NUM, UInt(DATA_WIDTH.W))
-    if (cTimeType.equals("async")) {
-        mMem = Mem(MEMS_NUM, UInt(DATA_WIDTH.W))
-    }
-    else if (cTimeType.equals("sync")) {
-        mMem = SyncReadMem(MEMS_NUM, UInt(DATA_WIDTH.W))
+    val mMem = cTimeType match {
+        case "async" => Mem(MEMS_NUM, UInt(DATA_WIDTH.W))
+        case "sync"  => SyncReadMem(MEMS_NUM, UInt(DATA_WIDTH.W))
     }
 
-    when (io.iRdEn) {
-        io.oRdData := mMem(io.iRdAddr)
-    }
-    .otherwise {
-        io.oRdData := io.oRdData
-    }
+    io.oRdData := (mMem match {
+        case asyncMem: Mem[_]         => asyncMem.read(io.iRdAddr)
+        case syncMem:  SyncReadMem[_] => syncMem.read(io.iRdAddr)
+    })
 
     when (io.iWrEn) {
         mMem(io.iWrAddr) := io.iWrData
