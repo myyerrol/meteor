@@ -167,7 +167,6 @@ test:
 	mill -i cpu.test
 
 gen: $(SRCVS_GEN)
-	@echo "success"
 
 # run: $(NPC_BIN)
 # 	rm -rf $(DIR_BUILD)/wave.vcd
@@ -179,7 +178,6 @@ gen: $(SRCVS_GEN)
 
 sim: $(NPC_BIN)
 	gtkwave $(DIR_BUILD)/wave.vcd
-	@echo "success"
 
 fmt:
 	mill -i cpu.reformat

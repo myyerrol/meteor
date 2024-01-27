@@ -1,17 +1,10 @@
-package cpu.core.ml.me32ls.stage
+package cpu.port
 
 import chisel3._
 import chisel3.util._
 
 import cpu.base._
-import cpu.port._
 
 class IDUIO extends Bundle with ConfigIO {
+    val bPC = Output(UInt(ADDR_WIDTH.W))
 }
-
-class IDU extends Module with ConfigInst {
-
-}
-
-
-

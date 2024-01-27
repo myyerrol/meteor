@@ -7,13 +7,13 @@ import cpu.port._
 
 class RegGPR extends Module with ConfigInst {
     val io = IO(new Bundle {
-        val iRd1Addr   = Input(UInt(GPRS_WIDTH.W))
-        val iRd2Addr   = Input(UInt(GPRS_WIDTH.W))
-        val iWrEn      = Input(Bool())
-        val iWrAddr    = Input(UInt(ADDR_WIDTH.W))
-        val iWrData    = Input(UInt(DATA_WIDTH.W))
+        val iRd1Addr = Input(UInt(GPRS_WIDTH.W))
+        val iRd2Addr = Input(UInt(GPRS_WIDTH.W))
+        val iWrEn    = Input(Bool())
+        val iWrAddr  = Input(UInt(ADDR_WIDTH.W))
+        val iWrData  = Input(UInt(DATA_WIDTH.W))
 
-        val pRegGPR    = new RegGPRIO
+        val pRegGPR  = new RegGPRIO
     })
 
     val mRegGPR = Mem(GPRS_NUM, UInt(DATA_WIDTH.W))
@@ -26,9 +26,9 @@ class RegGPR extends Module with ConfigInst {
         mRegGPR(io.iWrAddr) := mRegGPR(io.iWrAddr)
     }
 
-    io.pRegGPR.bRd1Data := mRegGPR(io.iRd1Addr)
-    io.pRegGPR.bRd2Data := mRegGPR(io.iRd2Addr)
-    io.pRegGPR.bRdEData := mRegGPR(GPRS_END)
+    io.pRegGPR.bRd1Data  := mRegGPR(io.iRd1Addr)
+    io.pRegGPR.bRd2Data  := mRegGPR(io.iRd2Addr)
+    io.pRegGPR.bRdEData  := mRegGPR(GPRS_END)
 
     io.pRegGPR.bRdData0  := mRegGPR( 0.U(GPRS_WIDTH.W))
     io.pRegGPR.bRdData1  := mRegGPR( 1.U(GPRS_WIDTH.W))

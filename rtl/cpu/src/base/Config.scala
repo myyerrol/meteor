@@ -16,6 +16,7 @@ trait ConfigIO {
 
     val GPRS_NUM = 1 << GPRS_WIDTH
     val CSRS_NUM = 4096
+    val MEMS_NUM = 1 << 16
     val MEMS_TYP = "DPIDirect" // DPIDirect, DPIAXI4Lite, Embed
 }
 
