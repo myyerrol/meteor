@@ -18,15 +18,24 @@ class MemDualFake(val cTimeType: String) extends Module with ConfigInst {
                                     Vec(MASK_WIDTH, UInt(BYTE_WIDTH.W)))
     }
 
-    val wRdData = Wire(Vec(MASK_WIDTH, UInt(BYTE_WIDTH.W)))
+    val wRdDataA = Wire(Vec(MASK_WIDTH, UInt(BYTE_WIDTH.W)))
+    val wRdDataB = Wire(Vec(MASK_WIDTH, UInt(BYTE_WIDTH.W)))
 
-    wRdData := (mMem match {
-        case asyncMem: Mem[_]         => asyncMem.read(io.pMem.bRdAddr)
-        case syncMem:  SyncReadMem[_] => syncMem.read(io.pMem.bRdAddr,
+    wRdDataA := (mMem match {
+        case asyncMem: Mem[_]         => asyncMem.read(io.pMem.bRdAddrA)
+        case syncMem:  SyncReadMem[_] => syncMem.read(io.pMem.bRdAddrA,
+                                                      io.pMem.bRdEn)
+    })
+    wRdDataB := (mMem match {
+        case asyncMem: Mem[_]         => asyncMem.read(io.pMem.bRdAddrB)
+        case syncMem:  SyncReadMem[_] => syncMem.read(io.pMem.bRdAddrB,
                                                       io.pMem.bRdEn)
     })
 
-    io.pMem.bRdData := wRdData.reverse.foldLeft(0.U(BYTE_WIDTH.W)) {
+    io.pMem.bRdDataA := wRdDataA.reverse.foldLeft(0.U(BYTE_WIDTH.W)) {
+        (sum, nxt) => Cat(nxt, sum)
+    }
+    io.pMem.bRdDataB := wRdDataB.reverse.foldLeft(0.U(BYTE_WIDTH.W)) {
         (sum, nxt) => Cat(nxt, sum)
     }
 
@@ -40,8 +49,6 @@ class MemDualFake(val cTimeType: String) extends Module with ConfigInst {
         mMem.write(io.pMem.bWrAddr, wWrData, io.pMem.bWrMask)
     }
     .otherwise {
-        mMem.write(io.pMem.bWrAddr,
-                   mMem.read(io.pMem.bWrAddr),
-                   io.pMem.bWrMask)
+        mMem.write(io.pMem.bWrAddr, mMem.read(io.pMem.bWrAddr), io.pMem.bWrMask)
     }
 }
