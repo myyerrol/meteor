@@ -21,21 +21,21 @@ class MemSingle(val cTimeType: String) extends Module with ConfigInst {
     val wRdData = Wire(Vec(MASK_WIDTH, UInt(BYTE_WIDTH.W)))
     val wWrData = Wire(Vec(MASK_WIDTH, UInt(BYTE_WIDTH.W)))
     for (i <- 0 until MASK_WIDTH) {
-        wWrData(i) := io.pMem.iWrData(BYTE_WIDTH * i + (BYTE_WIDTH - 1),
+        wWrData(i) := io.pMem.bWrData(BYTE_WIDTH * i + (BYTE_WIDTH - 1),
                                       BYTE_WIDTH * i)
     }
 
-    when (!io.pMem.iWrEn) {
+    when (!io.pMem.bWrEn) {
         wRdData := (mMem match {
-            case asyncMem: Mem[_]         => asyncMem.read(io.pMem.iAddr)
-            case syncMem:  SyncReadMem[_] => syncMem.read(io.pMem.iAddr)
+            case asyncMem: Mem[_]         => asyncMem.read(io.pMem.bAddr)
+            case syncMem:  SyncReadMem[_] => syncMem.read(io.pMem.bAddr)
         })
 
-        io.pMem.oRdData := wRdData.reverse.foldLeft(0.U(BYTE_WIDTH.W)) {
+        io.pMem.bRdData := wRdData.reverse.foldLeft(0.U(BYTE_WIDTH.W)) {
             (sum, nxt) => Cat(nxt, sum)
         }
     }
     .otherwise {
-        mMem.write(io.pMem.iAddr, wWrData, io.pMem.iWrMask)
+        mMem.write(io.pMem.bAddr, wWrData, io.pMem.bWrMask)
     }
 }

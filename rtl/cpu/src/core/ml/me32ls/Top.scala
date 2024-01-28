@@ -13,19 +13,19 @@ class Top extends Module {
     });
 
     val mMemDualFake = Module(new MemDualFake("sync"))
-    mMemDualFake.io.pMem.iRdEn := true.B
-    mMemDualFake.io.pMem.iWrEn := true.B
+    mMemDualFake.io.pMem.bRdEn := true.B
+    mMemDualFake.io.pMem.bWrEn := true.B
 
-    mMemDualFake.io.pMem.iRdAddr := 0.U
-    mMemDualFake.io.pMem.iWrAddr := 0.U
-    mMemDualFake.io.pMem.iWrData := 0.U
+    mMemDualFake.io.pMem.bRdAddr := 0.U
+    mMemDualFake.io.pMem.bWrAddr := 0.U
+    mMemDualFake.io.pMem.bWrData := 0.U
 
     val maskInt = "b1110".U
     val maskVec = VecInit(maskInt.asBools)
-    mMemDualFake.io.pMem.iWrMask := maskVec
+    mMemDualFake.io.pMem.bWrMask := maskVec
 
     val test = WireInit(UInt(32.W), 0.U)
-    test := mMemDualFake.io.pMem.oRdData
+    test := mMemDualFake.io.pMem.bRdData
 
     io.c := 1.U + test
 }
