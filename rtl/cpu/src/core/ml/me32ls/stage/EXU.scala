@@ -71,16 +71,15 @@ class EXU extends Module with ConfigInst {
         io.pMem.bWrEn   := true.B
         io.pMem.bWrAddr := mALU.io.oOut
         io.pMem.bWrData := io.iJmpOrWrData
-        // io.pMem.bWrMask := MuxLookup(
-        //     io.iMemByt,
-        //     VecInit(("b1111".U).asBools))(
-        //     Seq(
-        //         MEM_BYT_1_U -> VecInit(("b0001".U).asBools),
-        //         MEM_BYT_2_U -> VecInit(("b0011".U).asBools),
-        //         MEM_BYT_4_U -> VecInit(("b1111".U).asBools)
-        //     )
-        // )
-        io.pMem.bWrMask := VecInit(("b1111".U).asBools)
+        io.pMem.bWrMask := MuxLookup(
+            io.iMemByt,
+            VecInit(("b1111".U).asBools))(
+            Seq(
+                MEM_BYT_1_U -> VecInit(false.B, false.B, false.B, true.B),
+                MEM_BYT_2_U -> VecInit(false.B, false.B, true.B,  true.B),
+                MEM_BYT_4_U -> VecInit(("b1111".U).asBools)
+            )
+        )
     }
     .otherwise {
         io.pMem.bWrEn   := false.B
