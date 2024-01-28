@@ -5,14 +5,12 @@ import chisel3.util._
 
 import cpu.base._
 import cpu.port._
-import cpu.mem._
 
 class LSU extends Module with ConfigInst {
     val io = IO(new Bundle {
-        val pMem = new MemDualIO
+        val pMemI =         new MemDualIO
+        val pMemO = Flipped(new MemDualIO)
     })
 
-    val mMem = Module(new MemDualFake("async"))
-
-    io.pMem <> mMem.io.pMem
+    io.pMemO <> io.pMemI
 }

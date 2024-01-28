@@ -19,14 +19,20 @@ class EXU extends Module with ConfigInst {
         val iGPRWrEn     =  Input(Bool())
         val iGPRWrSrc    =  Input(UInt(SIGS_WIDTH.W))
 
+        val iGPRRdAddr   =  Input(UInt(ADDR_WIDTH.W))
         val iALURS1Data  =  Input(UInt(DATA_WIDTH.W))
         val iALURS2Data  =  Input(UInt(DATA_WIDTH.W))
         val iJmpOrWrData =  Input(UInt(DATA_WIDTH.W))
+        val iMemRdData   =  Input(UInt(DATA_WIDTH.W))
 
-        val oJmpEn = Output(Bool())
-        val oJmpPC = Output(UInt(ADDR_WIDTH.W))
+        val oJmpEn       = Output(Bool())
+        val oJmpPC       = Output(UInt(ADDR_WIDTH.W))
+        val oGPRWrEn     = Output(Bool())
+        val oGPRWrAddr   = Output(UInt(ADDR_WIDTH.W))
+        val oGPRWrData   = Output(UInt(DATA_WIDTH.W))
+        val oMemRdAddr   = Output(UInt(ADDR_WIDTH.W))
 
-        val pMem   = new MemDualIO
+        val pMem         = new MemDualIO
     })
 
     val mALU = Module(new ALU)
@@ -81,5 +87,46 @@ class EXU extends Module with ConfigInst {
         io.pMem.bWrMask := VecInit(("b1111".U).asBools)
     }
 
-
+    val wGPRWrData = MuxLookup(io.iGPRWrSrc, DATA_ZERO)(
+        Seq(
+            GPR_WR_SRC_ALU -> mALU.io.oOut,
+            GPR_WR_SRC_PC  -> (io.iPC + 4.U(ADDR_WIDTH.W)),
+            GPR_WR_SRC_CSR -> DATA_ZERO
+        )
+    )
+    when (io.iGPRWrEn) {
+        io.oGPRWrEn   := false.B
+        io.oGPRWrAddr := io.iGPRRdAddr
+        when (io.iGPRWrSrc === GPR_WR_SRC_MEM) {
+            io.oMemRdAddr := mALU.io.oOut
+            val wMemRdDataByt1 = io.iMemRdData(BYTE_WIDTH * 1 - 1, 0)
+            val wMemRdDataByt2 = io.iMemRdData(BYTE_WIDTH * 2 - 1, 0)
+            val wMemRdDataByt4 = io.iMemRdData(BYTE_WIDTH * 4 - 1, 0)
+            val wMemRdData = MuxLookup(io.iMemByt, DATA_ZERO)(
+                Seq(
+                    (io.iMemByt === MEM_BYT_1_S) ->
+                        ExtenSign(wMemRdDataByt1, DATA_WIDTH - BYTE_WIDTH * 1),
+                    (io.iMemByt === MEM_BYT_1_U) ->
+                        ExtenZero(wMemRdDataByt1, DATA_WIDTH - BYTE_WIDTH * 1),
+                    (io.iMemByt === MEM_BYT_2_S) ->
+                        ExtenSign(wMemRdDataByt2, DATA_WIDTH - BYTE_WIDTH * 2),
+                    (io.iMemByt === MEM_BYT_2_U) ->
+                        ExtenZero(wMemRdDataByt2, DATA_WIDTH - BYTE_WIDTH * 2),
+                    (io.iMemByt === MEM_BYT_4_S) ->
+                        ExtenSign(wMemRdDataByt2, DATA_WIDTH - BYTE_WIDTH * 4),
+                    (io.iMemByt === MEM_BYT_4_U) ->
+                        ExtenZero(wMemRdDataByt4, DATA_WIDTH - BYTE_WIDTH * 4)
+                )
+            )
+            io.oGPRWrData := wMemRdData
+        }
+        .otherwise {
+            io.oGPRWrData := wGPRWrData
+        }
+    }
+    .otherwise {
+        io.oGPRWrEn   := false.B
+        io.oGPRWrAddr := 0.U(ADDR_WIDTH.W)
+        io.oGPRWrData := 0.U(DATA_WIDTH.W)
+    }
 }
