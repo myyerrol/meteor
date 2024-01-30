@@ -92,14 +92,14 @@ SRCCS_DIR += $(METEOR_ENV_HOME)/core/src             \
              $(METEOR_ENV_HOME)/core/src/memory      \
              $(METEOR_ENV_HOME)/core/src/monitor     \
              $(METEOR_ENV_HOME)/core/src/monitor/sdb \
-             $(METEOR_ENV_HOME)/core/src/utils
+             $(METEOR_ENV_HOME)/core/src/util
 SRCCS_SRC_BLACKLIST =
 SRCCS_DIR_BLACKLIST =
 SRCCS_BLACKLIST     = $(SRCCS_SRC_BLACKLIST)                               \
                       $(shell find $(SRCCS_DIR_BLACKLIST) -name "*.c")
 SRCCS_WHITELIST     = $(shell find $(SRCCS_DIR) -name "*.c")
 SRCCS               = $(filter-out $(SRCCS_BLACKLIST), $(SRCCS_WHITELIST)) \
-                      $(METEOR_ENV_HOME)/core/src/utils/disasm.cc
+                      $(METEOR_ENV_HOME)/core/src/util/disasm.cc
 
 SRCS = $(SRCVS_GEN) $(SRCVS) $(SRCCS)
 
