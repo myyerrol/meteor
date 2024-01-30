@@ -9,15 +9,17 @@ import cpu.mem._
 
 class Top extends Module with ConfigInst {
     val io = IO(new Bundle {
-        val oPC   = Output(UInt(ADDR_WIDTH.W))
-        val oInst = Output(UInt(DATA_WIDTH.W))
-        val oEnd  = Output(UInt(DATA_WIDTH.W))
+        val oPC      = Output(UInt(ADDR_WIDTH.W))
+        val oInst    = Output(UInt(DATA_WIDTH.W))
+        val oEndFlag = Output(Bool())
+        val oEndData = Output(UInt(DATA_WIDTH.W))
 
-        val pGPR  = new RegGPRIO
+        val pGPR     = new RegGPRIO
+        val pMem     = Flipped(new MemDualIO)
     });
 
     val mGPR = Module(new RegGPR)
-    val mMem = Module(new MemDualFake("async"))
+    // val mMem = Module(new MemDualFake("async"))
 
     val mIFU = Module(new IFU)
     val mIDU = Module(new IDU)
@@ -25,11 +27,24 @@ class Top extends Module with ConfigInst {
     val mLSU = Module(new LSU)
     val mWBU = Module(new WBU)
 
-    io.oPC   := mIFU.io.pIFU.bPC
-    io.oInst := mMem.io.pMem.bRdDataA
-    io.oEnd  := mGPR.io.pGPR.bRdEData
+    io.oPC     := mIFU.io.pIFU.bPC
+    // io.oInst := mMem.io.pMem.bRdDataA
+    io.oInst    := io.pMem.bRdDataA
+    io.oEndFlag := false.B
+    io.oEndData := mGPR.io.pGPR.bRdEData
 
     io.pGPR <> mGPR.io.pGPR
+    io.pMem <> mLSU.io.pMemO
+
+    when (mIDU.io.oInstName === INST_NAME_X) {
+        assert(false.B, "Invalid instruction at 0x%x", mIFU.io.pIFU.bPC)
+    }
+    .elsewhen (mIDU.io.oInstName === INST_NAME_EBREAK) {
+        io.oEndFlag := true.B
+    }
+    .otherwise {
+        io.oEndFlag := false.B
+    }
 
     mGPR.io.iRS1Addr := mIDU.io.oGPRRS1Addr
     mGPR.io.iRS2Addr := mIDU.io.oGPRRS2Addr
@@ -37,13 +52,14 @@ class Top extends Module with ConfigInst {
     mGPR.io.iWrAddr  := mWBU.io.oGPRWrAddr
     mGPR.io.iWrData  := mWBU.io.oGPRWrData
 
-    mMem.io.pMem <> mLSU.io.pMemO
+    // mMem.io.pMem <> mLSU.io.pMemO
 
     mIFU.io.iJmpEn := mEXU.io.oJmpEn
     mIFU.io.iJmpPC := mEXU.io.oJmpPC
 
     mIDU.io.iPC         := mIFU.io.pIFU.bPC
-    mIDU.io.iInst       := mMem.io.pMem.bRdDataA
+    // mIDU.io.iInst       := mMem.io.pMem.bRdDataA
+    mIDU.io.iInst       := io.pMem.bRdDataA
     mIDU.io.iGPRRS1Data := mGPR.io.pGPR.bRS1Data
     mIDU.io.iGPRRS2Data := mGPR.io.pGPR.bRS2Data
 
@@ -59,7 +75,8 @@ class Top extends Module with ConfigInst {
     mEXU.io.iALURS1Data  := mIDU.io.oALURS1Data
     mEXU.io.iALURS2Data  := mIDU.io.oALURS2Data
     mEXU.io.iJmpOrWrData := mIDU.io.oJmpOrWrData
-    mEXU.io.iMemRdData   := mMem.io.pMem.bRdDataB
+    // mEXU.io.iMemRdData   := mMem.io.pMem.bRdDataB
+    mEXU.io.iMemRdData   := io.pMem.bRdDataB
 
     mLSU.io.pMemI <> mEXU.io.pMem
 

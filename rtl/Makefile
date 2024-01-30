@@ -8,6 +8,7 @@ ifeq ($(filter $(CPU_LIST), $(CPU)),)
 endif
 
 CPU_PREFIX = m$(shell echo $(CPU) | cut -c5-5).$(CPU)
+CPU_UPPER  = $(shell echo $(CPU) | tr a-z A-Z)
 
 CPU_BLACKLIST = $(filter-out $(CPU), $(CPU_LIST))
 CPU_BLACKLIT_PREFIX =
@@ -50,16 +51,9 @@ CFLAGS_BUILD += $(call FUNC_REMOVE_QUOTE, $(CONFIG_CC_OPT))
 CFLAGS_BUILD += $(if $(CONFIG_CC_LTO), -flto,)
 CFLAGS_BUILD += $(if $(CONFIG_CC_DEBUG), -Og -ggdb3,)
 CFLAGS_BUILD += $(if $(CONFIG_CC_ASAN), -fsanitize=address,)
-CFLAGS_BUILD += -DCFLAGS_CPU_TYPE=$(CPU)
-ifeq ($(CPU), me32ls)
-    CFLAGS_BUILD += -DCFLAGS_CPU_TYPE_SINGLE
-endif
-ifeq ($(CPU), me32lm)
-    CFLAGS_BUILD += -DCFLAGS_CPU_TYPE_MULTIP
-endif
-ifeq ($(CPU), me32lp)
-    CFLAGS_BUILD += -DCFLAGS_CPU_TYPE_PIPELINE
-endif
+CFLAGS_BUILD += -DCFLAGS_CPU_TYPE=$(CPU_UPPER)
+CFLAGS_BUILD += -DCFLAGS_CPU_TYPE_$(CPU_UPPER)
+
 CFLAGS       += $(CFLAGS_BUILD)                                 \
                 -DCFLAGS_GUEST_ISA=$(CFG_GUEST_ISA)             \
                 -Wno-unused-result                              \
