@@ -187,8 +187,8 @@ cfmt:
 
 clean:
 	rm -rf out
+	rm -rf test_run_dir
 	rm -rf cpu/build
-	rm -rf cpu/test_run_dir
 
 bsp:
 	mill -i mill.bsp.BSP/install
