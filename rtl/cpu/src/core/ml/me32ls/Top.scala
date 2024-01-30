@@ -12,20 +12,24 @@ class Top extends Module with ConfigInst {
         val oPC   = Output(UInt(ADDR_WIDTH.W))
         val oInst = Output(UInt(DATA_WIDTH.W))
         val oEnd  = Output(UInt(DATA_WIDTH.W))
+
+        val pGPR  = new RegGPRIO
     });
 
-    val mGPR = Module(new RegGPR())
+    val mGPR = Module(new RegGPR)
     val mMem = Module(new MemDualFake("async"))
 
-    val mIFU = Module(new IFU())
-    val mIDU = Module(new IDU())
-    val mEXU = Module(new EXU())
-    val mLSU = Module(new LSU())
-    val mWBU = Module(new WBU())
+    val mIFU = Module(new IFU)
+    val mIDU = Module(new IDU)
+    val mEXU = Module(new EXU)
+    val mLSU = Module(new LSU)
+    val mWBU = Module(new WBU)
 
     io.oPC   := mIFU.io.pIFU.bPC
     io.oInst := mMem.io.pMem.bRdDataA
     io.oEnd  := mGPR.io.pGPR.bRdEData
+
+    io.pGPR <> mGPR.io.pGPR
 
     mGPR.io.iRS1Addr := mIDU.io.oGPRRS1Addr
     mGPR.io.iRS2Addr := mIDU.io.oGPRRS2Addr

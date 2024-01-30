@@ -14,96 +14,96 @@ CPU_BLACKLIT_PREFIX =
 $(foreach str, $(CPU_BLACKLIST), \
     $(eval CPU_BLACKLIT_PREFIX += m$(shell echo $(str) | cut -c5-5)/$(str)))
 
-# ifeq ($(wildcard $(METEOR_HOME)/emu/src/main.c),)
-#     $(error METEOR_HOME=$(METEOR_HOME) is not a NPC repo)
-# endif
+ifeq ($(wildcard $(METEOR_ENV_HOME)/core/src/main.c),)
+    $(error METEOR_HOME=$(METEOR_HOME) is not a METEOR repo)
+endif
 
-# -include $(METEOR_HOME)/emu/include/config/auto.conf
-# -include $(METEOR_HOME)/emu/include/config/auto.conf.cmd
+-include $(METEOR_ENV_HOME)/core/include/config/auto.conf
+-include $(METEOR_ENV_HOME)/core/include/config/auto.conf.cmd
 
 export PATH := $(PATH):$(abspath ./util)
 
-# FUNC_REMOVE_QUOTE = $(patsubst "%",%,$(1))
+FUNC_REMOVE_QUOTE = $(patsubst "%",%,$(1))
 
-# CFG_CFLAGS_TOP_NAME   = Top
-# CFG_GUEST_ISA ?= $(call FUNC_REMOVE_QUOTE, $(CONFIG_ISA))
-# CFG_ENGINE    ?= $(call FUNC_REMOVE_QUOTE, $(CONFIG_ENGINE))
+CFG_CFLAGS_TOP_NAME  = Top
+CFG_GUEST_ISA       ?= $(call FUNC_REMOVE_QUOTE, $(CONFIG_ISA))
+CFG_ENGINE          ?= $(call FUNC_REMOVE_QUOTE, $(CONFIG_ENGINE))
 
 BUILD_DIR = $(METEOR_CPU_HOME)/cpu/build
 OBJ_DIR   = $(BUILD_DIR)/obj_dir
 
-# NPC_BIN_NAME = $(CFG_GUEST_ISA)-npc-$(CFG_ENGINE)
-# NPC_BIN      = $(BUILD_DIR)/$(NPC_BIN_NAME)
+METEOR_BIN_NAME = $(CFG_GUEST_ISA)-meteor-$(CFG_ENGINE)
+METEOR_BIN      = $(BUILD_DIR)/$(METEOR_BIN_NAME)
 
-# VERILATOR         = verilator
-# VERILATOR_CFLAGS += -MMD --build -cc                                \
-#                     -O3 --x-assign fast --x-initial fast --noassert \
-#                     --trace                                         \
-#                     +incdir+$(METEOR_HOME)/cpu/srcv
+VERILATOR         = verilator
+VERILATOR_CFLAGS += -MMD --build -cc                                \
+                    -O3 --x-assign fast --x-initial fast --noassert \
+                    --trace                                         \
+                    +incdir+$(METEOR_CPU_HOME)/srcv
 
-# INCS_DIR = $(METEOR_HOME)/emu/include           \
-#            $(METEOR_HOME)/emu/include/generated
-# INCS     = $(shell find $(INCS_DIR) -name "*.h")
-# INCFLAGS = $(addprefix -I, $(INCS_DIR))
+INCS_DIR = $(METEOR_ENV_HOME)/core/include           \
+           $(METEOR_ENV_HOME)/core/include/generated
+INCS     = $(shell find $(INCS_DIR) -name "*.h")
+INCFLAGS = $(addprefix -I, $(INCS_DIR))
 
-# CFLAGS_BUILD += $(call FUNC_REMOVE_QUOTE, $(CONFIG_CC_OPT))
-# CFLAGS_BUILD += $(if $(CONFIG_CC_LTO), -flto,)
-# CFLAGS_BUILD += $(if $(CONFIG_CC_DEBUG), -Og -ggdb3,)
-# CFLAGS_BUILD += $(if $(CONFIG_CC_ASAN), -fsanitize=address,)
-# CFLAGS_BUILD += -DCFLAGS_CPU_TYPE=$(CPU)
-# ifeq ($(CPU), single)
-#     CFLAGS_BUILD += -DCFLAGS_CPU_TYPE_SINGLE
-# endif
-# ifeq ($(CPU), multip)
-#     CFLAGS_BUILD += -DCFLAGS_CPU_TYPE_MULTIP
-# endif
-# ifeq ($(CPU), pipeline)
-#     CFLAGS_BUILD += -DCFLAGS_CPU_TYPE_PIPELINE
-# endif
-# CFLAGS       += $(CFLAGS_BUILD)                                 \
-#                 -DCFLAGS_GUEST_ISA=$(CFG_GUEST_ISA)             \
-#                 -Wno-unused-result                              \
-#                 -DCFLAGS_TOP_NAME="\"V$(CFG_CFLAGS_TOP_NAME)\"" \
-#                 $(INCFLAGS)                                     \
-#                 $(shell llvm-config-11 --cxxflags) -fPIE
+CFLAGS_BUILD += $(call FUNC_REMOVE_QUOTE, $(CONFIG_CC_OPT))
+CFLAGS_BUILD += $(if $(CONFIG_CC_LTO), -flto,)
+CFLAGS_BUILD += $(if $(CONFIG_CC_DEBUG), -Og -ggdb3,)
+CFLAGS_BUILD += $(if $(CONFIG_CC_ASAN), -fsanitize=address,)
+CFLAGS_BUILD += -DCFLAGS_CPU_TYPE=$(CPU)
+ifeq ($(CPU), me32ls)
+    CFLAGS_BUILD += -DCFLAGS_CPU_TYPE_SINGLE
+endif
+ifeq ($(CPU), me32lm)
+    CFLAGS_BUILD += -DCFLAGS_CPU_TYPE_MULTIP
+endif
+ifeq ($(CPU), me32lp)
+    CFLAGS_BUILD += -DCFLAGS_CPU_TYPE_PIPELINE
+endif
+CFLAGS       += $(CFLAGS_BUILD)                                 \
+                -DCFLAGS_GUEST_ISA=$(CFG_GUEST_ISA)             \
+                -Wno-unused-result                              \
+                -DCFLAGS_TOP_NAME="\"V$(CFG_CFLAGS_TOP_NAME)\"" \
+                $(INCFLAGS)                                     \
+                $(shell llvm-config-11 --cxxflags) -fPIE
 
-# LDFLAGS += $(CFLAGS_BUILD)                \
-#            -lreadline -ldl -pie           \
-#            $(shell llvm-config-11 --libs) \
-#            -lSDL2
+LDFLAGS += $(CFLAGS_BUILD)                \
+           -lreadline -ldl -pie           \
+           $(shell llvm-config-11 --libs) \
+           -lSDL2
 
 SRCSS_DIR           = $(abspath $(METEOR_CPU_HOME)/cpu/src)
 SRCSS_SRC_BLACKLIST =
 SRCSS_DIR_BLACKLIST = $(addprefix $(SRCSS_DIR)/core/, $(CPU_BLACKLIT_PREFIX))
-SRCSS_BLACKLIST     = $(SRCSS_SRC_BLACKLIST)                               \
+SRCSS_BLACKLIST     = $(SRCSS_SRC_BLACKLIST)                                  \
                       $(shell find $(SRCSS_DIR_BLACKLIST) -name "*.scala")
 SRCSS_WHITELIST     = $(shell find $(SRCSS_DIR) -name "*.scala")
 SRCSS               = $(filter-out $(SRCSS_BLACKLIST), $(SRCSS_WHITELIST))
 
-# SRCVS_DIR = $(abspath $(METEOR_HOME)/cpu/srcv)
+SRCVS_DIR = $(abspath $(METEOR_CPU_HOME)/cpu/srcv)
 SRCVS_GEN = $(BUILD_DIR)/$(CFG_CFLAGS_TOP_NAME).v
-# SRCVS     = $(shell find $(SRCVS_DIR) -name "*.v")
+SRCVS     = $(shell find $(SRCVS_DIR) -name "*.v")
 
-# SRCCS_DIR += $(METEOR_HOME)/emu/src             \
-#              $(METEOR_HOME)/emu/src/cpu         \
-#              $(METEOR_HOME)/emu/src/debug       \
-#              $(METEOR_HOME)/emu/src/device      \
-#              $(METEOR_HOME)/emu/src/isa         \
-#              $(METEOR_HOME)/emu/src/memory      \
-#              $(METEOR_HOME)/emu/src/monitor     \
-#              $(METEOR_HOME)/emu/src/monitor/sdb \
-#              $(METEOR_HOME)/emu/src/utils
-# SRCCS_SRC_BLACKLIST =
-# SRCCS_DIR_BLACKLIST =
-# SRCCS_BLACKLIST     = $(SRCCS_SRC_BLACKLIST)                               \
-#                       $(shell find $(SRCCS_DIR_BLACKLIST) -name "*.c")
-# SRCCS_WHITELIST     = $(shell find $(SRCCS_DIR) -name "*.c")
-# SRCCS               = $(filter-out $(SRCCS_BLACKLIST), $(SRCCS_WHITELIST)) \
-#                       $(METEOR_HOME)/emu/src/utils/disasm.cc
+SRCCS_DIR += $(METEOR_ENV_HOME)/core/src             \
+             $(METEOR_ENV_HOME)/core/src/cpu         \
+             $(METEOR_ENV_HOME)/core/src/debug       \
+             $(METEOR_ENV_HOME)/core/src/device      \
+             $(METEOR_ENV_HOME)/core/src/isa         \
+             $(METEOR_ENV_HOME)/core/src/memory      \
+             $(METEOR_ENV_HOME)/core/src/monitor     \
+             $(METEOR_ENV_HOME)/core/src/monitor/sdb \
+             $(METEOR_ENV_HOME)/core/src/utils
+SRCCS_SRC_BLACKLIST =
+SRCCS_DIR_BLACKLIST =
+SRCCS_BLACKLIST     = $(SRCCS_SRC_BLACKLIST)                               \
+                      $(shell find $(SRCCS_DIR_BLACKLIST) -name "*.c")
+SRCCS_WHITELIST     = $(shell find $(SRCCS_DIR) -name "*.c")
+SRCCS               = $(filter-out $(SRCCS_BLACKLIST), $(SRCCS_WHITELIST)) \
+                      $(METEOR_ENV_HOME)/core/src/utils/disasm.cc
 
-# SRCS = $(SRCVS_GEN) $(SRCVS) $(SRCCS)
+SRCS = $(SRCVS_GEN) $(SRCVS) $(SRCCS)
 
-# CONFIG = $(METEOR_HOME)/emu/.config
+CONFIG = $(METEOR_ENV_HOME)/core/.config
 
 BUILD_PATH = $(SRCSS_DIR)/temp/Build.scala
 BUILD_INFO = "package cpu.temp\n\ntrait Build {\n    val CPU_TYPE = \"$(CPU)\"\n}"
@@ -120,8 +120,8 @@ TOP_MAIN_INFO_L8 = "}"
 
 ifeq ($(shell cat $(BUILD_PATH) | grep $(CPU)),)
     $(shell rm -rf out)
+    $(shell rm -rf test_run_dir)
     $(shell rm -rf cpu/build)
-    $(shell rm -rf cpu/test_run_dir)
 endif
 
 $(SRCVS_GEN): $(SRCSS)
@@ -137,44 +137,44 @@ $(SRCVS_GEN): $(SRCSS)
 	echo $(TOP_MAIN_INFO_L8) >> $(TOP_MAIN_PATH) &&   \
 	mkdir -p $(BUILD_DIR) &&                          \
 	mill -i cpu.runMain TopMain -td $(BUILD_DIR)
-# $(NPC_BIN): $(INCS) $(SRCS) $(CONFIG)
-# 	@rm -rf $(OBJ_DIR)
-# 	$(VERILATOR) $(VERILATOR_CFLAGS)            \
-# 	--top-module $(CFG_CFLAGS_TOP_NAME) $(SRCS) \
-# 	$(addprefix -CFLAGS ,  $(CFLAGS))           \
-# 	$(addprefix -LDFLAGS , $(LDFLAGS))          \
-# 	--Mdir $(OBJ_DIR) --exe -o                  \
-# 	$(abspath $(NPC_BIN))
+$(METEOR_BIN): $(INCS) $(SRCS) $(CONFIG)
+	@rm -rf $(OBJ_DIR)
+	$(VERILATOR) $(VERILATOR_CFLAGS)            \
+	--top-module $(CFG_CFLAGS_TOP_NAME) $(SRCS) \
+	$(addprefix -CFLAGS ,  $(CFLAGS))           \
+	$(addprefix -LDFLAGS , $(LDFLAGS))          \
+	--Mdir $(OBJ_DIR) --exe -o                  \
+	$(abspath $(METEOR_BIN))
 
 # ifdef CONFIG_DIFFTEST
 #     ARGS_EMBED_DIFF = --diff=$(NEMU_HOME)/build/riscv64-nemu-interpreter-so
 # endif
 
-# override ARGS_EMBED ?= --log=$(BUILD_DIR)/npc-log.txt
-# override ARGS_EMBED += $(ARGS_EMBED_DIFF)
+override ARGS_EMBED ?= --log=$(BUILD_DIR)/log.txt
+override ARGS_EMBED += $(ARGS_EMBED_DIFF)
 
-# IMG ?=
-# NPC_EXEC := $(NPC_BIN) $(ARGS_EMBED) $(ARGS) $(IMG)
+IMG ?=
+METEOR_EXEC := $(METEOR_BIN) $(ARGS_EMBED) $(ARGS) $(IMG)
 
 .PHONY: config test gen run gdb sim fmt cfmt clean bsp
 
 config:
-	cd ../env && make menuconfig
+	cd ../env/core && make menuconfig
 
 test:
 	mill -i cpu.test
 
 gen: $(SRCVS_GEN)
 
-# run: $(NPC_BIN)
-# 	rm -rf $(BUILD_DIR)/wave.vcd
-# 	$(NPC_EXEC)
+run: $(METEOR_BIN)
+	rm -rf $(BUILD_DIR)/wave.vcd
+	$(METEOR_EXEC)
 
-# gdb: $(NPC_BIN)
-# 	rm -rf $(BUILD_DIR)/wave.vcd
-# 	gdb -s $(NPC_BIN) --ARGS_EMBED $(NPC_EXEC)
+gdb: $(METEOR_BIN)
+	rm -rf $(BUILD_DIR)/wave.vcd
+	gdb -s $(METEOR_BIN) --ARGS_EMBED $(METEOR_EXEC)
 
-sim: $(NPC_BIN)
+sim: $(METEOR_BIN)
 	gtkwave $(BUILD_DIR)/wave.vcd
 
 fmt:
