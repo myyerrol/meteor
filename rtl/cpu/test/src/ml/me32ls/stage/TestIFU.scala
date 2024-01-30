@@ -20,7 +20,7 @@ object TestIFU extends ChiselUtestTester with ConfigInst {
             }
         }
         test("PCJump") {
-            testCircuit(new IFU(), Seq(WriteVcdAnnotation)) { dut =>
+            testCircuit(new IFU()) { dut =>
                 var vPCJump: Long = 0x80008000L
                 dut.io.iJmpEn.poke(true.B)
                 for (i <- 1 until 50) {
@@ -32,7 +32,7 @@ object TestIFU extends ChiselUtestTester with ConfigInst {
             }
         }
         test("PCNextJump") {
-            testCircuit(new IFU(), Seq(WriteVcdAnnotation)) { dut =>
+            testCircuit(new IFU()) { dut =>
                 var vPCNext: Long = 0x80000000L
                 var vPCJump: Long = 0x80008000L
                 for (i <- 1 until 50) {
