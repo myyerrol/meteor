@@ -7,11 +7,9 @@ import cpu.port._
 
 class GPR extends Module with ConfigInst {
     val io = IO(new Bundle {
-        val iRS1Addr = Input(UInt(GPRS_WIDTH.W))
-        val iRS2Addr = Input(UInt(GPRS_WIDTH.W))
-
-        val pGPRRd   =         new GPRRdIO
-        val pGPRWr   = Flipped(new GPRWrIO)
+        val pGPRRS =         new GPRRSIO
+        val pGPRRd =         new GPRRdIO
+        val pGPRWr = Flipped(new GPRWrIO)
     })
 
     val mGPR = Mem(GPRS_NUM, UInt(DATA_WIDTH.W))
@@ -24,10 +22,10 @@ class GPR extends Module with ConfigInst {
         mGPR(io.pGPRWr.bWrAddr) := mGPR(io.pGPRWr.bWrAddr)
     }
 
-    io.pGPRRd.bRS1Data  := mGPR(io.iRS1Addr)
-    io.pGPRRd.bRS2Data  := mGPR(io.iRS2Addr)
-    io.pGPRRd.bRdEData  := mGPR(GPRS_END)
+    io.pGPRRS.bRS1Data  := mGPR(io.pGPRRS.bRS1Addr)
+    io.pGPRRS.bRS2Data  := mGPR(io.pGPRRS.bRS2Addr)
 
+    io.pGPRRd.bRdEData  := mGPR(GPRS_END)
     io.pGPRRd.bRdData0  := mGPR( 0.U(GPRS_WIDTH.W))
     io.pGPRRd.bRdData1  := mGPR( 1.U(GPRS_WIDTH.W))
     io.pGPRRd.bRdData2  := mGPR( 2.U(GPRS_WIDTH.W))

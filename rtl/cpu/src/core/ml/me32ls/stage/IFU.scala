@@ -8,16 +8,17 @@ import cpu.port._
 
 class IFU extends Module with ConfigInst {
     val io = IO(new Bundle {
-        val iJmpEn = Input(Bool())
-        val iJmpPC = Input(UInt(ADDR_WIDTH.W))
-
-        val pIFU   = new IFUIO
+        val pBase   =         new BaseIO
+        val pEXUJmp = Flipped(new EXUJmpIO)
     })
 
     val rPC     = RegInit(ADDR_INIT)
-    val wPCNext = Mux(io.iJmpEn, io.iJmpPC, rPC + 4.U(ADDR_WIDTH.W))
+    val wPCNext = Mux(io.pEXUJmp.bJmpEn,
+                      io.pEXUJmp.bJmpPC,
+                      rPC + 4.U(ADDR_WIDTH.W))
 
     rPC := wPCNext
 
-    io.pIFU.bPC := rPC
+    io.pBase.bPC   := rPC
+    io.pBase.bInst := DontCare
 }

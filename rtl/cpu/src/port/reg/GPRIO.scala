@@ -5,11 +5,16 @@ import chisel3.util._
 
 import cpu.base._
 
-class GPRRdIO extends Bundle with ConfigIO {
-    val bRS1Data  = Output(UInt(DATA_WIDTH.W))
-    val bRS2Data  = Output(UInt(DATA_WIDTH.W))
-    val bRdEData  = Output(UInt(DATA_WIDTH.W))
+class GPRRSIO extends Bundle with ConfigIO {
+    val bRS1Addr = Input(UInt(ADDR_WIDTH.W))
+    val bRS2Addr = Input(UInt(ADDR_WIDTH.W))
 
+    val bRS1Data = Output(UInt(DATA_WIDTH.W))
+    val bRS2Data = Output(UInt(DATA_WIDTH.W))
+}
+
+class GPRRdIO extends Bundle with ConfigIO {
+    val bRdEData  = Output(UInt(DATA_WIDTH.W))
     val bRdData0  = Output(UInt(DATA_WIDTH.W))
     val bRdData1  = Output(UInt(DATA_WIDTH.W))
     val bRdData2  = Output(UInt(DATA_WIDTH.W))
@@ -49,4 +54,3 @@ class GPRWrIO extends Bundle with ConfigIO {
     val bWrAddr = Output(UInt(ADDR_WIDTH.W))
     val bWrData = Output(UInt(DATA_WIDTH.W))
 }
-

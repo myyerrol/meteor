@@ -8,30 +8,13 @@ import cpu.port._
 
 class IDU extends Module with ConfigInstRV32I with ConfigInstRV32M {
     val io = IO(new Bundle {
-        val iPC          =  Input(UInt(ADDR_WIDTH.W))
-        val iInst        =  Input(UInt(INST_WIDTH.W))
-        val iGPRRS1Data  =  Input(UInt(DATA_WIDTH.W))
-        val iGPRRS2Data  =  Input(UInt(DATA_WIDTH.W))
-
-        val oInstName    = Output(UInt(SIGS_WIDTH.W))
-        val oALUType     = Output(UInt(SIGS_WIDTH.W))
-        val oALURS1      = Output(UInt(SIGS_WIDTH.W))
-        val oALURS2      = Output(UInt(SIGS_WIDTH.W))
-        val oJmpEn       = Output(Bool())
-        val oMemWrEn     = Output(Bool())
-        val oMemByt      = Output(UInt(SIGS_WIDTH.W))
-        val oGPRWrEn     = Output(Bool())
-        val oGPRWrSrc    = Output(UInt(SIGS_WIDTH.W))
-
-        val oGPRRS1Addr  = Output(UInt(ADDR_WIDTH.W))
-        val oGPRRS2Addr  = Output(UInt(ADDR_WIDTH.W))
-        val oGPRRdAddr   = Output(UInt(ADDR_WIDTH.W))
-        val oALURS1Data  = Output(UInt(DATA_WIDTH.W))
-        val oALURS2Data  = Output(UInt(DATA_WIDTH.W))
-        val oJmpOrWrData = Output(UInt(DATA_WIDTH.W))
+        val pBase    = Flipped(new BaseIO)
+        val pGPRRS   = Flipped(new GPRRSIO)
+        val pIDUCtr  =         new IDUCtrIO
+        val pIDUData =         new IDUDataIO
     })
 
-    val wInst = io.iInst;
+    val wInst = io.pBase.bInst;
     var lInst = ListLookup(
         wInst,
         List(INST_NAME_X, ALU_TYPE_X, ALU_RS1_X, ALU_RS2_X, JMP_FL, MEM_WR_FL, MEM_BYT_X, GPR_WR_FL, GPR_WR_SRC_X),
@@ -103,30 +86,21 @@ class IDU extends Module with ConfigInstRV32I with ConfigInstRV32M {
     val wGPRWrEn  = lInst(7)
     val wGPRWrSrc = lInst(8)
 
-    io.oInstName := wInstName
-    io.oALUType  := wALUType
-    io.oALURS1   := wALURS1
-    io.oALURS2   := wALURS2
-    io.oJmpEn    := wJmpEn
-    io.oMemWrEn  := wMemWrEn
-    io.oMemByt   := wMemByt
-    io.oGPRWrEn  := wGPRWrEn
-    io.oGPRWrSrc := wGPRWrSrc
+    io.pGPRRS.bRS1Addr := wInst(19, 15)
+    io.pGPRRS.bRS2Addr := wInst(24, 20)
 
-    io.oGPRRS1Addr := wInst(19, 15)
-    io.oGPRRS2Addr := wInst(24, 20)
-    io.oGPRRdAddr  := wInst(11,  7)
-    io.oALURS1Data := MuxLookup(wALURS1, DATA_ZERO)(
+    io.pIDUData.bGPRRdAddr  := wInst(11, 7)
+    io.pIDUData.bALURS1Data := MuxLookup(wALURS1, DATA_ZERO)(
         Seq(
            ALU_RS1_X   -> DATA_ZERO,
-           ALU_RS1_GPR -> io.iGPRRS1Data,
-           ALU_RS1_PC  -> io.iPC
+           ALU_RS1_GPR -> io.pGPRRS.bRS1Data,
+           ALU_RS1_PC  -> io.pBase.bPC
         )
     )
-    io.oALURS2Data := MuxLookup(wALURS2, DATA_ZERO)(
+    io.pIDUData.bALURS2Data := MuxLookup(wALURS2, DATA_ZERO)(
         Seq(
             ALU_RS2_X     -> DATA_ZERO,
-            ALU_RS2_GPR   -> io.iGPRRS2Data,
+            ALU_RS2_GPR   -> io.pGPRRS.bRS2Data,
             ALU_RS2_CSR   -> DATA_ZERO,
             ALU_RS2_IMM_I -> ExtenImm(wInst, "immI"),
             ALU_RS2_IMM_S -> ExtenImm(wInst, "immS"),
@@ -134,7 +108,7 @@ class IDU extends Module with ConfigInstRV32I with ConfigInstRV32M {
             ALU_RS2_IMM_J -> ExtenImm(wInst, "immJ"),
         )
     )
-    io.oJmpOrWrData := Mux(
+    io.pIDUData.bJmpOrWrData := Mux(
         (wInstName === INST_NAME_BEQ)  ||
         (wInstName === INST_NAME_BNE)  ||
         (wInstName === INST_NAME_BLT)  ||
@@ -142,6 +116,16 @@ class IDU extends Module with ConfigInstRV32I with ConfigInstRV32M {
         (wInstName === INST_NAME_BLTU) ||
         (wInstName === INST_NAME_BGEU),
         ExtenImm(wInst, "immB"),
-        io.iGPRRS2Data
+        io.pGPRRS.bRS2Data
     )
+
+    io.pIDUCtr.bInstName := wInstName
+    io.pIDUCtr.bALUType  := wALUType
+    io.pIDUCtr.bALURS1   := wALURS1
+    io.pIDUCtr.bALURS2   := wALURS2
+    io.pIDUCtr.bJmpEn    := wJmpEn
+    io.pIDUCtr.bMemWrEn  := wMemWrEn
+    io.pIDUCtr.bMemByt   := wMemByt
+    io.pIDUCtr.bGPRWrEn  := wGPRWrEn
+    io.pIDUCtr.bGPRWrSrc := wGPRWrSrc
 }

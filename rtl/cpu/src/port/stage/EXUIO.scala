@@ -5,5 +5,7 @@ import chisel3.util._
 
 import cpu.base._
 
-class EXUIO extends Bundle with ConfigIO {
+class EXUJmpIO extends Bundle with ConfigIO {
+    val bJmpEn = Output(Bool())
+    val bJmpPC = Output(UInt(ADDR_WIDTH.W))
 }

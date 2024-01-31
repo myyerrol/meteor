@@ -5,5 +5,6 @@ import chisel3.util._
 
 import cpu.base._
 
-class IFUIO extends Bundle with ConfigIO {
+class ITraceIO extends Bundle with ConfigIO {
+
 }
