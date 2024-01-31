@@ -82,7 +82,7 @@ class EXU extends Module with ConfigInst {
 
     wMemRdAddr := ADDR_ZERO
     when (io.pIDUCtr.bGPRWrEn) {
-        io.pGPRWr.bWrEn   := false.B
+        io.pGPRWr.bWrEn   := true.B
         io.pGPRWr.bWrAddr := io.pIDUData.bGPRRdAddr
         when (io.pIDUCtr.bGPRWrSrc === GPR_WR_SRC_MEM) {
             wMemRdAddr := mALU.io.oOut
