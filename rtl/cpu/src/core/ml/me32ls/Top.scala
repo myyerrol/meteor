@@ -9,10 +9,8 @@ import cpu.mem._
 
 class Top extends Module with ConfigInst {
     val io = IO(new Bundle {
-        val pBase  =         new BaseIO
-        val pEnd   =         new EndIO
-        val pGPRRd =         new GPRRdIO
-        val pMem   = Flipped(new MemDualIO)
+        val pEnd   = new EndIO
+        val pTrace = new TraceIO
     });
 
     val mGPR = Module(new GPR)
@@ -23,13 +21,17 @@ class Top extends Module with ConfigInst {
     val mLSU = Module(new LSU)
     val mWBU = Module(new WBU)
 
-    io.pBase.bPC   := mIFU.io.pBase.bPC
-    io.pBase.bInst := io.pMem.bRdDataA
-
     io.pEnd.bFlag := false.B
     io.pEnd.bData := mGPR.io.pGPRRd.bRdEData
-    io.pGPRRd     <> mGPR.io.pGPRRd
-    io.pMem       <> mLSU.io.pMemO
+
+    io.pTrace.pBase.bPC   := mIFU.io.pBase.bPC
+    io.pTrace.pBase.bInst := io.pTrace.pMem.bRdDataA
+    io.pTrace.pGPRRd      <> mGPR.io.pGPRRd
+    io.pTrace.pGPRWr      <> mWBU.io.pGPRWrO
+    io.pTrace.pMem        <> mLSU.io.pMemO
+    io.pTrace.pIDUCtr     <> mIDU.io.pIDUCtr
+    io.pTrace.pIDUData    <> mIDU.io.pIDUData
+    io.pTrace.pEXUJmp     <> mEXU.io.pEXUJmp
 
     when (mIDU.io.pIDUCtr.bInstName === INST_NAME_X) {
         assert(false.B, "Invalid instruction at 0x%x", mIFU.io.pBase.bPC)
@@ -47,7 +49,7 @@ class Top extends Module with ConfigInst {
     mIFU.io.pEXUJmp <> mEXU.io.pEXUJmp
 
     mIDU.io.pBase.bPC   := mIFU.io.pBase.bPC
-    mIDU.io.pBase.bInst := io.pMem.bRdDataA
+    mIDU.io.pBase.bInst := io.pTrace.pMem.bRdDataA
 
     mEXU.io.pBase.bPC   := mIFU.io.pBase.bPC
     mEXU.io.pBase.bInst := DontCare
