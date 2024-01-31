@@ -8,16 +8,9 @@ import cpu.port._
 
 class WBU extends Module with ConfigInst {
     val io = IO(new Bundle {
-        val iGPRWrEn   =  Input(Bool())
-        val iGPRWrAddr =  Input(UInt(ADDR_WIDTH.W))
-        val iGPRWrData =  Input(UInt(DATA_WIDTH.W))
-
-        val oGPRWrEn   = Output(Bool())
-        val oGPRWrAddr = Output(UInt(ADDR_WIDTH.W))
-        val oGPRWrData = Output(UInt(DATA_WIDTH.W))
+        val pGPRWrI = Flipped(new GPRWrIO)
+        val pGPRWrO =         new GPRWrIO
     })
 
-    io.oGPRWrEn   := io.iGPRWrEn
-    io.oGPRWrAddr := io.iGPRWrAddr
-    io.oGPRWrData := io.iGPRWrData
+    io.pGPRWrO <> io.pGPRWrI
 }

@@ -5,7 +5,7 @@ import chisel3.util._
 
 import cpu.base._
 
-class RegGPRIO extends Bundle with ConfigIO {
+class GPRRdIO extends Bundle with ConfigIO {
     val bRS1Data  = Output(UInt(DATA_WIDTH.W))
     val bRS2Data  = Output(UInt(DATA_WIDTH.W))
     val bRdEData  = Output(UInt(DATA_WIDTH.W))
@@ -43,3 +43,10 @@ class RegGPRIO extends Bundle with ConfigIO {
     val bRdData30 = Output(UInt(DATA_WIDTH.W))
     val bRdData31 = Output(UInt(DATA_WIDTH.W))
 }
+
+class GPRWrIO extends Bundle with ConfigIO {
+    val bWrEn   = Output(Bool())
+    val bWrAddr = Output(UInt(ADDR_WIDTH.W))
+    val bWrData = Output(UInt(DATA_WIDTH.W))
+}
+

@@ -27,12 +27,10 @@ class EXU extends Module with ConfigInst {
 
         val oJmpEn       = Output(Bool())
         val oJmpPC       = Output(UInt(ADDR_WIDTH.W))
-        val oGPRWrEn     = Output(Bool())
-        val oGPRWrAddr   = Output(UInt(ADDR_WIDTH.W))
-        val oGPRWrData   = Output(UInt(DATA_WIDTH.W))
         val oMemRdAddr   = Output(UInt(ADDR_WIDTH.W))
 
         val pMem         = Flipped(new MemDualIO)
+        val pGPRWr       =         new GPRWrIO
     })
 
     val mALU = Module(new ALU)
@@ -98,8 +96,8 @@ class EXU extends Module with ConfigInst {
 
     io.oMemRdAddr := ADDR_ZERO
     when (io.iGPRWrEn) {
-        io.oGPRWrEn   := false.B
-        io.oGPRWrAddr := io.iGPRRdAddr
+        io.pGPRWr.bWrEn   := false.B
+        io.pGPRWr.bWrAddr := io.iGPRRdAddr
         when (io.iGPRWrSrc === GPR_WR_SRC_MEM) {
             io.oMemRdAddr := mALU.io.oOut
             val wMemRdDataByt1 = io.iMemRdData(BYTE_WIDTH * 1 - 1, 0)
@@ -121,15 +119,15 @@ class EXU extends Module with ConfigInst {
                         ExtenZero(wMemRdDataByt4, DATA_WIDTH)
                 )
             )
-            io.oGPRWrData := wMemRdData
+            io.pGPRWr.bWrData := wMemRdData
         }
         .otherwise {
-            io.oGPRWrData := wGPRWrData
+            io.pGPRWr.bWrData := wGPRWrData
         }
     }
     .otherwise {
-        io.oGPRWrEn   := false.B
-        io.oGPRWrAddr := 0.U(ADDR_WIDTH.W)
-        io.oGPRWrData := 0.U(DATA_WIDTH.W)
+        io.pGPRWr.bWrEn   := false.B
+        io.pGPRWr.bWrAddr := 0.U(ADDR_WIDTH.W)
+        io.pGPRWr.bWrData := 0.U(DATA_WIDTH.W)
     }
 }

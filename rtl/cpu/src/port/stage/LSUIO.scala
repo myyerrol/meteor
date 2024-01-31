@@ -5,5 +5,5 @@ import chisel3.util._
 
 import cpu.base._
 
-class RegCSRIO extends Bundle with ConfigIO {
+class LSUIO extends Bundle with ConfigIO {
 }
