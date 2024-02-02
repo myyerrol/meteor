@@ -13,4 +13,5 @@ class TraceIO extends Bundle with ConfigIO {
     val pIDUCtr  =         new IDUCtrIO
     val pIDUData =         new IDUDataIO
     val pEXUJmp  =         new EXUJmpIO
+    val pEXUOut  =         new EXUOutIO
 }

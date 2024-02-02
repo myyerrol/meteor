@@ -9,3 +9,7 @@ class EXUJmpIO extends Bundle with ConfigIO {
     val bJmpEn = Output(Bool())
     val bJmpPC = Output(UInt(ADDR_WIDTH.W))
 }
+
+class  EXUOutIO extends Bundle with ConfigIO {
+    val bALUOut = Output(UInt(DATA_WIDTH.W))
+}
