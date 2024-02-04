@@ -40,7 +40,7 @@ VERILATOR         = verilator
 VERILATOR_CFLAGS += -MMD --build -cc                                \
                     -O3 --x-assign fast --x-initial fast --noassert \
                     --trace                                         \
-                    +incdir+$(METEOR_CPU_HOME)/srcv
+                    +incdir+$(METEOR_CPU_HOME)/cpu/srcv/mem             \
 
 INCS_DIR = $(METEOR_ENV_HOME)/core/include           \
            $(METEOR_ENV_HOME)/core/include/generated
@@ -74,19 +74,19 @@ SRCSS_BLACKLIST     = $(SRCSS_SRC_BLACKLIST)                                  \
 SRCSS_WHITELIST     = $(shell find $(SRCSS_DIR) -name "*.scala")
 SRCSS               = $(filter-out $(SRCSS_BLACKLIST), $(SRCSS_WHITELIST))
 
-SRCVS_DIR = $(abspath $(METEOR_CPU_HOME)/cpu/srcv)
+SRCVS_DIR = $(METEOR_CPU_HOME)/cpu/srcv
 SRCVS_GEN = $(BUILD_DIR)/$(CFG_CFLAGS_TOP_NAME).v
 SRCVS     = $(shell find $(SRCVS_DIR) -name "*.v")
 
-SRCCS_DIR += $(METEOR_ENV_HOME)/core/src             \
-             $(METEOR_ENV_HOME)/core/src/cpu         \
-             $(METEOR_ENV_HOME)/core/src/debug       \
-             $(METEOR_ENV_HOME)/core/src/device      \
-             $(METEOR_ENV_HOME)/core/src/isa         \
-             $(METEOR_ENV_HOME)/core/src/memory      \
-             $(METEOR_ENV_HOME)/core/src/monitor     \
-             $(METEOR_ENV_HOME)/core/src/monitor/sdb \
-             $(METEOR_ENV_HOME)/core/src/util
+SRCCS_DIR = $(METEOR_ENV_HOME)/core/src             \
+            $(METEOR_ENV_HOME)/core/src/cpu         \
+            $(METEOR_ENV_HOME)/core/src/debug       \
+            $(METEOR_ENV_HOME)/core/src/device      \
+            $(METEOR_ENV_HOME)/core/src/isa         \
+            $(METEOR_ENV_HOME)/core/src/memory      \
+            $(METEOR_ENV_HOME)/core/src/monitor     \
+            $(METEOR_ENV_HOME)/core/src/monitor/sdb \
+            $(METEOR_ENV_HOME)/core/src/util
 SRCCS_SRC_BLACKLIST =
 SRCCS_DIR_BLACKLIST =
 SRCCS_BLACKLIST     = $(SRCCS_SRC_BLACKLIST)                               \
@@ -141,7 +141,7 @@ $(METEOR_BIN): $(INCS) $(SRCS) $(CONFIG)
 	$(abspath $(METEOR_BIN))
 
 # ifdef CONFIG_DIFFTEST
-#     ARGS_EMBED_DIFF = --diff=$(NEMU_HOME)/build/riscv64-nemu-interpreter-so
+#     ARGS_EMBED_DIFF = --diff=$(NEMU_HOME)/build/riscv32-nemu-interpreter-so
 # endif
 
 override ARGS_EMBED ?= --log=$(BUILD_DIR)/log.txt
