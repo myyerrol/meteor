@@ -26,9 +26,11 @@ export PATH := $(PATH):$(abspath ./util)
 
 FUNC_REMOVE_QUOTE = $(patsubst "%",%,$(1))
 
-CFG_CFLAGS_TOP_NAME  = Top
-CFG_GUEST_ISA       ?= $(call FUNC_REMOVE_QUOTE, $(CONFIG_ISA))
-CFG_ENGINE          ?= $(call FUNC_REMOVE_QUOTE, $(CONFIG_ENGINE))
+CFG_CFLAGS_TOP_NAME    = Top
+CFG_GUEST_ISA         ?= $(call FUNC_REMOVE_QUOTE, $(CONFIG_ISA))
+CFG_ENGINE            ?= $(call FUNC_REMOVE_QUOTE, $(CONFIG_ENGINE))
+CFG_DIFFTEST_REF_PATH ?= $(call FUNC_REMOVE_QUOTE, $(CONFIG_DIFFTEST_REF_PATH))
+CFG_DIFFTEST_REF_NAME ?= $(call FUNC_REMOVE_QUOTE, $(CONFIG_DIFFTEST_REF_NAME))
 
 BUILD_DIR = $(METEOR_CPU_HOME)/cpu/build
 OBJ_DIR   = $(BUILD_DIR)/obj_dir
@@ -40,26 +42,26 @@ VERILATOR         = verilator
 VERILATOR_CFLAGS += -MMD --build -cc                                \
                     -O3 --x-assign fast --x-initial fast --noassert \
                     --trace                                         \
-                    +incdir+$(METEOR_CPU_HOME)/cpu/srcv/mem             \
+                    +incdir+$(METEOR_CPU_HOME)/cpu/srcv/mem         \
 
 INCS_DIR = $(METEOR_ENV_HOME)/core/include           \
            $(METEOR_ENV_HOME)/core/include/generated
 INCS     = $(shell find $(INCS_DIR) -name "*.h")
 INCFLAGS = $(addprefix -I, $(INCS_DIR))
 
-CFLAGS_BUILD += $(call FUNC_REMOVE_QUOTE, $(CONFIG_CC_OPT))
-CFLAGS_BUILD += $(if $(CONFIG_CC_LTO), -flto,)
-CFLAGS_BUILD += $(if $(CONFIG_CC_DEBUG), -Og -ggdb3,)
-CFLAGS_BUILD += $(if $(CONFIG_CC_ASAN), -fsanitize=address,)
-CFLAGS_BUILD += -DCFLAGS_CPU_TYPE=$(CPU_UPPER)
-CFLAGS_BUILD += -DCFLAGS_CPU_TYPE_$(CPU_UPPER)
-
-CFLAGS       += $(CFLAGS_BUILD)                                 \
+CFLAGS_BUILD += $(call FUNC_REMOVE_QUOTE, $(CONFIG_CC_OPT))     \
+                $(if $(CONFIG_CC_LTO), -flto,)                  \
+                $(if $(CONFIG_CC_DEBUG), -Og -ggdb3,)           \
+                $(if $(CONFIG_CC_ASAN), -fsanitize=address,)    \
+                -DCFLAGS_CPU_TYPE=$(CPU_UPPER)                  \
+                -DCFLAGS_CPU_TYPE_$(CPU_UPPER)                  \
                 -DCFLAGS_GUEST_ISA=$(CFG_GUEST_ISA)             \
-                -Wno-unused-result                              \
-                -DCFLAGS_TOP_NAME="\"V$(CFG_CFLAGS_TOP_NAME)\"" \
-                $(INCFLAGS)                                     \
-                $(shell llvm-config-11 --cxxflags) -fPIE
+                -DCFLAGS_TOP_NAME="\"V$(CFG_CFLAGS_TOP_NAME)\""
+
+CFLAGS += $(CFLAGS_BUILD)                          \
+          -Wno-unused-result                       \
+          $(INCFLAGS)                              \
+          $(shell llvm-config-11 --cxxflags) -fPIE
 
 LDFLAGS += $(CFLAGS_BUILD)                \
            -lreadline -ldl -pie           \
@@ -78,15 +80,7 @@ SRCVS_DIR = $(METEOR_CPU_HOME)/cpu/srcv
 SRCVS_GEN = $(BUILD_DIR)/$(CFG_CFLAGS_TOP_NAME).v
 SRCVS     = $(shell find $(SRCVS_DIR) -name "*.v")
 
-SRCCS_DIR = $(METEOR_ENV_HOME)/core/src             \
-            $(METEOR_ENV_HOME)/core/src/cpu         \
-            $(METEOR_ENV_HOME)/core/src/debug       \
-            $(METEOR_ENV_HOME)/core/src/device      \
-            $(METEOR_ENV_HOME)/core/src/isa         \
-            $(METEOR_ENV_HOME)/core/src/memory      \
-            $(METEOR_ENV_HOME)/core/src/monitor     \
-            $(METEOR_ENV_HOME)/core/src/monitor/sdb \
-            $(METEOR_ENV_HOME)/core/src/util
+SRCCS_DIR = $(METEOR_ENV_HOME)/core/src
 SRCCS_SRC_BLACKLIST =
 SRCCS_DIR_BLACKLIST =
 SRCCS_BLACKLIST     = $(SRCCS_SRC_BLACKLIST)                               \
@@ -144,6 +138,8 @@ $(METEOR_BIN): $(INCS) $(SRCS) $(CONFIG)
 #     ARGS_EMBED_DIFF = --diff=$(NEMU_HOME)/build/riscv32-nemu-interpreter-so
 # endif
 
+include $(METEOR_ENV_HOME)/core/tool/difftest.mk
+
 override ARGS_EMBED ?= --log=$(BUILD_DIR)/log.txt
 override ARGS_EMBED += $(ARGS_EMBED_DIFF)
 
@@ -160,7 +156,11 @@ test:
 
 gen: $(SRCVS_GEN)
 
-run: $(METEOR_BIN)
+run: $(METEOR_BIN) $(DIFF_REF_SO)
+	@echo ""
+	@echo $(CFG_DIFFTEST_REF_PATH)
+	@echo $(CFG_DIFFTEST_REF_NAME)
+	@echo ""
 	rm -rf $(BUILD_DIR)/wave.vcd
 	$(METEOR_EXEC)
 

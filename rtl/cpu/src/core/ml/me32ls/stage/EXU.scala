@@ -82,12 +82,12 @@ class EXU extends Module with ConfigInst {
         )
     )
 
-    wMemRdAddr := mALU.io.oOut
+    wMemRdAddr := ADDR_ZERO
     when (io.pIDUCtr.bGPRWrEn) {
         io.pGPRWr.bWrEn   := true.B
         io.pGPRWr.bWrAddr := io.pIDUData.bGPRRdAddr
         when (io.pIDUCtr.bGPRWrSrc === GPR_WR_SRC_MEM) {
-            // wMemRdAddr := mALU.io.oOut
+            wMemRdAddr := mALU.io.oOut
             val wMemRdDataByt1 = io.pMem.bRdDataB(BYTE_WIDTH * 1 - 1, 0)
             val wMemRdDataByt2 = io.pMem.bRdDataB(BYTE_WIDTH * 2 - 1, 0)
             val wMemRdDataByt4 = io.pMem.bRdDataB(BYTE_WIDTH * 4 - 1, 0)
