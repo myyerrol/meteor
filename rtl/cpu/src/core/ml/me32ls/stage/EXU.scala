@@ -94,13 +94,13 @@ class EXU extends Module with ConfigInst {
             val wMemRdData = MuxLookup(io.pIDUCtr.bMemByt, DATA_ZERO)(
                 Seq(
                     MEM_BYT_1_S ->
-                        ExtenSign(wMemRdDataByt1, DATA_WIDTH - BYTE_WIDTH * 1),
+                        ExtenSign(wMemRdDataByt1, DATA_WIDTH),
                     MEM_BYT_1_U ->
-                        ExtenZero(wMemRdDataByt1, DATA_WIDTH - BYTE_WIDTH * 1),
+                        ExtenZero(wMemRdDataByt1, DATA_WIDTH),
                     MEM_BYT_2_S ->
-                        ExtenSign(wMemRdDataByt2, DATA_WIDTH - BYTE_WIDTH * 2),
+                        ExtenSign(wMemRdDataByt2, DATA_WIDTH),
                     MEM_BYT_2_U ->
-                        ExtenZero(wMemRdDataByt2, DATA_WIDTH - BYTE_WIDTH * 2),
+                        ExtenZero(wMemRdDataByt2, DATA_WIDTH),
                     MEM_BYT_4_S ->
                         ExtenSign(wMemRdDataByt4, DATA_WIDTH),
                     MEM_BYT_4_U ->
