@@ -14,7 +14,6 @@ class Top extends Module with ConfigInst {
     });
 
     val mGPR = Module(new GPR)
-    val mMem = Module(new MemDualFakeBB)
 
     val mIFU = Module(new IFU)
     val mIDU = Module(new IDU)
@@ -26,7 +25,7 @@ class Top extends Module with ConfigInst {
     io.pEnd.bData := mGPR.io.pGPRRd.bRdEData
 
     io.pTrace.pBase.bPC   := mIFU.io.pBase.bPC
-    io.pTrace.pBase.bInst := mMem.io.pMem.bRdDataA
+    io.pTrace.pBase.bInst := io.pTrace.pMem.bRdDataA
     io.pTrace.pGPRRd      <> mGPR.io.pGPRRd
     io.pTrace.pGPRWr      <> mWBU.io.pGPRWrO
     io.pTrace.pMem        <> mLSU.io.pMemO
@@ -35,25 +34,13 @@ class Top extends Module with ConfigInst {
     io.pTrace.pEXUJmp     <> mEXU.io.pEXUJmp
     io.pTrace.pEXUOut     <> mEXU.io.pEXUOut
 
-    when (mIDU.io.pIDUCtr.bInstName === INST_NAME_X) {
-        assert(false.B, "Invalid instruction at 0x%x", mIFU.io.pBase.bPC)
-    }
-    .elsewhen (mIDU.io.pIDUCtr.bInstName === INST_NAME_EBREAK) {
-        io.pEnd.bFlag := true.B
-    }
-    .otherwise {
-        io.pEnd.bFlag := false.B
-    }
-
     mGPR.io.pGPRRS <> mIDU.io.pGPRRS
     mGPR.io.pGPRWr <> mWBU.io.pGPRWrO
-
-    mMem.io.pMem <> mLSU.io.pMemO
 
     mIFU.io.pEXUJmp <> mEXU.io.pEXUJmp
 
     mIDU.io.pBase.bPC   := mIFU.io.pBase.bPC
-    mIDU.io.pBase.bInst := mMem.io.pMem.bRdDataA
+    mIDU.io.pBase.bInst := io.pTrace.pMem.bRdDataA
 
     mEXU.io.pBase.bPC   := mIFU.io.pBase.bPC
     mEXU.io.pBase.bInst := DontCare
@@ -64,4 +51,14 @@ class Top extends Module with ConfigInst {
     mLSU.io.pMemI <> mEXU.io.pMem
 
     mWBU.io.pGPRWrI <> mEXU.io.pGPRWr
+
+    when (mIDU.io.pIDUCtr.bInstName === INST_NAME_X) {
+        assert(false.B, "Invalid instruction at 0x%x", mIFU.io.pBase.bPC)
+    }
+    .elsewhen (mIDU.io.pIDUCtr.bInstName === INST_NAME_EBREAK) {
+        io.pEnd.bFlag := true.B
+    }
+    .otherwise {
+        io.pEnd.bFlag := false.B
+    }
 }
