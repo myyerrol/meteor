@@ -38,9 +38,18 @@ module MemDualFakeBB(
         end
     end
 
+    wire [3: 0] pMem_bWrMask = { pMem_bWrMask_0,
+                                 pMem_bWrMask_1,
+                                 pMem_bWrMask_2,
+                                 pMem_bWrMask_3 };
     always @(pMem_bWrAddr or pMem_bWrData) begin
         if (pMem_bWrEn) begin
-            writeMemData(pMem_bWrAddr, pMem_bWrData, 4);
+            case (pMem_bWrMask)
+                4'b0001: writeMemData(pMem_bWrAddr, pMem_bWrData, 1);
+                4'b0011: writeMemData(pMem_bWrAddr, pMem_bWrData, 2);
+                4'b1111: writeMemData(pMem_bWrAddr, pMem_bWrData, 4);
+                default: writeMemData(pMem_bWrAddr, pMem_bWrData, 4);
+            endcase
         end
     end
 
