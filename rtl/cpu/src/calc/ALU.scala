@@ -16,7 +16,7 @@ class ALU extends Module with ConfigInst {
     })
 
     val jalrMask = Cat(Fill(DATA_WIDTH - 1, 1.U(1.W)), 0.U(1.W))
-    val wOut = MuxLookup(io.iType, DATA_ZERO)(
+    val wOut = MuxLookup(io.iType, DATA_ZERO) (
         Seq(
             ALU_TYPE_SLL    ->  (io.iRS1Data << io.iRS2Data(5, 0)),
             ALU_TYPE_SRL    ->  (io.iRS1Data >> io.iRS2Data(5, 0)),
@@ -53,6 +53,8 @@ class ALU extends Module with ConfigInst {
             ALU_TYPE_REMW   ->  (io.iRS1Data(31, 0).asSInt % io.iRS2Data(31, 0).asSInt).asUInt
         )
     )
+
+    dontTouch(wOut)
 
     io.oZero := Mux(wOut === DATA_ZERO, 0.U, 1.U)
     io.oOut  := wOut

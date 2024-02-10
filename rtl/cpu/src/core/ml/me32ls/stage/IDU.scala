@@ -90,14 +90,14 @@ class IDU extends Module with ConfigInstRV32I with ConfigInstRV32M {
     io.pGPRRS.bRS2Addr := wInst(24, 20)
 
     io.pIDUData.bGPRRdAddr  := wInst(11, 7)
-    io.pIDUData.bALURS1Data := MuxLookup(wALURS1, DATA_ZERO)(
+    io.pIDUData.bALURS1Data := MuxLookup(wALURS1, DATA_ZERO) (
         Seq(
            ALU_RS1_X   -> DATA_ZERO,
            ALU_RS1_GPR -> io.pGPRRS.bRS1Data,
            ALU_RS1_PC  -> io.pBase.bPC
         )
     )
-    io.pIDUData.bALURS2Data := MuxLookup(wALURS2, DATA_ZERO)(
+    io.pIDUData.bALURS2Data := MuxLookup(wALURS2, DATA_ZERO) (
         Seq(
             ALU_RS2_X     -> DATA_ZERO,
             ALU_RS2_GPR   -> io.pGPRRS.bRS2Data,

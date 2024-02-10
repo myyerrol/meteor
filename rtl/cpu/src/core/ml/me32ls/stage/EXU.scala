@@ -59,7 +59,7 @@ class EXU extends Module with ConfigInst {
         io.pMem.bWrData := io.pIDUData.bJmpOrWrData
         io.pMem.bWrMask := MuxLookup(
             io.pIDUCtr.bMemByt,
-            VecInit(("b1111".U).asBools))(
+            VecInit(("b1111".U).asBools)) (
             Seq(
                 MEM_BYT_1_U -> VecInit(false.B, false.B, false.B, true.B),
                 MEM_BYT_2_U -> VecInit(false.B, false.B, true.B,  true.B),
@@ -74,7 +74,7 @@ class EXU extends Module with ConfigInst {
         io.pMem.bWrMask := VecInit(("b1111".U).asBools)
     }
 
-    val wGPRWrData = MuxLookup(io.pIDUCtr.bGPRWrSrc, DATA_ZERO)(
+    val wGPRWrData = MuxLookup(io.pIDUCtr.bGPRWrSrc, DATA_ZERO) (
         Seq(
             GPR_WR_SRC_ALU -> mALU.io.oOut,
             GPR_WR_SRC_PC  -> (io.pBase.bPC + 4.U(ADDR_WIDTH.W)),
@@ -91,7 +91,7 @@ class EXU extends Module with ConfigInst {
             val wMemRdDataByt1 = io.pMem.bRdDataB(BYTE_WIDTH * 1 - 1, 0)
             val wMemRdDataByt2 = io.pMem.bRdDataB(BYTE_WIDTH * 2 - 1, 0)
             val wMemRdDataByt4 = io.pMem.bRdDataB(BYTE_WIDTH * 4 - 1, 0)
-            val wMemRdData = MuxLookup(io.pIDUCtr.bMemByt, DATA_ZERO)(
+            val wMemRdData = MuxLookup(io.pIDUCtr.bMemByt, DATA_ZERO) (
                 Seq(
                     MEM_BYT_1_S ->
                         ExtenSign(wMemRdDataByt1, DATA_WIDTH),
