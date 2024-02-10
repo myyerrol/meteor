@@ -106,10 +106,12 @@ TOP_MAIN_INFO_L6 = "        args,"
 TOP_MAIN_INFO_L7 = "        gen :+ CIRCTTargetAnnotation(CIRCTTarget.Verilog))"
 TOP_MAIN_INFO_L8 = "}"
 
-ifeq ($(shell cat $(BUILD_PATH) | grep $(CPU)),)
-    $(shell rm -rf out)
-    $(shell rm -rf test_run_dir)
-    $(shell rm -rf cpu/build)
+ifeq ($(findstring $(MAKECMDGOALS), config|clean),)
+    ifeq ($(shell cat $(BUILD_PATH) | grep $(CPU)),)
+        $(shell rm -rf out)
+        $(shell rm -rf test_run_dir)
+        $(shell rm -rf cpu/build)
+    endif
 endif
 
 $(SRCVS_GEN): $(SRCSS)
@@ -133,10 +135,6 @@ $(METEOR_BIN): $(INCS) $(SRCS) $(CONFIG)
 	$(addprefix -LDFLAGS , $(LDFLAGS))          \
 	--Mdir $(OBJ_DIR) --exe -o                  \
 	$(abspath $(METEOR_BIN))
-
-# ifdef CONFIG_DIFFTEST
-#     ARGS_EMBED_DIFF = --diff=$(NEMU_HOME)/build/riscv32-nemu-interpreter-so
-# endif
 
 include $(METEOR_ENV_HOME)/core/tool/difftest.mk
 
