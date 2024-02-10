@@ -140,11 +140,11 @@ $(METEOR_BIN): $(INCS) $(SRCS) $(CONFIG)
 
 include $(METEOR_ENV_HOME)/core/tool/difftest.mk
 
-override ARGS_EMBED ?= --log=$(BUILD_DIR)/log.txt
-override ARGS_EMBED += $(ARGS_EMBED_DIFF)
+override ARGS ?= -l $(BUILD_DIR)/log.txt
+override ARGS += $(ARGS_DIFF)
 
 IMG ?=
-METEOR_EXEC := $(METEOR_BIN) $(ARGS_EMBED) $(ARGS) $(IMG)
+METEOR_EXEC := $(METEOR_BIN) $(ARGS) $(IMG)
 
 .PHONY: config test gen run gdb sim fmt cfmt clean bsp
 
