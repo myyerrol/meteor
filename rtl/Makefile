@@ -154,7 +154,7 @@ test:
 
 gen: $(SRCVS_GEN)
 
-run: $(METEOR_BIN) $(DIFF_REF_SO)
+run: $(METEOR_BIN) $(DIFFTEST_REF_SO)
 	rm -rf $(BUILD_DIR)/wave.vcd
 	$(METEOR_EXEC)
 
