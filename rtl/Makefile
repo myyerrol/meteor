@@ -82,7 +82,8 @@ SRCVS     = $(shell find $(SRCVS_DIR) -name "*.v")
 
 SRCCS_DIR = $(METEOR_ENV_HOME)/core/src
 SRCCS_SRC_BLACKLIST =
-SRCCS_DIR_BLACKLIST =
+SRCCS_DIR_BLACKLIST = $(shell [ "$(CONFIG_DEVICE)" = "y" ] && echo ||      \
+                      echo $(METEOR_ENV_HOME)/core/src/device)
 SRCCS_BLACKLIST     = $(SRCCS_SRC_BLACKLIST)                               \
                       $(shell find $(SRCCS_DIR_BLACKLIST) -name "*.c")
 SRCCS_WHITELIST     = $(shell find $(SRCCS_DIR) -name "*.c")
