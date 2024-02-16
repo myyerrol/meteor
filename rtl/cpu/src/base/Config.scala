@@ -7,6 +7,7 @@ trait ConfigIO {
     val RESP_WIDTH = 2
     val MODE_WIDTH = 2
     val GPRS_WIDTH = 5
+    val CSRS_WIDTH = 12
     val BYTE_WIDTH = 8
     val SIGS_WIDTH = 10
     val INST_WIDTH = 32
@@ -15,7 +16,7 @@ trait ConfigIO {
     val MASK_WIDTH = DATA_WIDTH / BYTE_WIDTH
 
     val GPRS_NUM = 1 << GPRS_WIDTH
-    val CSRS_NUM = 4096
+    val CSRS_NUM = 1 << CSRS_WIDTH
     val MEMS_NUM = 1 << 16
 }
 
@@ -24,7 +25,13 @@ trait ConfigInst extends ConfigIO {
     val INST_ZERO = "x00000000".U(INST_WIDTH.W)
     val ADDR_ZERO = "x00000000".U(ADDR_WIDTH.W)
     val DATA_ZERO = "x00000000".U(DATA_WIDTH.W)
-    val GPRS_END  = 10.U(GPRS_WIDTH.W)
+
+    val GPR_ZERO    =     0.U(GPRS_WIDTH.W)
+    val GPR_END     =    10.U(GPRS_WIDTH.W)
+    val CSR_MSTATUS = 0x300.U(CSRS_WIDTH.W)
+    val CSR_MTVEC   = 0x305.U(CSRS_WIDTH.W)
+    val CSR_MEPC    = 0x341.U(CSRS_WIDTH.W)
+    val CSR_MCAUSE  = 0x342.U(CSRS_WIDTH.W)
 
     val EN_TR = true.B
     val EN_FL = false.B
@@ -92,6 +99,7 @@ trait ConfigInst extends ConfigIO {
     val INST_NAME_DIVU   = 53.U(SIGS_WIDTH.W)
     val INST_NAME_REM    = 54.U(SIGS_WIDTH.W)
     val INST_NAME_REMU   = 55.U(SIGS_WIDTH.W)
+    val INST_NAME_MRET   = 56.U(SIGS_WIDTH.W)
 
     val PC_WR_SRC_X    = 0.U(SIGS_WIDTH.W)
     val PC_WR_SRC_NEXT = 1.U(SIGS_WIDTH.W)
@@ -111,16 +119,11 @@ trait ConfigInst extends ConfigIO {
     val MEM_BYT_4_S = 7.U(SIGS_WIDTH.W)
     val MEM_BYT_8_S = 8.U(SIGS_WIDTH.W)
 
-    val GPR_WR_SRC_X   = 0.U(SIGS_WIDTH.W)
-    val GPR_WR_SRC_ALU = 1.U(SIGS_WIDTH.W)
-    val GPR_WR_SRC_MEM = 2.U(SIGS_WIDTH.W)
-    val GPR_WR_SRC_PC  = 3.U(SIGS_WIDTH.W)
-    val GPR_WR_SRC_CSR = 4.U(SIGS_WIDTH.W)
-
-    val CSR_MSTATUS = 0x300.U(ADDR_WIDTH.W)
-    val CSR_MTVEC   = 0x305.U(ADDR_WIDTH.W)
-    val CSR_MEPC    = 0x341.U(ADDR_WIDTH.W)
-    val CSR_MCAUSE  = 0x342.U(ADDR_WIDTH.W)
+    val REG_WR_SRC_X   = 0.U(SIGS_WIDTH.W)
+    val REG_WR_SRC_ALU = 1.U(SIGS_WIDTH.W)
+    val REG_WR_SRC_MEM = 2.U(SIGS_WIDTH.W)
+    val REG_WR_SRC_PC  = 3.U(SIGS_WIDTH.W)
+    val REG_WR_SRC_CSR = 4.U(SIGS_WIDTH.W)
 
     val ALU_TYPE_X      =  0.U(SIGS_WIDTH.W)
     val ALU_TYPE_SLL    =  1.U(SIGS_WIDTH.W)
@@ -152,6 +155,7 @@ trait ConfigInst extends ConfigIO {
     val ALU_RS1_X     = 0.U(SIGS_WIDTH.W)
     val ALU_RS1_PC    = 1.U(SIGS_WIDTH.W)
     val ALU_RS1_GPR   = 2.U(SIGS_WIDTH.W)
+    val ALU_RS1_IMM   = 3.U(SIGS_WIDTH.W)
 
     val ALU_RS2_X     = 0.U(SIGS_WIDTH.W)
     val ALU_RS2_GPR   = 1.U(SIGS_WIDTH.W)
@@ -169,8 +173,8 @@ trait ConfigInst extends ConfigIO {
     val MEM_WR_TR = 1.U(SIGS_WIDTH.W)
     val MEM_WR_FL = 0.U(SIGS_WIDTH.W)
 
-    val GPR_WR_TR = 1.U(SIGS_WIDTH.W)
-    val GPR_WR_FL = 0.U(SIGS_WIDTH.W)
+    val REG_WR_TR = 1.U(SIGS_WIDTH.W)
+    val REG_WR_FL = 0.U(SIGS_WIDTH.W)
 
     val CSR_WR_T = 1.U(SIGS_WIDTH.W)
     val CSR_WR_F = 0.U(SIGS_WIDTH.W)
@@ -288,4 +292,8 @@ trait ConfigInstRV64M extends ConfigInstRV32M {
     // Remainder
     val INST_REMW   = BitPat("b0000001_?????_?????_110_?????_0111011")
     val INST_REMUW  = BitPat("b0000001_?????_?????_111_?????_0111011")
+}
+
+trait ConfigInstRVPri extends ConfigInst {
+    val INST_MRET   = BitPat("b0011000_00010_00000_000_00000_1110011")
 }

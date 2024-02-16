@@ -14,19 +14,10 @@ class GPR extends Module with ConfigInst {
 
     val mGPR = Mem(GPRS_NUM, UInt(DATA_WIDTH.W))
 
-    when (io.pGPRWr.bWrEn) {
-        mGPR(io.pGPRWr.bWrAddr) := io.pGPRWr.bWrData
-    }
-    .otherwise {
-        mGPR(io.pGPRWr.bWrAddr) := mGPR(io.pGPRWr.bWrAddr)
-    }
-
-    mGPR(0.U) := DATA_ZERO
-
     io.pGPRRS.bRS1Data  := mGPR(io.pGPRRS.bRS1Addr)
     io.pGPRRS.bRS2Data  := mGPR(io.pGPRRS.bRS2Addr)
 
-    io.pGPRRd.bRdEData  := mGPR(GPRS_END)
+    io.pGPRRd.bRdEData  := mGPR(GPR_END)
     io.pGPRRd.bRdData0  := mGPR( 0.U(GPRS_WIDTH.W))
     io.pGPRRd.bRdData1  := mGPR( 1.U(GPRS_WIDTH.W))
     io.pGPRRd.bRdData2  := mGPR( 2.U(GPRS_WIDTH.W))
@@ -59,4 +50,10 @@ class GPR extends Module with ConfigInst {
     io.pGPRRd.bRdData29 := mGPR(29.U(GPRS_WIDTH.W))
     io.pGPRRd.bRdData30 := mGPR(30.U(GPRS_WIDTH.W))
     io.pGPRRd.bRdData31 := mGPR(31.U(GPRS_WIDTH.W))
+
+    when (io.pGPRWr.bWrEn) {
+        mGPR(io.pGPRWr.bWrAddr) := io.pGPRWr.bWrData
+    }
+
+    mGPR(GPR_ZERO) := DATA_ZERO
 }
