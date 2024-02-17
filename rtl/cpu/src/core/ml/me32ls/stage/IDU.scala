@@ -128,29 +128,6 @@ class IDU extends Module with ConfigInstRV32I
                                    ~wALURS1DataGPR,
                                     wALURS1DataGPR)
 
-    // val wALURS2DataCSR = MuxLookup(wInstName, DATA_ZERO) (
-    //     Seq(
-    //         INST_NAME_CSRRW  -> DATA_ZERO,
-    //         INST_NAME_CSRRS  -> io.pCSRRd.bRdData,
-    //         INST_NAME_CSRRC  -> io.pCSRRd.bRdData,
-    //         INST_NAME_CSRRWI -> DATA_ZERO,
-    //         INST_NAME_CSRRSI -> io.pCSRRd.bRdData,
-    //         INST_NAME_CSRRCI -> io.pCSRRd.bRdData,
-    //         INST_NAME_MRET   -> io.pCSRRd.bRdData
-    //     )
-    // )
-    // io.pIDUData.bALURS2Data := MuxLookup(wALURS2, DATA_ZERO) (
-    //     Seq(
-    //         ALU_RS2_X     -> DATA_ZERO,
-    //         ALU_RS2_GPR   -> io.pGPRRS.bRS2Data,
-    //         ALU_RS2_CSR   -> wALURS2DataCSR,
-    //         ALU_RS2_IMM_I -> ExtenImm(wInst, "immI"),
-    //         ALU_RS2_IMM_S -> ExtenImm(wInst, "immS"),
-    //         ALU_RS2_IMM_U -> ExtenImm(wInst, "immU"),
-    //         ALU_RS2_IMM_J -> ExtenImm(wInst, "immJ"),
-    //     )
-    // )
-
     val wALURs2DataGPR = MuxLookup(wALURS2, DATA_ZERO) (
         Seq(
             ALU_RS2_X     -> DATA_ZERO,
@@ -169,7 +146,8 @@ class IDU extends Module with ConfigInstRV32I
             (wInstName === INST_NAME_CSRRS   ||
              wInstName === INST_NAME_CSRRC   ||
              wInstName === INST_NAME_CSRRSI  ||
-             wInstName === INST_NAME_CSRRCI) -> io.pCSRRd.bRdData
+             wInstName === INST_NAME_CSRRCI  ||
+             wInstName === INST_NAME_MRET)   -> io.pCSRRd.bRdData
         )
     )
 
