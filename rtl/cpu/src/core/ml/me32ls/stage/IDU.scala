@@ -55,12 +55,12 @@ class IDU extends Module with ConfigInstRV32I
             INST_FENCEI -> List(INST_NAME_FENCEI, ALU_TYPE_X,      ALU_RS1_X,    ALU_RS2_X,     JMP_FL, MEM_WR_FL, MEM_BYT_X,   REG_WR_FL, REG_WR_SRC_X),
             INST_ECALL  -> List(INST_NAME_ECALL,  ALU_TYPE_X,      ALU_RS1_X,    ALU_RS2_X,     JMP_FL, MEM_WR_FL, MEM_BYT_X,   REG_WR_FL, REG_WR_SRC_X),
             INST_EBREAK -> List(INST_NAME_EBREAK, ALU_TYPE_X,      ALU_RS1_X,    ALU_RS2_X,     JMP_FL, MEM_WR_FL, MEM_BYT_X,   REG_WR_FL, REG_WR_SRC_X),
-            INST_CSRRW  -> List(INST_NAME_CSRRW,  ALU_TYPE_OR,     ALU_RS1_GPR,  ALU_RS2_CSR,   JMP_FL, MEM_WR_FL, MEM_BYT_X,   REG_WR_TR, REG_WR_SRC_CSR),
-            INST_CSRRS  -> List(INST_NAME_CSRRS,  ALU_TYPE_OR,     ALU_RS1_GPR,  ALU_RS2_CSR,   JMP_FL, MEM_WR_FL, MEM_BYT_X,   REG_WR_TR, REG_WR_SRC_CSR),
-            INST_CSRRC  -> List(INST_NAME_CSRRC,  ALU_TYPE_AND,    ALU_RS1_GPR,  ALU_RS2_CSR,   JMP_FL, MEM_WR_FL, MEM_BYT_X,   REG_WR_TR, REG_WR_SRC_CSR),
-            INST_CSRRWI -> List(INST_NAME_CSRRWI, ALU_TYPE_OR,     ALU_RS1_IMM,  ALU_RS2_CSR,   JMP_FL, MEM_WR_FL, MEM_BYT_X,   REG_WR_TR, REG_WR_SRC_CSR),
-            INST_CSRRSI -> List(INST_NAME_CSRRSI, ALU_TYPE_OR,     ALU_RS1_IMM,  ALU_RS2_CSR,   JMP_FL, MEM_WR_FL, MEM_BYT_X,   REG_WR_TR, REG_WR_SRC_CSR),
-            INST_CSRRCI -> List(INST_NAME_CSRRCI, ALU_TYPE_AND,    ALU_RS1_IMM,  ALU_RS2_CSR,   JMP_FL, MEM_WR_FL, MEM_BYT_X,   REG_WR_TR, REG_WR_SRC_CSR),
+            INST_CSRRW  -> List(INST_NAME_CSRRW,  ALU_TYPE_OR,     ALU_RS1_GPR,  ALU_RS2_X,     JMP_FL, MEM_WR_FL, MEM_BYT_X,   REG_WR_TR, REG_WR_SRC_CSR),
+            INST_CSRRS  -> List(INST_NAME_CSRRS,  ALU_TYPE_OR,     ALU_RS1_GPR,  ALU_RS2_X,     JMP_FL, MEM_WR_FL, MEM_BYT_X,   REG_WR_TR, REG_WR_SRC_CSR),
+            INST_CSRRC  -> List(INST_NAME_CSRRC,  ALU_TYPE_AND,    ALU_RS1_GPR,  ALU_RS2_X,     JMP_FL, MEM_WR_FL, MEM_BYT_X,   REG_WR_TR, REG_WR_SRC_CSR),
+            INST_CSRRWI -> List(INST_NAME_CSRRWI, ALU_TYPE_OR,     ALU_RS1_IMM,  ALU_RS2_X,     JMP_FL, MEM_WR_FL, MEM_BYT_X,   REG_WR_TR, REG_WR_SRC_CSR),
+            INST_CSRRSI -> List(INST_NAME_CSRRSI, ALU_TYPE_OR,     ALU_RS1_IMM,  ALU_RS2_X,     JMP_FL, MEM_WR_FL, MEM_BYT_X,   REG_WR_TR, REG_WR_SRC_CSR),
+            INST_CSRRCI -> List(INST_NAME_CSRRCI, ALU_TYPE_AND,    ALU_RS1_IMM,  ALU_RS2_X,     JMP_FL, MEM_WR_FL, MEM_BYT_X,   REG_WR_TR, REG_WR_SRC_CSR),
             INST_LB     -> List(INST_NAME_LB,     ALU_TYPE_ADD,    ALU_RS1_GPR,  ALU_RS2_IMM_I, JMP_FL, MEM_WR_FL, MEM_BYT_1_S, REG_WR_TR, REG_WR_SRC_MEM),
             INST_LH     -> List(INST_NAME_LH,     ALU_TYPE_ADD,    ALU_RS1_GPR,  ALU_RS2_IMM_I, JMP_FL, MEM_WR_FL, MEM_BYT_2_S, REG_WR_TR, REG_WR_SRC_MEM),
             INST_LBU    -> List(INST_NAME_LBU,    ALU_TYPE_ADD,    ALU_RS1_GPR,  ALU_RS2_IMM_I, JMP_FL, MEM_WR_FL, MEM_BYT_1_U, REG_WR_TR, REG_WR_SRC_MEM),
@@ -79,7 +79,7 @@ class IDU extends Module with ConfigInstRV32I
             INST_REM    -> List(INST_NAME_REM,    ALU_TYPE_REM,    ALU_RS1_GPR,  ALU_RS2_GPR,   JMP_FL, MEM_WR_FL, MEM_BYT_X,   REG_WR_TR, REG_WR_SRC_ALU),
             INST_REMU   -> List(INST_NAME_REMU,   ALU_TYPE_REMU,   ALU_RS1_GPR,  ALU_RS2_GPR,   JMP_FL, MEM_WR_FL, MEM_BYT_X,   REG_WR_TR, REG_WR_SRC_ALU),
 
-            INST_MRET   -> List(INST_NAME_MRET,   ALU_TYPE_ADD,    ALU_RS1_X,    ALU_RS2_CSR,   JMP_TR, MEM_WR_FL, MEM_BYT_X,   REG_WR_FL, REG_WR_SRC_X)
+            INST_MRET   -> List(INST_NAME_MRET,   ALU_TYPE_ADD,    ALU_RS1_4,    ALU_RS2_X,     JMP_TR, MEM_WR_FL, MEM_BYT_X,   REG_WR_FL, REG_WR_SRC_X)
         )
     )
     val wInstName = lInst(0)
@@ -113,37 +113,66 @@ class IDU extends Module with ConfigInstRV32I
     io.pIDUData.bGPRRdAddr  := wInst(11, 7)
     io.pIDUData.bCSRRdData  := io.pCSRRd.bRdData
     io.pIDUData.bCSRWrAddr  := wCSRAddr
-    io.pIDUData.bALURS1Data := MuxLookup(wALURS1, DATA_ZERO) (
+
+    val wALURS1DataGPR = MuxLookup(wALURS1, DATA_ZERO) (
         Seq(
            ALU_RS1_X   -> DATA_ZERO,
            ALU_RS1_GPR -> io.pGPRRS.bRS1Data,
            ALU_RS1_PC  -> io.pBase.bPC,
-           ALU_RS1_IMM -> ExtenZero(wInst(19, 15), DATA_WIDTH)
+           ALU_RS1_IMM -> ExtenZero(wInst(19, 15), DATA_WIDTH),
+           ALU_RS1_4   -> 4.U(DATA_WIDTH.W)
         )
     )
+    io.pIDUData.bALURS1Data := Mux((wInstName === INST_NAME_CSRRC ||
+                                    wInstName === INST_NAME_CSRRCI),
+                                   ~wALURS1DataGPR,
+                                    wALURS1DataGPR)
 
-    val wALURS2DataCSR = MuxLookup(wInstName, DATA_ZERO) (
-        Seq(
-            INST_NAME_CSRRW  -> DATA_ZERO,
-            INST_NAME_CSRRS  -> DATA_ZERO,
-            INST_NAME_CSRRC  -> DATA_ZERO,
-            INST_NAME_CSRRWI -> DATA_ZERO,
-            INST_NAME_CSRRSI -> DATA_ZERO,
-            INST_NAME_CSRRCI -> DATA_ZERO,
-            INST_NAME_MRET   -> DATA_ZERO
-        )
-    )
-    io.pIDUData.bALURS2Data := MuxLookup(wALURS2, DATA_ZERO) (
+    // val wALURS2DataCSR = MuxLookup(wInstName, DATA_ZERO) (
+    //     Seq(
+    //         INST_NAME_CSRRW  -> DATA_ZERO,
+    //         INST_NAME_CSRRS  -> io.pCSRRd.bRdData,
+    //         INST_NAME_CSRRC  -> io.pCSRRd.bRdData,
+    //         INST_NAME_CSRRWI -> DATA_ZERO,
+    //         INST_NAME_CSRRSI -> io.pCSRRd.bRdData,
+    //         INST_NAME_CSRRCI -> io.pCSRRd.bRdData,
+    //         INST_NAME_MRET   -> io.pCSRRd.bRdData
+    //     )
+    // )
+    // io.pIDUData.bALURS2Data := MuxLookup(wALURS2, DATA_ZERO) (
+    //     Seq(
+    //         ALU_RS2_X     -> DATA_ZERO,
+    //         ALU_RS2_GPR   -> io.pGPRRS.bRS2Data,
+    //         ALU_RS2_CSR   -> wALURS2DataCSR,
+    //         ALU_RS2_IMM_I -> ExtenImm(wInst, "immI"),
+    //         ALU_RS2_IMM_S -> ExtenImm(wInst, "immS"),
+    //         ALU_RS2_IMM_U -> ExtenImm(wInst, "immU"),
+    //         ALU_RS2_IMM_J -> ExtenImm(wInst, "immJ"),
+    //     )
+    // )
+
+    val wALURs2DataGPR = MuxLookup(wALURS2, DATA_ZERO) (
         Seq(
             ALU_RS2_X     -> DATA_ZERO,
             ALU_RS2_GPR   -> io.pGPRRS.bRS2Data,
-            ALU_RS2_CSR   -> wALURS2DataCSR,
             ALU_RS2_IMM_I -> ExtenImm(wInst, "immI"),
             ALU_RS2_IMM_S -> ExtenImm(wInst, "immS"),
             ALU_RS2_IMM_U -> ExtenImm(wInst, "immU"),
             ALU_RS2_IMM_J -> ExtenImm(wInst, "immJ"),
         )
     )
+    io.pIDUData.bALURS2Data := MuxCase(
+        wALURs2DataGPR,
+        Seq(
+            (wInstName === INST_NAME_CSRRW   ||
+             wInstName === INST_NAME_CSRRWI) -> DATA_ZERO,
+            (wInstName === INST_NAME_CSRRS   ||
+             wInstName === INST_NAME_CSRRC   ||
+             wInstName === INST_NAME_CSRRSI  ||
+             wInstName === INST_NAME_CSRRCI) -> io.pCSRRd.bRdData
+        )
+    )
+
     io.pIDUData.bJmpOrWrData := Mux(
         (wInstName === INST_NAME_BEQ)  ||
         (wInstName === INST_NAME_BNE)  ||
