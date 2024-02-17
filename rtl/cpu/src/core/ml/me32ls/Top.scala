@@ -9,7 +9,7 @@ import cpu.mem._
 
 class Top extends Module with ConfigInst {
     val io = IO(new Bundle {
-        val pEnd   = new EndIO
+        val pState = new StateIO
         val pTrace = new TraceIO
     });
 
@@ -23,8 +23,8 @@ class Top extends Module with ConfigInst {
     val mLSU = Module(new LSU)
     val mWBU = Module(new WBU)
 
-    io.pEnd.bFlag := false.B
-    io.pEnd.bData := mGPR.io.pGPRRd.bRdEData
+    io.pState.bEndFlag := false.B
+    io.pState.bEndData := mGPR.io.pGPRRd.bRdEData
 
     io.pTrace.pBase.bPC   := mIFU.io.pBase.bPC
     io.pTrace.pBase.bInst := mMem.io.pMem.bRdDataA
@@ -64,9 +64,16 @@ class Top extends Module with ConfigInst {
         assert(false.B, "Invalid instruction at 0x%x", mIFU.io.pBase.bPC)
     }
     .elsewhen (mIDU.io.pIDUCtr.bInstName === INST_NAME_EBREAK) {
-        io.pEnd.bFlag := true.B
+        io.pState.bEndFlag := true.B
     }
     .otherwise {
-        io.pEnd.bFlag := false.B
+        io.pState.bEndFlag := false.B
     }
+
+    io.pState.bCSRType := MuxLookup(mIDU.io.pIDUCtr.bInstName, 0.U(2.W)) (
+        Seq(
+            INST_NAME_ECALL -> 1.U(2.W),
+            INST_NAME_MRET  -> 2.U(2.W)
+        )
+    )
 }
