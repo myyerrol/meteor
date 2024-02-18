@@ -18,8 +18,8 @@ class Top extends Module with ConfigInst {
     val mCSR = Module(new CSR)
     val mMem = Module(new MemDualFakeBB)
 
-    val mAXI4IFUM = Module(new AXI4LiteIFUMaster)
-    val mAXI4IFUS = Module(new AXI4LiteIFUSlave)
+    // val mAXI4IFUM = Module(new AXI4LiteIFUMaster)
+    // val mAXI4IFUS = Module(new AXI4LiteIFUSlave)
 
     val mIFU = Module(new IFU)
     val mIDU = Module(new IDU)
@@ -31,13 +31,14 @@ class Top extends Module with ConfigInst {
     io.pState.bEndData := mGPR.io.pGPRRd.bRdEData
 
     io.pTrace.pBase.bPC   := mIFU.io.pBase.bPC
-    // io.pTrace.pBase.bInst := mMem.io.pMem.bRdDataA
-    io.pTrace.pBase.bInst := mAXI4IFUM.io.oData
+    // io.pTrace.pBase.bInst := mAXI4IFUM.io.oData
+    io.pTrace.pBase.bInst := mMem.io.pMemInst.pRd.bData
     io.pTrace.pGPRRd      <> mGPR.io.pGPRRd
     io.pTrace.pGPRWr      <> mWBU.io.pGPRWrO
     io.pTrace.pCSRRd      <> mCSR.io.pCSRRd
     io.pTrace.pCSRWr      <> mWBU.io.pCSRWrO
-    io.pTrace.pMem        <> mLSU.io.pMemO
+    io.pTrace.pMemInst    <> mMem.io.pMemInst
+    io.pTrace.pMemData    <> mLSU.io.pMemDataO
     io.pTrace.pIDUCtr     <> mIDU.io.pIDUCtr
     io.pTrace.pIDUData    <> mIDU.io.pIDUData
     io.pTrace.pEXUJmp     <> mEXU.io.pEXUJmp
@@ -48,26 +49,25 @@ class Top extends Module with ConfigInst {
     mCSR.io.pCSRRd <> mIDU.io.pCSRRd
     mCSR.io.pCSRWr <> mWBU.io.pCSRWrO
 
-    // mMem.io.pMem   <> mLSU.io.pMemO
-    // mMem.io.pMem.bRdEn    := true.B
-    // mMem.io.pMem.bRdAddrA := mAXI4IFUS.io.oAddr
-    mMem.io.pRdInst.bEn   := true.B
-    mMem.io.pRdInst.bAddr := mAXI4IFUS.io.oAddr
+    mMem.io.pMemInst.pRd.bEn   := true.B
+    mMem.io.pMemInst.pRd.bAddr := mIFU.io.pBase.bPC
+    // mMem.io.pMemInst.pRd.bAddr := mAXI4IFUS.io.oAddr
+    mMem.io.pMemData           <> mLSU.io.pMemDataO
 
-    mAXI4IFUM.io.iRdEn := true.B
-    mAXI4IFUM.io.iAddr := mIFU.io.pBase.bPC
+    // mAXI4IFUM.io.iRdEn := true.B
+    // mAXI4IFUM.io.iAddr := mIFU.io.pBase.bPC
     // mAXI4IFUS.io.iData := mMem.io.pMem.bRdDataA
-    mAXI4IFUS.io.iData := mMem.io.pRdInst.bData
+    // mAXI4IFUS.io.iData := mMem.io.pMemInst.pRd.bData
 
-    mAXI4IFUM.io.pAR <> mAXI4IFUS.io.pAR
-    mAXI4IFUM.io.pR  <> mAXI4IFUS.io.pR
+    // mAXI4IFUM.io.pAR <> mAXI4IFUS.io.pAR
+    // mAXI4IFUM.io.pR  <> mAXI4IFUS.io.pR
 
-    mIFU.io.iEn := false.B
+    mIFU.io.iEn := true.B
     mIFU.io.pEXUJmp <> mEXU.io.pEXUJmp
 
     mIDU.io.pBase.bPC   := mIFU.io.pBase.bPC
-    // mIDU.io.pBase.bInst := mMem.io.pMem.bRdDataA
-    mIDU.io.pBase.bInst := mAXI4IFUM.io.oData
+    // mIDU.io.pBase.bInst := mAXI4IFUM.io.oData
+    mIDU.io.pBase.bInst := mMem.io.pMemInst.pRd.bData
 
     mEXU.io.pBase.bPC   := mIFU.io.pBase.bPC
     mEXU.io.pBase.bInst := DontCare
@@ -75,7 +75,7 @@ class Top extends Module with ConfigInst {
     mEXU.io.pIDUCtr  <> mIDU.io.pIDUCtr
     mEXU.io.pIDUData <> mIDU.io.pIDUData
 
-    mLSU.io.pMemI <> mEXU.io.pMem
+    mLSU.io.pMemDataI <> mEXU.io.pMemData
 
     mWBU.io.pGPRWrI <> mEXU.io.pGPRWr
     mWBU.io.pCSRWrI <> mEXU.io.pCSRWr

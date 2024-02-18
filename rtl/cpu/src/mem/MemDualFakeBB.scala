@@ -6,8 +6,9 @@ import chisel3.util._
 import cpu.base._
 import cpu.port._
 
-class MemDualFakeBB extends BlackBox with ConfigInst {
+class MemDualFakeBB extends BlackBox {
     val io = IO(new Bundle {
-        val pMem = new MemDualIO
+        val pMemInst = new MemDualInstIO
+        val pMemData = new MemDualDataIO
     })
 }

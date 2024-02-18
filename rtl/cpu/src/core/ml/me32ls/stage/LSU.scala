@@ -8,9 +8,9 @@ import cpu.port._
 
 class LSU extends Module with ConfigInst {
     val io = IO(new Bundle {
-        val pMemI =         new MemDualIO
-        val pMemO = Flipped(new MemDualIO)
+        val pMemDataI =         new MemDualDataIO
+        val pMemDataO = Flipped(new MemDualDataIO)
     })
 
-    io.pMemO <> io.pMemI
+    io.pMemDataO <> io.pMemDataI
 }

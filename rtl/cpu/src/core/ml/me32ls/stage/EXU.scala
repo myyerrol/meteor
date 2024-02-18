@@ -12,9 +12,7 @@ class EXU extends Module with ConfigInst {
         val pBase    = Flipped(new BaseIO)
         val pGPRWr   =         new GPRWrIO
         val pCSRWr   =         new CSRWrIO
-        // val pMem     = Flipped(new MemDualIO)
-        val pMem     = Flipped(new MemDualRdIO)
-        val pMem     = Flipped(new MemDualWrIO)
+        val pMemData = Flipped(new MemDualDataIO)
         val pIDUCtr  = Flipped(new IDUCtrIO)
         val pIDUData = Flipped(new IDUDataIO)
         val pEXUJmp  =         new EXUJmpIO
@@ -52,15 +50,14 @@ class EXU extends Module with ConfigInst {
     }
 
     val wMemRdAddr = Wire(UInt(ADDR_WIDTH.W))
-    // io.pMem.bRdEn    := true.B
-    // io.pMem.bRdAddrA := io.pBase.bPC
-    io.pMem.bRdAddrB := wMemRdAddr
+    io.pMemData.pRd.bEn   := true.B
+    io.pMemData.pRd.bAddr := wMemRdAddr
 
     when (io.pIDUCtr.bMemWrEn) {
-        io.pMem.bWrEn   := true.B
-        io.pMem.bWrAddr := mALU.io.oOut
-        io.pMem.bWrData := io.pIDUData.bJmpOrWrData
-        io.pMem.bWrMask := MuxLookup(
+        io.pMemData.pWr.bEn   := true.B
+        io.pMemData.pWr.bAddr := mALU.io.oOut
+        io.pMemData.pWr.bData := io.pIDUData.bJmpOrWrData
+        io.pMemData.pWr.bMask := MuxLookup(
             io.pIDUCtr.bMemByt,
             VecInit(("b1111".U).asBools)) (
             Seq(
@@ -71,10 +68,10 @@ class EXU extends Module with ConfigInst {
         )
     }
     .otherwise {
-        io.pMem.bWrEn   := false.B
-        io.pMem.bWrAddr := ADDR_ZERO
-        io.pMem.bWrData := ADDR_ZERO
-        io.pMem.bWrMask := VecInit(("b1111".U).asBools)
+        io.pMemData.pWr.bEn   := false.B
+        io.pMemData.pWr.bAddr := ADDR_ZERO
+        io.pMemData.pWr.bData := ADDR_ZERO
+        io.pMemData.pWr.bMask := VecInit(("b1111".U).asBools)
     }
 
     val wGPRWrData = MuxLookup(io.pIDUCtr.bRegWrSrc, DATA_ZERO) (
@@ -91,9 +88,9 @@ class EXU extends Module with ConfigInst {
         io.pGPRWr.bWrAddr := io.pIDUData.bGPRRdAddr
         when (io.pIDUCtr.bRegWrSrc === REG_WR_SRC_MEM) {
             wMemRdAddr := mALU.io.oOut
-            val wMemRdDataByt1 = io.pMem.bRdDataB(BYTE_WIDTH * 1 - 1, 0)
-            val wMemRdDataByt2 = io.pMem.bRdDataB(BYTE_WIDTH * 2 - 1, 0)
-            val wMemRdDataByt4 = io.pMem.bRdDataB(BYTE_WIDTH * 4 - 1, 0)
+            val wMemRdDataByt1 = io.pMemData.pRd.bData(BYTE_WIDTH * 1 - 1, 0)
+            val wMemRdDataByt2 = io.pMemData.pRd.bData(BYTE_WIDTH * 2 - 1, 0)
+            val wMemRdDataByt4 = io.pMemData.pRd.bData(BYTE_WIDTH * 4 - 1, 0)
             val wMemRdData = MuxLookup(io.pIDUCtr.bMemByt, DATA_ZERO) (
                 Seq(
                     MEM_BYT_1_S ->
