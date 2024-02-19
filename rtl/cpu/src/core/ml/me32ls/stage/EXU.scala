@@ -12,7 +12,9 @@ class EXU extends Module with ConfigInst {
         val pBase    = Flipped(new BaseIO)
         val pGPRWr   =         new GPRWrIO
         val pCSRWr   =         new CSRWrIO
-        val pMem     = Flipped(new MemDualIO)
+        // val pMem     = Flipped(new MemDualIO)
+        val pMem     = Flipped(new MemDualRdIO)
+        val pMem     = Flipped(new MemDualWrIO)
         val pIDUCtr  = Flipped(new IDUCtrIO)
         val pIDUData = Flipped(new IDUDataIO)
         val pEXUJmp  =         new EXUJmpIO
@@ -50,8 +52,8 @@ class EXU extends Module with ConfigInst {
     }
 
     val wMemRdAddr = Wire(UInt(ADDR_WIDTH.W))
-    io.pMem.bRdEn    := true.B
-    io.pMem.bRdAddrA := io.pBase.bPC
+    // io.pMem.bRdEn    := true.B
+    // io.pMem.bRdAddrA := io.pBase.bPC
     io.pMem.bRdAddrB := wMemRdAddr
 
     when (io.pIDUCtr.bMemWrEn) {

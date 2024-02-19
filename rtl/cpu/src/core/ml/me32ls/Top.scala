@@ -5,6 +5,7 @@ import chisel3.util._
 
 import cpu.base._
 import cpu.port._
+import cpu.bus._
 import cpu.mem._
 
 class Top extends Module with ConfigInst {
@@ -17,6 +18,9 @@ class Top extends Module with ConfigInst {
     val mCSR = Module(new CSR)
     val mMem = Module(new MemDualFakeBB)
 
+    val mAXI4IFUM = Module(new AXI4LiteIFUMaster)
+    val mAXI4IFUS = Module(new AXI4LiteIFUSlave)
+
     val mIFU = Module(new IFU)
     val mIDU = Module(new IDU)
     val mEXU = Module(new EXU)
@@ -27,7 +31,8 @@ class Top extends Module with ConfigInst {
     io.pState.bEndData := mGPR.io.pGPRRd.bRdEData
 
     io.pTrace.pBase.bPC   := mIFU.io.pBase.bPC
-    io.pTrace.pBase.bInst := mMem.io.pMem.bRdDataA
+    // io.pTrace.pBase.bInst := mMem.io.pMem.bRdDataA
+    io.pTrace.pBase.bInst := mAXI4IFUM.io.oData
     io.pTrace.pGPRRd      <> mGPR.io.pGPRRd
     io.pTrace.pGPRWr      <> mWBU.io.pGPRWrO
     io.pTrace.pCSRRd      <> mCSR.io.pCSRRd
@@ -42,12 +47,27 @@ class Top extends Module with ConfigInst {
     mGPR.io.pGPRWr <> mWBU.io.pGPRWrO
     mCSR.io.pCSRRd <> mIDU.io.pCSRRd
     mCSR.io.pCSRWr <> mWBU.io.pCSRWrO
-    mMem.io.pMem   <> mLSU.io.pMemO
 
+    // mMem.io.pMem   <> mLSU.io.pMemO
+    // mMem.io.pMem.bRdEn    := true.B
+    // mMem.io.pMem.bRdAddrA := mAXI4IFUS.io.oAddr
+    mMem.io.pRdInst.bEn   := true.B
+    mMem.io.pRdInst.bAddr := mAXI4IFUS.io.oAddr
+
+    mAXI4IFUM.io.iRdEn := true.B
+    mAXI4IFUM.io.iAddr := mIFU.io.pBase.bPC
+    // mAXI4IFUS.io.iData := mMem.io.pMem.bRdDataA
+    mAXI4IFUS.io.iData := mMem.io.pRdInst.bData
+
+    mAXI4IFUM.io.pAR <> mAXI4IFUS.io.pAR
+    mAXI4IFUM.io.pR  <> mAXI4IFUS.io.pR
+
+    mIFU.io.iEn := false.B
     mIFU.io.pEXUJmp <> mEXU.io.pEXUJmp
 
     mIDU.io.pBase.bPC   := mIFU.io.pBase.bPC
-    mIDU.io.pBase.bInst := mMem.io.pMem.bRdDataA
+    // mIDU.io.pBase.bInst := mMem.io.pMem.bRdDataA
+    mIDU.io.pBase.bInst := mAXI4IFUM.io.oData
 
     mEXU.io.pBase.bPC   := mIFU.io.pBase.bPC
     mEXU.io.pBase.bInst := DontCare
