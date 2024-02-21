@@ -1,19 +1,20 @@
 `include "../Config.v"
 
 module MemDualFakeBB(
-    input  wire                       pMem_bRdEn,
-    input  wire [`ADDR_WIDTH - 1 : 0] pMem_bRdAddrA,
-    input  wire [`ADDR_WIDTH - 1 : 0] pMem_bRdAddrB,
-    input  wire                       pMem_bWrEn,
-    input  wire [`ADDR_WIDTH - 1 : 0] pMem_bWrAddr,
-    input  wire [`DATA_WIDTH - 1 : 0] pMem_bWrData,
-    input  wire                       pMem_bWrMask_0,
-    input  wire                       pMem_bWrMask_1,
-    input  wire                       pMem_bWrMask_2,
-    input  wire                       pMem_bWrMask_3,
+    input  wire                       pMemInst_pRd_bEn,
+    input  wire [`ADDR_WIDTH - 1 : 0] pMemInst_pRd_bAddr,
+    output reg  [`INST_WIDTH - 1 : 0] pMemInst_pRd_bData,
 
-    output reg  [`INST_WIDTH - 1 : 0] pMem_bRdDataA,
-    output reg  [`DATA_WIDTH - 1 : 0] pMem_bRdDataB
+    input  wire                       pMemData_pRd_bEn,
+    input  wire [`ADDR_WIDTH - 1 : 0] pMemData_pRd_bAddr,
+    output reg  [`INST_WIDTH - 1 : 0] pMemData_pRd_bData,
+    input  wire                       pMemData_pWr_bEn,
+    input  wire [`ADDR_WIDTH - 1 : 0] pMemData_pWr_bAddr,
+    input  wire [`DATA_WIDTH - 1 : 0] pMemData_pWr_bData,
+    input  wire                       pMemData_pWr_bMask_0,
+    input  wire                       pMemData_pWr_bMask_1,
+    input  wire                       pMemData_pWr_bMask_2,
+    input  wire                       pMemData_pWr_bMask_3
 );
 
     import "DPI-C" context function int unsigned readSimInstData(
@@ -27,29 +28,37 @@ module MemDualFakeBB(
         input int unsigned data,
         input byte unsigned len);
 
-    always @(pMem_bRdAddrA) begin
-        if (pMem_bRdEn) begin
-            pMem_bRdDataA = readSimInstData(pMem_bRdAddrA, 4);
+    always @(pMemInst_pRd_bAddr) begin
+        if (pMemInst_pRd_bEn) begin
+            pMemInst_pRd_bData = readSimInstData(pMemInst_pRd_bAddr, 4);
         end
     end
 
-    always @(pMem_bRdAddrB) begin
-        if (pMem_bRdEn) begin
-            pMem_bRdDataB = readSimMemoryData(pMem_bRdAddrB, 4);
+    always @(pMemData_pRd_bAddr) begin
+        if (pMemData_pRd_bEn) begin
+            pMemData_pRd_bData = readSimMemoryData(pMemData_pRd_bAddr, 4);
         end
     end
 
-    wire [3: 0] pMem_bWrMask = { pMem_bWrMask_0,
-                                 pMem_bWrMask_1,
-                                 pMem_bWrMask_2,
-                                 pMem_bWrMask_3 };
-    always @(pMem_bWrAddr or pMem_bWrData) begin
-        if (pMem_bWrEn) begin
-            case (pMem_bWrMask)
-                4'b0001: writeSimMemoryData(pMem_bWrAddr, pMem_bWrData, 1);
-                4'b0011: writeSimMemoryData(pMem_bWrAddr, pMem_bWrData, 2);
-                4'b1111: writeSimMemoryData(pMem_bWrAddr, pMem_bWrData, 4);
-                default: writeSimMemoryData(pMem_bWrAddr, pMem_bWrData, 4);
+    wire [3: 0] pMemData_pWr_bMask = { pMemData_pWr_bMask_0,
+                                       pMemData_pWr_bMask_1,
+                                       pMemData_pWr_bMask_2,
+                                       pMemData_pWr_bMask_3 };
+    always @(pMemData_pWr_bAddr or pMemData_pWr_bData) begin
+        if (pMemData_pWr_bEn) begin
+            case (pMemData_pWr_bMask)
+                4'b0001: writeSimMemoryData(pMemData_pWr_bAddr,
+                                            pMemData_pWr_bData,
+                                            1);
+                4'b0011: writeSimMemoryData(pMemData_pWr_bAddr,
+                                            pMemData_pWr_bData,
+                                            2);
+                4'b1111: writeSimMemoryData(pMemData_pWr_bAddr,
+                                            pMemData_pWr_bData,
+                                            4);
+                default: writeSimMemoryData(pMemData_pWr_bAddr,
+                                            pMemData_pWr_bData,
+                                            4);
             endcase
         end
     end
