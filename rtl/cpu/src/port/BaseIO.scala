@@ -7,5 +7,6 @@ import cpu.base._
 
 class BaseIO extends Bundle with ConfigIO {
     val bPC   = Output(UInt(ADDR_WIDTH.W))
+    val bPCEn = Output(Bool())
     val bInst = Output(UInt(DATA_WIDTH.W))
 }

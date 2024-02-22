@@ -18,20 +18,20 @@ class Top extends Module with ConfigInst {
     val mCSR = Module(new CSR)
     val mMem = Module(new MemDualFakeBB)
 
-    // val mAXI4IFUM = Module(new AXI4LiteIFUMaster)
-    // val mAXI4IFUS = Module(new AXI4LiteIFUSlave)
-
     val mIFU = Module(new IFU)
     val mIDU = Module(new IDU)
     val mEXU = Module(new EXU)
     val mLSU = Module(new LSU)
     val mWBU = Module(new WBU)
 
+    // val wPCEn = Wire(Bool())
+    // wPCEn := false.B
+
     io.pState.bEndFlag := false.B
     io.pState.bEndData := mGPR.io.pGPRRd.bRdEData
 
     io.pTrace.pBase.bPC   := mIFU.io.pBase.bPC
-    // io.pTrace.pBase.bInst := mAXI4IFUM.io.oData
+    io.pTrace.pBase.bPCEn := mIFU.io.pBase.bPCEn
     io.pTrace.pBase.bInst := mMem.io.pMemInst.pRd.bData
     io.pTrace.pGPRRd      <> mGPR.io.pGPRRd
     io.pTrace.pGPRWr      <> mWBU.io.pGPRWrO
@@ -51,25 +51,17 @@ class Top extends Module with ConfigInst {
 
     mMem.io.pMemInst.pRd.bEn   := true.B
     mMem.io.pMemInst.pRd.bAddr := mIFU.io.pBase.bPC
-    // mMem.io.pMemInst.pRd.bAddr := mAXI4IFUS.io.oAddr
     mMem.io.pMemData           <> mLSU.io.pMemDataO
 
-    // mAXI4IFUM.io.iRdEn := true.B
-    // mAXI4IFUM.io.iAddr := mIFU.io.pBase.bPC
-    // mAXI4IFUS.io.iData := mMem.io.pMem.bRdDataA
-    // mAXI4IFUS.io.iData := mMem.io.pMemInst.pRd.bData
-
-    // mAXI4IFUM.io.pAR <> mAXI4IFUS.io.pAR
-    // mAXI4IFUM.io.pR  <> mAXI4IFUS.io.pR
-
-    mIFU.io.iEn := true.B
+    // mIFU.io.iPCEn   := wPCEn
     mIFU.io.pEXUJmp <> mEXU.io.pEXUJmp
 
     mIDU.io.pBase.bPC   := mIFU.io.pBase.bPC
-    // mIDU.io.pBase.bInst := mAXI4IFUM.io.oData
+    mIDU.io.pBase.bPCEn := DontCare
     mIDU.io.pBase.bInst := mMem.io.pMemInst.pRd.bData
 
     mEXU.io.pBase.bPC   := mIFU.io.pBase.bPC
+    mEXU.io.pBase.bPCEn := DontCare
     mEXU.io.pBase.bInst := DontCare
 
     mEXU.io.pIDUCtr  <> mIDU.io.pIDUCtr
@@ -80,8 +72,29 @@ class Top extends Module with ConfigInst {
     mWBU.io.pGPRWrI <> mEXU.io.pGPRWr
     mWBU.io.pCSRWrI <> mEXU.io.pCSRWr
 
+    var MEM_TYPE = "AXI4Lite"
+    // var MEM_TYPE = ""
+
+    if (MEM_TYPE.equals("AXI4Lite")) {
+        val mAXI4IFUM = Module(new AXI4LiteIFUM)
+        val mAXI4IFUS = Module(new AXI4LiteIFUS)
+
+        io.pTrace.pBase.bInst := mAXI4IFUM.io.oData
+
+        mAXI4IFUM.io.iRdEn := true.B
+        mAXI4IFUM.io.iAddr := mIFU.io.pBase.bPC
+        mAXI4IFUM.io.pAR   <> mAXI4IFUS.io.pAR
+        mAXI4IFUM.io.pR    <> mAXI4IFUS.io.pR
+        mAXI4IFUS.io.iData := mMem.io.pMemInst.pRd.bData
+
+        mMem.io.pMemInst.pRd.bAddr := mAXI4IFUS.io.oAddr
+
+        mIFU.io.iPCEn       := mAXI4IFUM.io.oFlag
+        mIDU.io.pBase.bInst := mAXI4IFUM.io.oData
+    }
+
     when (mIDU.io.pIDUCtr.bInstName === INST_NAME_X) {
-        assert(false.B, "Invalid instruction at 0x%x", mIFU.io.pBase.bPC)
+        // assert(false.B, "Invalid instruction at 0x%x", mIFU.io.pBase.bPC)
     }
     .elsewhen (mIDU.io.pIDUCtr.bInstName === INST_NAME_EBREAK) {
         io.pState.bEndFlag := true.B

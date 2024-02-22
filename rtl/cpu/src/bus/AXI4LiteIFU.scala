@@ -6,21 +6,21 @@ import chisel3.util._
 import cpu.base._
 import cpu.port._
 
-class AXI4LiteIFUMaster extends Module with ConfigInst {
+class AXI4LiteIFUM extends Module with ConfigInst {
     val io = IO(new Bundle {
         val iRdEn = Input(Bool())
         val iAddr = Input(UInt(ADDR_WIDTH.W))
         val oData = Output(UInt(DATA_WIDTH.W))
+        val oFlag = Output(Bool())
 
         val pAR   = new AXI4LiteARIO
         val pR    = new AXI4LiteRIO
     })
 
     // AXI4-Lite AR
-    val rARValid = RegInit(false.B)
-    val wARReady = WireInit(false.B)
+    val rARValid = Reg(Bool())
+    val wARReady = Wire(Bool())
 
-    rARValid := Mux(rARValid, true.B, io.iRdEn)
     wARReady := io.pAR.bReady
 
     when (rARValid && wARReady) {
@@ -29,9 +29,10 @@ class AXI4LiteIFUMaster extends Module with ConfigInst {
     }
     .otherwise {
         io.pAR.bAddr := ADDR_ZERO
-        rARValid     := rARValid
+        rARValid     := Mux(rARValid, true.B, io.iRdEn)
     }
 
+    io.oFlag := rARValid && wARReady
     io.pAR.bValid := rARValid
 
     // AXI4-Lite R
@@ -45,7 +46,7 @@ class AXI4LiteIFUMaster extends Module with ConfigInst {
     }
 }
 
-class AXI4LiteIFUSlave extends Module with ConfigInst {
+class AXI4LiteIFUS extends Module with ConfigInst {
     val io = IO(new Bundle {
         val iData = Input(UInt(DATA_WIDTH.W))
         val oAddr = Output(UInt(ADDR_WIDTH.W))
