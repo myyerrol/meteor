@@ -24,9 +24,6 @@ class Top extends Module with ConfigInst {
     val mLSU = Module(new LSU)
     val mWBU = Module(new WBU)
 
-    // val wPCEn = Wire(Bool())
-    // wPCEn := false.B
-
     io.pState.bEndFlag := false.B
     io.pState.bEndData := mGPR.io.pGPRRd.bRdEData
 
@@ -53,7 +50,7 @@ class Top extends Module with ConfigInst {
     mMem.io.pMemInst.pRd.bAddr := mIFU.io.pBase.bPC
     mMem.io.pMemData           <> mLSU.io.pMemDataO
 
-    // mIFU.io.iPCEn   := wPCEn
+    mIFU.io.iPCEn   := true.B
     mIFU.io.pEXUJmp <> mEXU.io.pEXUJmp
 
     mIDU.io.pBase.bPC   := mIFU.io.pBase.bPC
@@ -72,8 +69,7 @@ class Top extends Module with ConfigInst {
     mWBU.io.pGPRWrI <> mEXU.io.pGPRWr
     mWBU.io.pCSRWrI <> mEXU.io.pCSRWr
 
-    var MEM_TYPE = "AXI4Lite"
-    // var MEM_TYPE = ""
+    var MEM_TYPE = ""
 
     if (MEM_TYPE.equals("AXI4Lite")) {
         val mAXI4IFUM = Module(new AXI4LiteIFUM)
@@ -93,8 +89,9 @@ class Top extends Module with ConfigInst {
         mIDU.io.pBase.bInst := mAXI4IFUM.io.oData
     }
 
-    when (mIDU.io.pIDUCtr.bInstName === INST_NAME_X) {
-        // assert(false.B, "Invalid instruction at 0x%x", mIFU.io.pBase.bPC)
+    when (mIDU.io.pBase.bInst =/= DATA_ZERO &&
+          mIDU.io.pIDUCtr.bInstName === INST_NAME_X) {
+        assert(false.B, "Invalid instruction at 0x%x", mIFU.io.pBase.bPC)
     }
     .elsewhen (mIDU.io.pIDUCtr.bInstName === INST_NAME_EBREAK) {
         io.pState.bEndFlag := true.B
