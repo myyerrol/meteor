@@ -25,6 +25,7 @@ trait ConfigInst extends ConfigIO {
     val INST_ZERO = "x00000000".U(INST_WIDTH.W)
     val ADDR_ZERO = "x00000000".U(ADDR_WIDTH.W)
     val DATA_ZERO = "x00000000".U(DATA_WIDTH.W)
+    val MASK_ZERO = "x00000000".U(MASK_WIDTH.W)
 
     val GPR_ZERO    =     0.U(GPRS_WIDTH.W)
     val GPR_END     =    10.U(GPRS_WIDTH.W)
