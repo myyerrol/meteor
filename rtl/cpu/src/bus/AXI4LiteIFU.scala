@@ -8,10 +8,10 @@ import cpu.port._
 
 class AXI4LiteIFUM extends Module with ConfigInst {
     val io = IO(new Bundle {
-        val iRdEn = Input(Bool())
-        val iAddr = Input(UInt(ADDR_WIDTH.W))
-        val oData = Output(UInt(DATA_WIDTH.W))
-        val oFlag = Output(Bool())
+        val iRdEn   = Input(Bool())
+        val iRdAddr = Input(UInt(ADDR_WIDTH.W))
+        val oRdData = Output(UInt(DATA_WIDTH.W))
+        val oRdFlag = Output(Bool())
 
         val pAR   = new AXI4LiteARIO
         val pR    = new AXI4LiteRIO
@@ -24,7 +24,7 @@ class AXI4LiteIFUM extends Module with ConfigInst {
     wARReady := io.pAR.bReady
 
     when (rARValid && wARReady) {
-        io.pAR.bAddr := io.iAddr
+        io.pAR.bAddr := io.iRdAddr
         rARValid     := false.B
     }
     .otherwise {
@@ -32,31 +32,31 @@ class AXI4LiteIFUM extends Module with ConfigInst {
         rARValid     := Mux(rARValid, true.B, io.iRdEn)
     }
 
-    io.oFlag := rARValid && wARReady
+    io.oRdFlag    := rARValid && wARReady
     io.pAR.bValid := rARValid
 
     // AXI4-Lite R
     io.pR.bReady := true.B
-    io.oData     := DATA_ZERO
+    io.oRdData   := DATA_ZERO
 
     when (io.pR.bValid && io.pR.bReady) {
-        io.oData := Mux(io.pR.bResp === AXI4_RESP_OKEY,
-                        io.pR.bData,
-                        io.pR.bResp)
+        io.oRdData := Mux(io.pR.bResp === AXI4_RESP_OKEY,
+                          io.pR.bData,
+                          io.pR.bResp)
     }
 }
 
 class AXI4LiteIFUS extends Module with ConfigInst {
     val io = IO(new Bundle {
-        val iData = Input(UInt(DATA_WIDTH.W))
-        val oAddr = Output(UInt(ADDR_WIDTH.W))
+        val iRdData = Input(UInt(DATA_WIDTH.W))
+        val oRdAddr = Output(UInt(ADDR_WIDTH.W))
 
-        val pAR   = Flipped(new AXI4LiteARIO)
-        val pR    = Flipped(new AXI4LiteRIO)
+        val pAR     = Flipped(new AXI4LiteARIO)
+        val pR      = Flipped(new AXI4LiteRIO)
     })
 
     // AXI4-Lite AR
-    io.oAddr      := io.pAR.bAddr
+    io.oRdAddr    := io.pAR.bAddr
     io.pAR.bReady := true.B
 
     // AXI4-Lite R
@@ -67,8 +67,8 @@ class AXI4LiteIFUS extends Module with ConfigInst {
         io.pR.bValid := false.B
     }
 
-    io.pR.bData := io.iData
-    io.pR.bResp := Mux(io.iData =/= DATA_ZERO,
+    io.pR.bData := io.iRdData
+    io.pR.bResp := Mux(io.iRdData =/= DATA_ZERO,
                        AXI4_RESP_OKEY,
                        AXI4_RESP_SLVEER)
 }
