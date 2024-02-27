@@ -20,7 +20,8 @@ class IFU extends Module with ConfigInst {
 
     rPC := Mux(io.iPCEn, wPCNext, rPC)
 
-    io.pBase.bPC   := rPC
-    io.pBase.bPCEn := io.iPCEn
-    io.pBase.bInst := DontCare
+    io.pBase.bPC     := rPC
+    io.pBase.bPCNext := wPCNext
+    io.pBase.bPCEn   := io.iPCEn
+    io.pBase.bInst   := DontCare
 }
