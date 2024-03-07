@@ -7,5 +7,6 @@ out/
 temp/
 test_run_dir/
 
-# env
+# other
 env/
+ip/
