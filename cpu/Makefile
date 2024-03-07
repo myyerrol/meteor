@@ -32,7 +32,7 @@ CFG_ENGINE            ?= $(call FUNC_REMOVE_QUOTE, $(CONFIG_ENGINE))
 CFG_DIFFTEST_REF_PATH ?= $(call FUNC_REMOVE_QUOTE, $(CONFIG_DIFFTEST_REF_PATH))
 CFG_DIFFTEST_REF_NAME ?= $(call FUNC_REMOVE_QUOTE, $(CONFIG_DIFFTEST_REF_NAME))
 
-BUILD_DIR = $(METEOR_CPU_HOME)/cpu/build
+BUILD_DIR = $(METEOR_CPU_HOME)/rtl/build
 OBJ_DIR   = $(BUILD_DIR)/obj_dir
 
 METEOR_BIN_NAME = $(CFG_GUEST_ISA)-meteor-$(CFG_ENGINE)
@@ -42,7 +42,7 @@ VERILATOR         = verilator
 VERILATOR_CFLAGS += -MMD --build -cc                                \
                     -O3 --x-assign fast --x-initial fast --noassert \
                     --trace                                         \
-                    +incdir+$(METEOR_CPU_HOME)/cpu/srcv/mem         \
+                    +incdir+$(METEOR_CPU_HOME)/rtl/srcv/mem         \
 
 INCS_DIR = $(METEOR_ENV_HOME)/core/include           \
            $(METEOR_ENV_HOME)/core/include/generated
@@ -68,7 +68,7 @@ LDFLAGS += $(CFLAGS_BUILD)                \
            $(shell llvm-config-11 --libs) \
            -lSDL2
 
-SRCSS_DIR           = $(abspath $(METEOR_CPU_HOME)/cpu/src)
+SRCSS_DIR           = $(abspath $(METEOR_CPU_HOME)/rtl/src)
 SRCSS_SRC_BLACKLIST =
 SRCSS_DIR_BLACKLIST = $(addprefix $(SRCSS_DIR)/core/, $(CPU_BLACKLIT_PREFIX))
 SRCSS_BLACKLIST     = $(SRCSS_SRC_BLACKLIST)                                  \
@@ -76,7 +76,7 @@ SRCSS_BLACKLIST     = $(SRCSS_SRC_BLACKLIST)                                  \
 SRCSS_WHITELIST     = $(shell find $(SRCSS_DIR) -name "*.scala")
 SRCSS               = $(filter-out $(SRCSS_BLACKLIST), $(SRCSS_WHITELIST))
 
-SRCVS_DIR = $(METEOR_CPU_HOME)/cpu/srcv
+SRCVS_DIR = $(METEOR_CPU_HOME)/rtl/srcv
 SRCVS_GEN = $(BUILD_DIR)/$(CFG_CFLAGS_TOP_NAME).v
 SRCVS     = $(shell find $(SRCVS_DIR) -name "*.v")
 
@@ -111,7 +111,7 @@ ifeq ($(findstring $(MAKECMDGOALS), config|clean),)
     ifeq ($(shell cat $(BUILD_PATH) | grep $(CPU)),)
         $(shell rm -rf out)
         $(shell rm -rf test_run_dir)
-        $(shell rm -rf cpu/build)
+        $(shell rm -rf rtl/build)
     endif
 endif
 
@@ -127,7 +127,7 @@ $(SRCVS_GEN): $(SRCSS)
 	echo $(TOP_MAIN_INFO_L7) >> $(TOP_MAIN_PATH) &&   \
 	echo $(TOP_MAIN_INFO_L8) >> $(TOP_MAIN_PATH) &&   \
 	mkdir -p $(BUILD_DIR) &&                          \
-	mill -i cpu.runMain TopMain -td $(BUILD_DIR)
+	mill -i rtl.runMain TopMain -td $(BUILD_DIR)
 $(METEOR_BIN): $(INCS) $(SRCS) $(CONFIG)
 	@rm -rf $(OBJ_DIR)
 	$(VERILATOR) $(VERILATOR_CFLAGS)            \
@@ -151,7 +151,7 @@ config:
 	cd ../env/core && make menuconfig
 
 test:
-	mill -i cpu.test
+	mill -i rtl.test
 
 gen: $(SRCVS_GEN)
 
@@ -167,15 +167,15 @@ sim: $(METEOR_BIN)
 	gtkwave $(BUILD_DIR)/wave.vcd
 
 fmt:
-	mill -i cpu.reformat
+	mill -i rtl.reformat
 
 cfmt:
-	mill -i cpu.checkFormat
+	mill -i rtl.checkFormat
 
 clean:
 	rm -rf out
 	rm -rf test_run_dir
-	rm -rf cpu/build
+	rm -rf rtl/build
 
 bsp:
 	mill -i mill.bsp.BSP/install

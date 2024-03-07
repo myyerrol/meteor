@@ -5,7 +5,7 @@ import mill.scalalib.TestModule.Utest
 
 import mill.bsp._
 
-object cpu extends ScalaModule with ScalafmtModule { m =>
+object rtl extends ScalaModule with ScalafmtModule { m =>
     val useChisel5 = true
     override def scalaVersion = "2.13.10"
     override def scalacOptions = Seq(
