@@ -1,12 +1,10 @@
 .vscode/
 
-# cpu
 .bsp/
 build/
 out/
 temp/
 test_run_dir/
 
-# other
 env/
 ip/
