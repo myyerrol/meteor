@@ -1,5 +1,5 @@
 CPU     ?= x
-CPU_LIST = me32ls me32lm me32lp me32ep2
+CPU_LIST = ml1 ml2 ml3 mr1
 
 ifeq ($(filter $(CPU_LIST), $(CPU)),)
     ifeq ($(findstring $(MAKECMDGOALS), config|clean),)
@@ -7,13 +7,13 @@ ifeq ($(filter $(CPU_LIST), $(CPU)),)
     endif
 endif
 
-CPU_PREFIX = m$(shell echo $(CPU) | cut -c5-5).$(CPU)
+CPU_PREFIX = $(CPU)
 CPU_UPPER  = $(shell echo $(CPU) | tr a-z A-Z)
 
 CPU_BLACKLIST = $(filter-out $(CPU), $(CPU_LIST))
 CPU_BLACKLIT_PREFIX =
 $(foreach str, $(CPU_BLACKLIST), \
-    $(eval CPU_BLACKLIT_PREFIX += m$(shell echo $(str) | cut -c5-5)/$(str)))
+    $(eval CPU_BLACKLIT_PREFIX += $(str)))
 
 ifeq ($(wildcard $(METEOR_ENV_HOME)/core/src/main.c),)
     $(error METEOR_HOME=$(METEOR_HOME) is not a METEOR repo)

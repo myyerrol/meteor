@@ -3,7 +3,7 @@ import chiseltest._
 import utest._
 
 import cpu.base._
-import cpu.core.ml.me32ls._
+import cpu.core.ml1._
 
 object TestIFU extends ChiselUtestTester with ConfigInst {
     val tests = Tests {

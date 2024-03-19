@@ -1,4 +1,4 @@
-package cpu.core.ml.me32ls
+package cpu.core.ml1
 
 import chisel3._
 import chisel3.util._
