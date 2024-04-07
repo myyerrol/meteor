@@ -34,4 +34,3 @@ object rtl extends ScalaModule with ScalafmtModule { m =>
         coursier.MavenRepository("https://repo.scala-sbt.org/scalasbt/maven-releases"),
     ) ++ super.repositoriesTask() }
 }
-
