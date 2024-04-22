@@ -132,7 +132,7 @@ class EXU extends Module with ConfigInst {
     when (io.pIDUCtr.bInstName === INST_NAME_ECALL) {
         io.pCSRWr.bWrMEn      := true.B
         io.pCSRWr.bWrMEPCData := io.pBase.bPC
-        io.pCSRWr.bWrMCAUData := (-1.S(DATA_WIDTH.W)).asUInt
+        io.pCSRWr.bWrMCAUData := CSR_CODE_M_ECALL
     }
     .otherwise {
         io.pCSRWr.bWrMEn      := false.B
