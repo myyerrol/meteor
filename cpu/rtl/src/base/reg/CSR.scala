@@ -13,6 +13,10 @@ class CSR extends Module with ConfigInst {
 
     val mCSR = Mem(CSRS_NUM, UInt(DATA_WIDTH.W))
 
+    when (reset.asBool) {
+        mCSR(CSR_MSTATUS) := CSR_MSTATUS_INIT
+    }
+
     io.pCSRRd.bRdData     := mCSR(io.pCSRRd.bRdAddr)
     io.pCSRRd.bRdMSTAData := mCSR(CSR_MSTATUS)
     io.pCSRRd.bRdMTVEData := mCSR(CSR_MTVEC)

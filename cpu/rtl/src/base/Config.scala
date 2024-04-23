@@ -34,6 +34,7 @@ trait ConfigInst extends ConfigIO {
     val CSR_MEPC         = 0x341.U(CSRS_WIDTH.W)
     val CSR_MCAUSE       = 0x342.U(CSRS_WIDTH.W)
     val CSR_CODE_M_ECALL =    11.U
+    val CSR_MSTATUS_INIT = "x00001800".U(ADDR_WIDTH.W)
 
     val EN_TR = true.B
     val EN_FL = false.B
