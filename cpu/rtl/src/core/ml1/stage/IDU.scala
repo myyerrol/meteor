@@ -104,15 +104,16 @@ class IDU extends Module with ConfigInstRV32I
             INST_NAME_MRET   -> CSR_MEPC
         )
     )
+    val wCSRRdData = io.pCSRRd.bRdData
 
     io.pGPRRS.bRS1Addr := wInst(19, 15)
     io.pGPRRS.bRS2Addr := wInst(24, 20)
 
     io.pCSRRd.bRdAddr := wCSRAddr
 
-    io.pIDUData.bGPRRdAddr  := wInst(11, 7)
-    io.pIDUData.bCSRRdData  := io.pCSRRd.bRdData
-    io.pIDUData.bCSRWrAddr  := wCSRAddr
+    io.pIDUData.bGPRRdAddr := wInst(11, 7)
+    io.pIDUData.bCSRRdData := wCSRRdData
+    io.pIDUData.bCSRWrAddr := wCSRAddr
 
     val wALURS1DataGPR = MuxLookup(wALURS1, DATA_ZERO) (
         Seq(
@@ -147,9 +148,10 @@ class IDU extends Module with ConfigInstRV32I
              wInstName === INST_NAME_CSRRC   ||
              wInstName === INST_NAME_CSRRSI  ||
              wInstName === INST_NAME_CSRRCI  ||
-             wInstName === INST_NAME_MRET)   -> io.pCSRRd.bRdData
+             wInstName === INST_NAME_MRET)   -> wCSRRdData
         )
     )
+    // Cat(wCSRRdData(31, 13), 0.U(2.W), wCSRRdData(10, 8), 1.U(1.W), wCSRRdData(6, 4), wCSRRdData(7), wCSRRdData(2, 0)
 
     io.pIDUData.bJmpOrWrData := Mux(
         (wInstName === INST_NAME_BEQ)  ||

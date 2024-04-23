@@ -11,6 +11,7 @@ class EXU extends Module with ConfigInst {
     val io = IO(new Bundle {
         val pBase    = Flipped(new BaseIO)
         val pGPRWr   =         new GPRWrIO
+        val pCSRRd   = Flipped(new CSRRdIO)
         val pCSRWr   =         new CSRWrIO
         val pMemData = Flipped(new MemDualDataIO)
         val pIDUCtr  = Flipped(new IDUCtrIO)
@@ -119,10 +120,23 @@ class EXU extends Module with ConfigInst {
         io.pGPRWr.bWrData := DATA_ZERO
     }
 
+    io.pCSRRd.bRdAddr := DontCare
     when (io.pIDUCtr.bRegWrEn & io.pIDUCtr.bRegWrSrc === REG_WR_SRC_CSR) {
         io.pCSRWr.bWrEn   := true.B
         io.pCSRWr.bWrAddr := io.pIDUData.bCSRWrAddr
         io.pCSRWr.bWrData := mALU.io.oOut
+    }
+    .elsewhen (io.pIDUCtr.bInstName === INST_NAME_MRET) {
+        val wRdMSTAData = io.pCSRRd.bRdMSTAData
+        io.pCSRWr.bWrEn   := true.B
+        io.pCSRWr.bWrAddr := CSR_MSTATUS
+        io.pCSRWr.bWrData := Cat(wRdMSTAData(31, 13),
+                                 0.U(2.W),
+                                 wRdMSTAData(10,  8),
+                                 1.U(1.W),
+                                 wRdMSTAData( 6,  4),
+                                 wRdMSTAData( 7),
+                                 wRdMSTAData( 2,  0))
     }
     .otherwise {
         io.pCSRWr.bWrEn   := false.B
@@ -130,6 +144,17 @@ class EXU extends Module with ConfigInst {
         io.pCSRWr.bWrData := DATA_ZERO
     }
     when (io.pIDUCtr.bInstName === INST_NAME_ECALL) {
+        val wRdMSTAData = io.pCSRRd.bRdMSTAData
+        io.pCSRWr.bWrEn   := true.B
+        io.pCSRWr.bWrAddr := CSR_MSTATUS
+        io.pCSRWr.bWrData := Cat(wRdMSTAData(31, 13),
+                                 3.U(2.W),
+                                 wRdMSTAData(10,  8),
+                                 wRdMSTAData( 3),
+                                 wRdMSTAData( 6,  4),
+                                 0.U(1.W),
+                                 wRdMSTAData( 2,  0))
+
         io.pCSRWr.bWrMEn      := true.B
         io.pCSRWr.bWrMEPCData := io.pBase.bPC
         io.pCSRWr.bWrMCAUData := CSR_CODE_M_ECALL

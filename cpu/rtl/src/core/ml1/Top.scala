@@ -59,10 +59,15 @@ class Top extends Module with ConfigInst {
     mIDU.io.pBase.bPCNext := DontCare
     mIDU.io.pBase.bInst   := mMem.io.pMemInst.pRd.bData
 
-    mEXU.io.pBase.bPC     := mIFU.io.pBase.bPC
-    mEXU.io.pBase.bPCNext := DontCare
-    mEXU.io.pBase.bPCEn   := DontCare
-    mEXU.io.pBase.bInst   := DontCare
+    mEXU.io.pBase.bPC          := mIFU.io.pBase.bPC
+    mEXU.io.pBase.bPCNext      := DontCare
+    mEXU.io.pBase.bPCEn        := DontCare
+    mEXU.io.pBase.bInst        := DontCare
+    mEXU.io.pCSRRd.bRdData     := DontCare
+    mEXU.io.pCSRRd.bRdMSTAData := mCSR.io.pCSRRd.bRdMSTAData
+    mEXU.io.pCSRRd.bRdMTVEData := DontCare
+    mEXU.io.pCSRRd.bRdMEPCData := DontCare
+    mEXU.io.pCSRRd.bRdMCAUData := DontCare
 
     mEXU.io.pIDUCtr  <> mIDU.io.pIDUCtr
     mEXU.io.pIDUData <> mIDU.io.pIDUData

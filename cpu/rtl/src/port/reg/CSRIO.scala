@@ -17,9 +17,10 @@ class CSRRdIO extends Bundle with ConfigIO {
 
 class CSRWrIO extends Bundle with ConfigIO {
     val bWrEn       = Output(Bool())
-    val bWrMEn      = Output(Bool())
     val bWrAddr     = Output(UInt(ADDR_WIDTH.W))
     val bWrData     = Output(UInt(DATA_WIDTH.W))
+
+    val bWrMEn      = Output(Bool())
     val bWrMEPCData = Output(UInt(DATA_WIDTH.W))
     val bWrMCAUData = Output(UInt(DATA_WIDTH.W))
 }
