@@ -79,7 +79,7 @@ class IDU extends Module with ConfigInstRV32I
             INST_REM    -> List(INST_NAME_REM,    ALU_TYPE_REM,    ALU_RS1_GPR,  ALU_RS2_GPR,   JMP_FL, MEM_WR_FL, MEM_BYT_X,   REG_WR_TR, REG_WR_SRC_ALU),
             INST_REMU   -> List(INST_NAME_REMU,   ALU_TYPE_REMU,   ALU_RS1_GPR,  ALU_RS2_GPR,   JMP_FL, MEM_WR_FL, MEM_BYT_X,   REG_WR_TR, REG_WR_SRC_ALU),
 
-            INST_MRET   -> List(INST_NAME_MRET,   ALU_TYPE_ADD,    ALU_RS1_4,    ALU_RS2_X,     JMP_TR, MEM_WR_FL, MEM_BYT_X,   REG_WR_FL, REG_WR_SRC_X)
+            INST_MRET   -> List(INST_NAME_MRET,   ALU_TYPE_ADD,    ALU_RS1_X,    ALU_RS2_X,     JMP_TR, MEM_WR_FL, MEM_BYT_X,   REG_WR_FL, REG_WR_SRC_X)
         )
     )
     val wInstName = lInst(0)
