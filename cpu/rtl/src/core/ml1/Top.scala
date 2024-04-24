@@ -4,11 +4,12 @@ import chisel3._
 import chisel3.util._
 
 import cpu.base._
+import cpu.temp._
 import cpu.port._
 import cpu.bus._
 import cpu.mem._
 
-class Top extends Module with ConfigInst {
+class Top extends Module with ConfigInst with Build {
     val io = IO(new Bundle {
         val pState = new StateIO
         val pTrace = new TraceIO
@@ -77,8 +78,7 @@ class Top extends Module with ConfigInst {
     mWBU.io.pGPRWrI <> mEXU.io.pGPRWr
     mWBU.io.pCSRWrI <> mEXU.io.pCSRWr
 
-    var MEM_TYPE = "AXI4Lite"
-    if (MEM_TYPE.equals("AXI4Lite")) {
+    if (MEM_TYPE.equals("axi4-lite")) {
         val mAXI4IFUM = Module(new AXI4LiteIFUM)
         val mAXI4IFUS = Module(new AXI4LiteIFUS)
 

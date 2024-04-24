@@ -4,11 +4,12 @@ import chisel3._
 import chisel3.util._
 
 import cpu.base._
+import cpu.temp._
 import cpu.port._
 import cpu.calc._
 import cpu.bus._
 
-class EXU extends Module with ConfigInst {
+class EXU extends Module with ConfigInst with Build {
     val io = IO(new Bundle {
         val pBase    = Flipped(new BaseIO)
         val pGPRWr   =         new GPRWrIO
@@ -89,14 +90,26 @@ class EXU extends Module with ConfigInst {
         )
     )
 
+    val mAXI4LSUM = Module(new AXI4LiteLSUM)
+    val mAXI4LSUS = Module(new AXI4LiteLSUS)
+
+    val wMemDataRdData = Wire(UInt(DATA_WIDTH.W))
+
+    if (MEM_TYPE.equals("axi4-lite")) {
+        wMemDataRdData := mAXI4LSUM.io.oRdData
+    }
+    else {
+        wMemDataRdData := io.pMemData.pRd.bData
+    }
+
     when (io.pIDUCtr.bRegWrEn) {
         io.pGPRWr.bWrEn   := true.B
         io.pGPRWr.bWrAddr := io.pIDUData.bGPRRdAddr
         when (io.pIDUCtr.bRegWrSrc === REG_WR_SRC_MEM) {
             wMemRdAddr := mALU.io.oOut
-            val wMemRdDataByt1 = io.pMemData.pRd.bData(BYTE_WIDTH * 1 - 1, 0)
-            val wMemRdDataByt2 = io.pMemData.pRd.bData(BYTE_WIDTH * 2 - 1, 0)
-            val wMemRdDataByt4 = io.pMemData.pRd.bData(BYTE_WIDTH * 4 - 1, 0)
+            val wMemRdDataByt1 = wMemDataRdData(BYTE_WIDTH * 1 - 1, 0)
+            val wMemRdDataByt2 = wMemDataRdData(BYTE_WIDTH * 2 - 1, 0)
+            val wMemRdDataByt4 = wMemDataRdData(BYTE_WIDTH * 4 - 1, 0)
             val wMemRdData = MuxLookup(io.pIDUCtr.bMemByt, DATA_ZERO) (
                 Seq(
                     MEM_BYT_1_S ->
@@ -170,11 +183,7 @@ class EXU extends Module with ConfigInst {
         io.pCSRWr.bWrMCAUData := DATA_ZERO
     }
 
-    var MEM_TYPE = "AXI4Lite"
-    if (MEM_TYPE.equals("AXI4Lite")) {
-        val mAXI4LSUM = Module(new AXI4LiteLSUM)
-        val mAXI4LSUS = Module(new AXI4LiteLSUS)
-
+    if (MEM_TYPE.equals("axi4-lite")) {
         mAXI4LSUM.io.iRdEn   := true.B
         mAXI4LSUM.io.iRdAddr := wMemRdAddr
         mAXI4LSUM.io.iWrEn   := io.pIDUCtr.bMemWrEn

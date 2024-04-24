@@ -1,9 +1,16 @@
 CPU     ?= x
 CPU_LIST = ml1 ml2 ml3
+MEM     ?= x
+MEM_LIST = direct axi4-lite axi4
 
 ifeq ($(filter $(CPU_LIST), $(CPU)),)
     ifeq ($(findstring $(MAKECMDGOALS), config|clean),)
         $(error $$CPU is incorrect, optional values in [$(CPU_LIST)])
+    endif
+endif
+ifeq ($(filter $(MEM_LIST), $(MEM)),)
+    ifeq ($(findstring $(MAKECMDGOALS), config|clean),)
+        $(error $$MEM is incorrect, optional values in [$(MEM_LIST)])
     endif
 endif
 
@@ -95,7 +102,7 @@ SRCS = $(SRCVS_GEN) $(SRCVS) $(SRCCS)
 CONFIG = $(METEOR_ENV_HOME)/core/.config
 
 BUILD_PATH = $(SRCSS_DIR)/temp/Build.scala
-BUILD_INFO = "package cpu.temp\n\ntrait Build {\n    val CPU_TYPE = \"$(CPU)\"\n}"
+BUILD_INFO = "package cpu.temp\n\ntrait Build {\n    val CPU_TYPE = \"$(CPU)\"\n    val MEM_TYPE = \"$(MEM)\"\n}"
 
 TOP_MAIN_PATH = $(SRCSS_DIR)/temp/TopMain.scala
 TOP_MAIN_INFO_L1 = "import circt.stage._\n"
