@@ -11,38 +11,77 @@ class AXI4LiteIFUM extends Module with ConfigInst {
         val iRdEn   = Input(Bool())
         val iRdAddr = Input(UInt(ADDR_WIDTH.W))
         val oRdData = Output(UInt(DATA_WIDTH.W))
+        val oRdResp = Output(UInt(RESP_WIDTH.W))
         val oRdFlag = Output(Bool())
 
         val pAR   = new AXI4LiteARIO
         val pR    = new AXI4LiteRIO
     })
 
-    // AXI4-Lite AR
-    val rARValid = Reg(Bool())
+    val rARValid = RegInit(false.B)
+    val rRValid  = RegInit(false.B)
+    val rARAddr  = RegInit(ADDR_ZERO)
+
     val wARReady = Wire(Bool())
+    val wRReady  = Wire(Bool())
 
     wARReady := io.pAR.bReady
+    wRReady  := true.B
 
-    when (rARValid && wARReady) {
-        io.pAR.bAddr := io.iRdAddr
-        rARValid     := false.B
-    }
-    .otherwise {
-        io.pAR.bAddr := ADDR_ZERO
-        rARValid     := Mux(rARValid, true.B, io.iRdEn)
+    val sRd0 :: sRd1 :: sRd2 :: Nil = Enum(3)
+    val rState = RegInit(sRd0)
+    switch (rState) {
+        is (sRd0) {
+            when (rARValid) {
+                rState := sRd1
+            }
+            .otherwise {
+                rState := sRd0
+            }
+        }
+        is (sRd1) {
+            when (rARValid && wARReady) {
+                rState := sRd2
+            }
+            .otherwise {
+                rState := sRd1
+            }
+        }
+        is (sRd2) {
+            when (rRValid && wRReady) {
+                rState := sRd0
+            }
+            .otherwise {
+                rState := sRd2
+            }
+        }
     }
 
-    io.oRdFlag    := rARValid && wARReady
+    io.oRdData    := DATA_ZERO
+    io.oRdResp    := AXI4_RESP_OKEY
+    io.oRdFlag    := false.B
     io.pAR.bValid := rARValid
+    io.pAR.bAddr  := rARAddr
+    io.pR.bReady  := wRReady
 
-    // AXI4-Lite R
-    io.pR.bReady := true.B
-    io.oRdData   := DATA_ZERO
+    switch (rState) {
+        is (sRd0) {
+            rARValid := io.iRdEn
+            rRValid  := false.B
+        }
+        is (sRd1) {
+            rARValid := false.B
+            rRValid  := io.pR.bValid
+            rARAddr  := io.iRdAddr
+        }
+        is (sRd2) {
+            rARValid := false.B
+            rRValid  := false.B
 
-    when (io.pR.bValid && io.pR.bReady) {
-        io.oRdData := Mux(io.pR.bResp === AXI4_RESP_OKEY,
-                          io.pR.bData,
-                          io.pR.bResp)
+            io.oRdFlag := true.B
+            io.oRdData := io.pR.bData
+            io.oRdResp := io.pR.bResp
+        }
     }
 }
 
@@ -55,18 +94,10 @@ class AXI4LiteIFUS extends Module with ConfigInst {
         val pR      = Flipped(new AXI4LiteRIO)
     })
 
-    // AXI4-Lite AR
     io.oRdAddr    := io.pAR.bAddr
     io.pAR.bReady := true.B
 
-    // AXI4-Lite R
-    when (io.pAR.bValid && io.pAR.bReady) {
-        io.pR.bValid := true.B
-    }
-    .otherwise {
-        io.pR.bValid := false.B
-    }
-
+    io.pR.bValid := Mux(io.pAR.bValid && io.pAR.bReady, true.B, false.B)
     io.pR.bData := io.iRdData
     io.pR.bResp := Mux(io.iRdData =/= DATA_ZERO,
                        AXI4_RESP_OKEY,

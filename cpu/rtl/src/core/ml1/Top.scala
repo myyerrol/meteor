@@ -77,24 +77,24 @@ class Top extends Module with ConfigInst {
     mWBU.io.pGPRWrI <> mEXU.io.pGPRWr
     mWBU.io.pCSRWrI <> mEXU.io.pCSRWr
 
-    // var MEM_TYPE = "AXI4Lite"
-    // if (MEM_TYPE.equals("AXI4Lite")) {
-    //     val mAXI4IFUM = Module(new AXI4LiteIFUM)
-    //     val mAXI4IFUS = Module(new AXI4LiteIFUS)
+    var MEM_TYPE = "AXI4Lite"
+    if (MEM_TYPE.equals("AXI4Lite")) {
+        val mAXI4IFUM = Module(new AXI4LiteIFUM)
+        val mAXI4IFUS = Module(new AXI4LiteIFUS)
 
-    //     io.pTrace.pBase.bInst := mAXI4IFUM.io.oRdData
+        io.pTrace.pBase.bInst := mAXI4IFUM.io.oRdData
 
-    //     mAXI4IFUM.io.iRdEn   := mMem.io.pMemInst.pRd.bEn
-    //     mAXI4IFUM.io.iRdAddr := mIFU.io.pBase.bPC
-    //     mAXI4IFUM.io.pAR     <> mAXI4IFUS.io.pAR
-    //     mAXI4IFUM.io.pR      <> mAXI4IFUS.io.pR
-    //     mAXI4IFUS.io.iRdData := mMem.io.pMemInst.pRd.bData
+        mAXI4IFUM.io.iRdEn   := mMem.io.pMemInst.pRd.bEn
+        mAXI4IFUM.io.iRdAddr := mIFU.io.pBase.bPC
+        mAXI4IFUM.io.pAR     <> mAXI4IFUS.io.pAR
+        mAXI4IFUM.io.pR      <> mAXI4IFUS.io.pR
+        mAXI4IFUS.io.iRdData := mMem.io.pMemInst.pRd.bData
 
-    //     mMem.io.pMemInst.pRd.bAddr := mAXI4IFUS.io.oRdAddr
+        mMem.io.pMemInst.pRd.bAddr := mAXI4IFUS.io.oRdAddr
 
-    //     mIFU.io.iPCEn       := mAXI4IFUM.io.oRdFlag
-    //     mIDU.io.pBase.bInst := mAXI4IFUM.io.oRdData
-    // }
+        mIFU.io.iPCEn       := mAXI4IFUM.io.oRdFlag
+        mIDU.io.pBase.bInst := mAXI4IFUM.io.oRdData
+    }
 
     when (mIDU.io.pBase.bInst =/= DATA_ZERO &&
           mIDU.io.pIDUCtr.bInstName === INST_NAME_X) {
