@@ -1,5 +1,5 @@
 CPU     ?= x
-CPU_LIST = ml1 ml2 ml3 mr1
+CPU_LIST = ml1 ml2 ml3
 
 ifeq ($(filter $(CPU_LIST), $(CPU)),)
     ifeq ($(findstring $(MAKECMDGOALS), config|clean),)

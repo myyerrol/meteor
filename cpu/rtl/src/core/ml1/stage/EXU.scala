@@ -51,6 +51,8 @@ class EXU extends Module with ConfigInst {
     }
 
     val wMemRdAddr = Wire(UInt(ADDR_WIDTH.W))
+    wMemRdAddr := ADDR_ZERO
+
     io.pMemData.pRd.bEn   := true.B
     io.pMemData.pRd.bAddr := wMemRdAddr
 
@@ -83,7 +85,6 @@ class EXU extends Module with ConfigInst {
         )
     )
 
-    wMemRdAddr := ADDR_ZERO
     when (io.pIDUCtr.bRegWrEn) {
         io.pGPRWr.bWrEn   := true.B
         io.pGPRWr.bWrAddr := io.pIDUData.bGPRRdAddr

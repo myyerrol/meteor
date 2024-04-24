@@ -151,7 +151,6 @@ class IDU extends Module with ConfigInstRV32I
              wInstName === INST_NAME_MRET)   -> wCSRRdData
         )
     )
-    // Cat(wCSRRdData(31, 13), 0.U(2.W), wCSRRdData(10, 8), 1.U(1.W), wCSRRdData(6, 4), wCSRRdData(7), wCSRRdData(2, 0)
 
     io.pIDUData.bJmpOrWrData := Mux(
         (wInstName === INST_NAME_BEQ)  ||
