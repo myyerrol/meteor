@@ -79,22 +79,25 @@ class AXI4LiteIFUM extends Module with ConfigInst {
             rARAddr  := rARAddr
             rRValid  := false.B
 
-            io.oRdFlag := true.B
             io.oRdData := io.pR.bData
             io.oRdResp := io.pR.bResp
+            io.oRdFlag := true.B
         }
     }
 }
 
 class AXI4LiteIFUS extends Module with ConfigInst {
     val io = IO(new Bundle {
+        val iRdEn   = Input(Bool())
         val iRdData = Input(UInt(DATA_WIDTH.W))
+        val oRdEn   = Output(Bool())
         val oRdAddr = Output(UInt(ADDR_WIDTH.W))
 
         val pAR     = Flipped(new AXI4LiteARIO)
         val pR      = Flipped(new AXI4LiteRIO)
     })
 
+    io.oRdEn      := io.iRdEn
     io.oRdAddr    := io.pAR.bAddr
     io.pAR.bReady := true.B
 

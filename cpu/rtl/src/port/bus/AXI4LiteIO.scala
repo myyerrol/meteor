@@ -32,7 +32,7 @@ class AXI4LiteWIO extends Bundle with ConfigIO {
 
     val bValid = Output(Bool())
     val bData  = Output(UInt(DATA_WIDTH.W))
-    val bStrb  = Output(UInt(MASK_WIDTH.W))
+    val bStrb  = Output(Vec(MASK_WIDTH, Bool()))
 }
 
 class AXI4LiteBIO extends Bundle with ConfigIO {

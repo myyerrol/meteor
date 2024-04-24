@@ -17,7 +17,7 @@ class AXI4LiteLSUM extends Module with ConfigInst {
         val iWrEn   = Input(Bool())
         val iWrAddr = Input(UInt(ADDR_WIDTH.W))
         val iWrData = Input(UInt(DATA_WIDTH.W))
-        val iWrStrb = Input(UInt(MASK_WIDTH.W))
+        val iWrStrb = Input(Vec(MASK_WIDTH, Bool()))
         val oWrResp = Output(UInt(RESP_WIDTH.W))
         val oWrFlag = Output(Bool())
 
@@ -89,9 +89,9 @@ class AXI4LiteLSUM extends Module with ConfigInst {
             rARAddr  := rARAddr
             rRValid  := false.B
 
-            io.oRdFlag := true.B
             io.oRdData := io.pR.bData
             io.oRdResp := io.pR.bResp
+            io.oRdFlag := true.B
         }
     }
 
@@ -157,18 +157,25 @@ class AXI4LiteLSUM extends Module with ConfigInst {
         is (sWrAddrValid) {
             rAWValid := io.iWrEn
             rWValid  := false.B
+            rBValid  := false.B
         }
         is (sWrAddrShake) {
             rAWValid := false.B
             rWValid  := io.pW.bValid
+            rBValid  := false.B
         }
         is (sWrDataShake) {
             rAWValid := false.B
             rWValid  := false.B
+            rBValid  := io.pB.bValid
         }
         is (sWrDataResp) {
             rAWValid := false.B
             rWValid  := false.B
+            rBValid  := false.B
+
+            io.oWrResp := io.pB.bResp
+            io.oWrFlag := true.B
         }
     }
 
@@ -214,12 +221,16 @@ class AXI4LiteLSUM extends Module with ConfigInst {
 
 class AXI4LiteLSUS extends Module with ConfigInst {
     val io = IO(new Bundle {
+        val iRdEn   = Input(Bool())
         val iRdData = Input(UInt(DATA_WIDTH.W))
+        val oRdEn   = Output(Bool())
         val oRdAddr = Output(UInt(ADDR_WIDTH.W))
 
+        val iWrEn   = Input(Bool())
+        val oWrEn   = Output(Bool())
         val oWrAddr = Output(UInt(ADDR_WIDTH.W))
         val oWrData = Output(UInt(DATA_WIDTH.W))
-        val oWrStrb = Output(UInt(MASK_WIDTH.W))
+        val oWrStrb = Output(Vec(MASK_WIDTH, Bool()))
 
         val pAR     = Flipped(new AXI4LiteARIO)
         val pR      = Flipped(new AXI4LiteRIO)
@@ -228,6 +239,7 @@ class AXI4LiteLSUS extends Module with ConfigInst {
         val pB      = Flipped(new AXI4LiteBIO)
     })
 
+    io.oRdEn      := io.iRdEn
     io.oRdAddr    := io.pAR.bAddr
     io.pAR.bReady := true.B
 
@@ -237,6 +249,7 @@ class AXI4LiteLSUS extends Module with ConfigInst {
                         AXI4_RESP_OKEY,
                         AXI4_RESP_SLVEER)
 
+    io.oWrEn      := io.iWrEn
     io.oWrAddr    := io.pAW.bAddr
     io.pAW.bReady := true.B
 

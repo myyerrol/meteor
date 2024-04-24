@@ -84,15 +84,27 @@ class Top extends Module with ConfigInst {
 
         io.pTrace.pBase.bInst := mAXI4IFUM.io.oRdData
 
-        mAXI4IFUM.io.iRdEn   := mMem.io.pMemInst.pRd.bEn
+        mAXI4IFUM.io.iRdEn   := true.B
         mAXI4IFUM.io.iRdAddr := mIFU.io.pBase.bPC
         mAXI4IFUM.io.pAR     <> mAXI4IFUS.io.pAR
         mAXI4IFUM.io.pR      <> mAXI4IFUS.io.pR
+        mAXI4IFUS.io.iRdEn   := mAXI4IFUM.io.iRdEn
         mAXI4IFUS.io.iRdData := mMem.io.pMemInst.pRd.bData
 
+        mMem.io.pMemInst.pRd.bEn   := mAXI4IFUS.io.oRdEn
         mMem.io.pMemInst.pRd.bAddr := mAXI4IFUS.io.oRdAddr
 
-        mIFU.io.iPCEn       := mAXI4IFUM.io.oRdFlag
+        // mIFU.io.iPCEn       := mAXI4IFUM.io.oRdFlag
+        mIFU.io.iPCEn := Mux((mIDU.io.pIDUCtr.bInstName === INST_NAME_LB  ||
+                              mIDU.io.pIDUCtr.bInstName === INST_NAME_LH  ||
+                              mIDU.io.pIDUCtr.bInstName === INST_NAME_LBU ||
+                              mIDU.io.pIDUCtr.bInstName === INST_NAME_LHU ||
+                              mIDU.io.pIDUCtr.bInstName === INST_NAME_LW  ||
+                              mIDU.io.pIDUCtr.bInstName === INST_NAME_SB  ||
+                              mIDU.io.pIDUCtr.bInstName === INST_NAME_SH  ||
+                              mIDU.io.pIDUCtr.bInstName === INST_NAME_SW),
+                              mEXU.io.oRdFlag || mEXU.io.oWrFlag,
+                              mAXI4IFUM.io.oRdFlag)
         mIDU.io.pBase.bInst := mAXI4IFUM.io.oRdData
     }
 
