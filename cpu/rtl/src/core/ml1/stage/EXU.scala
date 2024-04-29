@@ -90,12 +90,45 @@ class EXU extends Module with ConfigInst with Build {
         )
     )
 
-    val mAXI4LSUM = Module(new AXI4LiteLSUM)
-    val mAXI4LSUS = Module(new AXI4LiteLSUS)
-
     val wMemDataRdData = Wire(UInt(DATA_WIDTH.W))
 
     if (MEM_TYPE.equals("axi4-lite")) {
+        val mAXI4LSUM = Module(new AXI4LiteLSUM)
+        val mAXI4LSUS = Module(new AXI4LiteLSUS)
+
+        mAXI4LSUM.io.iRdEn   := true.B
+        mAXI4LSUM.io.iRdAddr := wMemRdAddr
+        mAXI4LSUM.io.iWrEn   := io.pIDUCtr.bMemWrEn
+        mAXI4LSUM.io.iWrAddr := mALU.io.oOut
+        mAXI4LSUM.io.iWrData := io.pIDUData.bJmpOrWrData
+        mAXI4LSUM.io.iWrStrb := MuxLookup(
+            io.pIDUCtr.bMemByt,
+            VecInit(("b1111".U).asBools)) (
+            Seq(
+                MEM_BYT_1_U -> VecInit(false.B, false.B, false.B, true.B),
+                MEM_BYT_2_U -> VecInit(false.B, false.B, true.B,  true.B),
+                MEM_BYT_4_U -> VecInit(("b1111".U).asBools)
+            )
+        )
+        mAXI4LSUM.io.pAR     <> mAXI4LSUS.io.pAR
+        mAXI4LSUM.io.pR      <> mAXI4LSUS.io.pR
+        mAXI4LSUM.io.pAW     <> mAXI4LSUS.io.pAW
+        mAXI4LSUM.io.pW      <> mAXI4LSUS.io.pW
+        mAXI4LSUM.io.pB      <> mAXI4LSUS.io.pB
+        mAXI4LSUS.io.iRdEn   := mAXI4LSUM.io.iRdEn
+        mAXI4LSUS.io.iRdData := io.pMemData.pRd.bData
+        mAXI4LSUS.io.iWrEn   := mAXI4LSUM.io.iWrEn
+
+        io.pMemData.pRd.bEn   := mAXI4LSUS.io.oRdEn
+        io.pMemData.pRd.bAddr := mAXI4LSUS.io.oRdAddr
+        io.pMemData.pWr.bEn   := mAXI4LSUS.io.oWrEn
+        io.pMemData.pWr.bAddr := mAXI4LSUS.io.oWrAddr
+        io.pMemData.pWr.bData := mAXI4LSUS.io.oWrData
+        io.pMemData.pWr.bMask := mAXI4LSUS.io.oWrStrb
+
+        io.oRdFlag := mAXI4LSUM.io.oRdFlag
+        io.oWrFlag := mAXI4LSUM.io.oWrFlag
+
         wMemDataRdData := mAXI4LSUM.io.oRdData
     }
     else {
@@ -184,37 +217,37 @@ class EXU extends Module with ConfigInst with Build {
     }
 
     if (MEM_TYPE.equals("axi4-lite")) {
-        mAXI4LSUM.io.iRdEn   := true.B
-        mAXI4LSUM.io.iRdAddr := wMemRdAddr
-        mAXI4LSUM.io.iWrEn   := io.pIDUCtr.bMemWrEn
-        mAXI4LSUM.io.iWrAddr := mALU.io.oOut
-        mAXI4LSUM.io.iWrData := io.pIDUData.bJmpOrWrData
-        mAXI4LSUM.io.iWrStrb := MuxLookup(
-            io.pIDUCtr.bMemByt,
-            VecInit(("b1111".U).asBools)) (
-            Seq(
-                MEM_BYT_1_U -> VecInit(false.B, false.B, false.B, true.B),
-                MEM_BYT_2_U -> VecInit(false.B, false.B, true.B,  true.B),
-                MEM_BYT_4_U -> VecInit(("b1111".U).asBools)
-            )
-        )
-        mAXI4LSUM.io.pAR     <> mAXI4LSUS.io.pAR
-        mAXI4LSUM.io.pR      <> mAXI4LSUS.io.pR
-        mAXI4LSUM.io.pAW     <> mAXI4LSUS.io.pAW
-        mAXI4LSUM.io.pW      <> mAXI4LSUS.io.pW
-        mAXI4LSUM.io.pB      <> mAXI4LSUS.io.pB
-        mAXI4LSUS.io.iRdEn   := mAXI4LSUM.io.iRdEn
-        mAXI4LSUS.io.iRdData := io.pMemData.pRd.bData
-        mAXI4LSUS.io.iWrEn   := mAXI4LSUM.io.iWrEn
+        // mAXI4LSUM.io.iRdEn   := true.B
+        // mAXI4LSUM.io.iRdAddr := wMemRdAddr
+        // mAXI4LSUM.io.iWrEn   := io.pIDUCtr.bMemWrEn
+        // mAXI4LSUM.io.iWrAddr := mALU.io.oOut
+        // mAXI4LSUM.io.iWrData := io.pIDUData.bJmpOrWrData
+        // mAXI4LSUM.io.iWrStrb := MuxLookup(
+        //     io.pIDUCtr.bMemByt,
+        //     VecInit(("b1111".U).asBools)) (
+        //     Seq(
+        //         MEM_BYT_1_U -> VecInit(false.B, false.B, false.B, true.B),
+        //         MEM_BYT_2_U -> VecInit(false.B, false.B, true.B,  true.B),
+        //         MEM_BYT_4_U -> VecInit(("b1111".U).asBools)
+        //     )
+        // )
+        // mAXI4LSUM.io.pAR     <> mAXI4LSUS.io.pAR
+        // mAXI4LSUM.io.pR      <> mAXI4LSUS.io.pR
+        // mAXI4LSUM.io.pAW     <> mAXI4LSUS.io.pAW
+        // mAXI4LSUM.io.pW      <> mAXI4LSUS.io.pW
+        // mAXI4LSUM.io.pB      <> mAXI4LSUS.io.pB
+        // mAXI4LSUS.io.iRdEn   := mAXI4LSUM.io.iRdEn
+        // mAXI4LSUS.io.iRdData := io.pMemData.pRd.bData
+        // mAXI4LSUS.io.iWrEn   := mAXI4LSUM.io.iWrEn
 
-        io.pMemData.pRd.bEn   := mAXI4LSUS.io.oRdEn
-        io.pMemData.pRd.bAddr := mAXI4LSUS.io.oRdAddr
-        io.pMemData.pWr.bEn   := mAXI4LSUS.io.oWrEn
-        io.pMemData.pWr.bAddr := mAXI4LSUS.io.oWrAddr
-        io.pMemData.pWr.bData := mAXI4LSUS.io.oWrData
-        io.pMemData.pWr.bMask := mAXI4LSUS.io.oWrStrb
+        // io.pMemData.pRd.bEn   := mAXI4LSUS.io.oRdEn
+        // io.pMemData.pRd.bAddr := mAXI4LSUS.io.oRdAddr
+        // io.pMemData.pWr.bEn   := mAXI4LSUS.io.oWrEn
+        // io.pMemData.pWr.bAddr := mAXI4LSUS.io.oWrAddr
+        // io.pMemData.pWr.bData := mAXI4LSUS.io.oWrData
+        // io.pMemData.pWr.bMask := mAXI4LSUS.io.oWrStrb
 
-        io.oRdFlag := mAXI4LSUM.io.oRdFlag
-        io.oWrFlag := mAXI4LSUM.io.oWrFlag
+        // io.oRdFlag := mAXI4LSUM.io.oRdFlag
+        // io.oWrFlag := mAXI4LSUM.io.oWrFlag
     }
 }
