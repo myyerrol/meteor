@@ -18,6 +18,16 @@ trait ConfigIO {
     val GPRS_NUM = 1 << GPRS_WIDTH
     val CSRS_NUM = 1 << CSRS_WIDTH
     val MEMS_NUM = 1 << 16
+
+    val AXBT_WIDTH = 2
+    val AXSZ_WIDTH = 3
+    val AXID_WIDTH = 4
+    val AXCH_WIDTH = 4
+    val AXPR_WIDTH = 4
+    val AXQS_WIDTH = 4
+    val AXRE_WIDTH = 4
+    val AXUS_WIDTH = 4
+    val AXLN_WIDTH = 8
 }
 
 trait ConfigInst extends ConfigIO {
