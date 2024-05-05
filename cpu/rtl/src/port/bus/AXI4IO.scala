@@ -20,3 +20,14 @@ class AXI4ARIO extends Bundle with ConfigIO {
     val bUser   = Output(UInt(AXUS_WIDTH.W))
     val bValid  = Output(Bool())
 }
+
+class AXI4RIO extends Bundle with ConfigIO {
+    val bID    = Input(UInt(AXID_WIDTH.W))
+    val bData  = Input(UInt(DATA_WIDTH.W))
+    val bResp  = Input(UInt(RESP_WIDTH.W))
+    val bLast  = Input(Bool())
+    val bUser  = Input(UInt(AXUS_WIDTH.W))
+    val bValid = Input(Bool())
+
+    val bReady = Output(Bool())
+}
