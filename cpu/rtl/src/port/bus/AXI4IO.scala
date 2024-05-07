@@ -55,7 +55,7 @@ class AXI4WIO extends Bundle with ConfigIO {
     val bData  = Output(UInt(DATA_WIDTH.W))
     val bStrb  = Output(Vec(MASK_WIDTH, Bool()))
     val bLast  = Output(Bool())
-    val bUser  = Output(UInt(AXUS_WIDTH.W)))
+    val bUser  = Output(UInt(AXUS_WIDTH.W))
     val bValid = Output(Bool())
 }
 
