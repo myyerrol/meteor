@@ -49,9 +49,10 @@ class IFU extends Module with ConfigInst {
         io.pIFU.oPC := rPC
     }
 
+    io.pIFU.oPCNext := wPCNext
+
     val mIRU = Module(new IRU)
     mIRU.io.iEn   := io.iIRWrEn
     mIRU.io.iData := io.iInst
-
     io.pIFU.oInst := mIRU.io.oData
 }

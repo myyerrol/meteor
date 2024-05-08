@@ -14,6 +14,7 @@ class TraceIO extends Bundle with ConfigIO {
     val pCSRWr   =         new CSRWrIO
     val pMemInst =         new MemDualInstIO
     val pMemData = Flipped(new MemDualDataIO)
+
     val pIDUCtr  =         new IDUCtrIO
     val pIDUData =         new IDUDataIO
     val pEXUJmp  =         new EXUJmpIO
