@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.util._
 
 import cpu.base._
-import cpu.port._
+import cpu.port.ml2._
 
 class IFU extends Module with ConfigInst {
     val io = IO(new Bundle {
@@ -18,8 +18,7 @@ class IFU extends Module with ConfigInst {
         val iALUZero  = Input(Bool())
         val iInst     = Input(UInt(INST_WIDTH.W))
 
-        val oPC   = Output(UInt(ADDR_WIDTH.W))
-        val oInst = Output(UInt(INST_WIDTH.W))
+        val pIFU      = new IFUIO
     })
 
     val rPC  = RegInit(ADDR_INIT)
@@ -43,16 +42,16 @@ class IFU extends Module with ConfigInst {
     }
 
     when (io.iPCWrEn) {
-        rPC    := wPCNext
-        io.oPC := rPC
+        rPC         := wPCNext
+        io.pIFU.oPC := rPC
     }
     .otherwise {
-        io.oPC := rPC
+        io.pIFU.oPC := rPC
     }
 
     val mIRU = Module(new IRU)
     mIRU.io.iEn   := io.iIRWrEn
     mIRU.io.iData := io.iInst
 
-    io.oInst := mIRU.io.oData
+    io.pIFU.oInst := mIRU.io.oData
 }

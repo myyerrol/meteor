@@ -202,7 +202,7 @@ trait ConfigInst extends ConfigIO {
     val AXI4_MODE_RW = 2.U(MODE_WIDTH.W)
 }
 
-trait  ConfigInstRV32I extends ConfigInst {
+trait ConfigInstRV32I extends ConfigInst {
     // Shifts
     val INST_SLL    = BitPat("b0000000_?????_?????_001_?????_0110011")
     val INST_SLLI   = BitPat("b000000?_?????_?????_001_?????_0010011")
