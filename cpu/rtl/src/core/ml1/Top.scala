@@ -7,7 +7,6 @@ import cpu.base._
 import cpu.port._
 import cpu.port.ml1._
 import cpu.temp._
-import cpu.bus._
 import cpu.mem._
 
 class Top extends Module with ConfigInst with Build {
