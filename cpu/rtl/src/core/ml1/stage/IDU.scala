@@ -5,6 +5,7 @@ import chisel3.util._
 
 import cpu.base._
 import cpu.port._
+import cpu.port.ml1._
 
 class IDU extends Module with ConfigInstRV32I
                          with ConfigInstRV32M

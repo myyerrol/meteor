@@ -4,10 +4,10 @@ import chisel3._
 import chisel3.util._
 
 import cpu.base._
-import cpu.temp._
 import cpu.port._
+import cpu.port.ml1._
+import cpu.temp._
 import cpu.calc._
-import cpu.bus._
 
 class EXU extends Module with ConfigInst with Build {
     val io = IO(new Bundle {
