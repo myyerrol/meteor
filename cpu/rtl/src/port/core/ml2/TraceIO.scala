@@ -5,7 +5,7 @@ import chisel3.util._
 
 import cpu.base._
 
-class ITraceIO extends Bundle with ConfigIO {
+class TraceIO extends Bundle with ConfigIO {
     val pCTR = new CTRIO
     val pIDU = new IDUIO
     val pEXU = new EXUIO

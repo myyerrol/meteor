@@ -27,6 +27,12 @@ class Top extends Module with ConfigInst with Build {
 
     io.pState.bEndFlag := false.B
     io.pState.bEndData := mGPR.io.pGPRRd.bRdEData
+    io.pState.bCSRType := MuxLookup(mIDU.io.pIDUCtr.bInstName, CSR_TYPE_X) (
+        Seq(
+            INST_NAME_ECALL -> CSR_TYPE_ECALL,
+            INST_NAME_MRET  -> CSR_TYPE_MRET
+        )
+    )
 
     io.pTrace.pBase.bPC     := mIFU.io.pBase.bPC
     io.pTrace.pBase.bPCNext := mIFU.io.pBase.bPCNext
@@ -88,11 +94,4 @@ class Top extends Module with ConfigInst with Build {
     .otherwise {
         io.pState.bEndFlag := false.B
     }
-
-    io.pState.bCSRType := MuxLookup(mIDU.io.pIDUCtr.bInstName, 0.U(2.W)) (
-        Seq(
-            INST_NAME_ECALL -> 1.U(2.W),
-            INST_NAME_MRET  -> 2.U(2.W)
-        )
-    )
 }

@@ -10,15 +10,8 @@ import cpu.temp._
 
 class Top extends Module with ConfigInst {
     val io = IO(new Bundle {
-        val oEndData = Output(UInt(DATA_WIDTH.W))
-
-        val pIFU     = new IFUIO
-        // val pGPRRS   = new GPRRSIO
-        val pGPRRd   = new GPRRdIO
-        // val pGPRWr   = new GPRWrIO
-        val pITrace  = new ITraceIO
-
         val pState = new StateIO
+        val pTrace = new TraceIO
     })
 
     val mIFU = Module(new IFU)
@@ -29,22 +22,13 @@ class Top extends Module with ConfigInst {
 
     io.pState.bEndFlag := false.B
     io.pState.bEndData := mIDU.io.pIDU.oEndData
-    io.pState.bCSRType := 0.U(2.W)
+    io.pState.bCSRType := CSR_TYPE_X
 
-    io.oEndData := mIDU.io.pIDU.oEndData
-
-    io.pIFU.oPC   := mIFU.io.pIFU.oPC
-    io.pIFU.oInst := mLSU.io.pLSU.oMemRdDataInst
-
-    // io.pGPRRS <> mIDU.io.pGPRRS
-    io.pGPRRd <> mIDU.io.pGPRRd
-    // io.pGPRWr <> mIDU.io.pGPRWr
-
-    io.pITrace.pCTR <> mIDU.io.pCTR
-    io.pITrace.pIDU <> mIDU.io.pIDU
-    io.pITrace.pEXU <> mEXU.io.pEXU
-    io.pITrace.pLSU <> mLSU.io.pLSU
-    io.pITrace.pWBU <> mWBU.io.pWBU
+    io.pTrace.pCTR <> mIDU.io.pCTR
+    io.pTrace.pIDU <> mIDU.io.pIDU
+    io.pTrace.pEXU <> mEXU.io.pEXU
+    io.pTrace.pLSU <> mLSU.io.pLSU
+    io.pTrace.pWBU <> mWBU.io.pWBU
 
     val rInstName = RegNext(mIDU.io.pCTR.oInstName, INST_NAME_X)
     when (rInstName === INST_NAME_X && mIDU.io.pCTR.oStateCurr === STATE_EX) {
