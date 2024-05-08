@@ -28,8 +28,9 @@ class AXI4LiteLSUM extends Module with ConfigInst {
         val pB      = new AXI4LiteBIO
     })
 
-    val rARAddr  = RegInit(ADDR_ZERO)
+    // Read transaction
     val rARValid = RegInit(false.B)
+    val rARAddr  = RegInit(ADDR_ZERO)
     val rRValid  = RegInit(false.B)
 
     val wARReady = Wire(Bool())
@@ -75,7 +76,7 @@ class AXI4LiteLSUM extends Module with ConfigInst {
     }
     switch (rRdState) {
         is (sRdAddrValid) {
-            rARValid := io.iRdEn
+            rARValid := Mux(rARValid === false.B, io.iRdEn, true.B)
             rARAddr  := rARAddr
             rRValid  := false.B
         }
@@ -95,6 +96,7 @@ class AXI4LiteLSUM extends Module with ConfigInst {
         }
     }
 
+    // Write transaction
     val rAWValid = RegInit(false.B)
     val rAWAddr  = RegInit(ADDR_ZERO)
     val rWValid  = RegInit(false.B)
@@ -178,45 +180,6 @@ class AXI4LiteLSUM extends Module with ConfigInst {
             io.oWrFlag := true.B
         }
     }
-
-
-    // // AXI4-Lite AW
-    // val rAWValid = Reg(Bool())
-    // val wAWReady = io.pAW.bReady
-
-    // when (rAWValid && wAWReady) {
-    //     io.pAW.bAddr := io.iWrAddr
-    //     rAWValid     := false.B
-    // }
-    // .otherwise {
-    //     io.pAW.bAddr := ADDR_ZERO
-    //     rAWValid     := Mux(rAWValid, true.B, io.iWrEn)
-    // }
-
-    // io.pAW.bValid := rAWValid
-
-    // // AXI4-Lite W
-    // val wWValid = rAWValid && wAWReady
-    // val wWReady = io.pW.bReady
-
-    // when (wWValid && wWReady) {
-    //     io.pW.bData := io.iWrData
-    //     io.pW.bStrb := io.iWrStrb
-    // }
-    // .otherwise {
-    //     io.pW.bData := DATA_ZERO
-    //     io.pW.bStrb := MASK_ZERO
-    // }
-
-    // io.pW.bValid := wWValid
-
-    // // AXI4-Lite B
-    // io.pB.bReady := true.B
-    // io.oWrFlag   := Mux(
-    //     io.pB.bValid && io.pB.bReady && io.pB.bResp === AXI4_RESP_OKEY,
-    //     true.B,
-    //     false.B
-    // )
 }
 
 class AXI4LiteLSUS extends Module with ConfigInst {
@@ -239,16 +202,16 @@ class AXI4LiteLSUS extends Module with ConfigInst {
         val pB      = Flipped(new AXI4LiteBIO)
     })
 
+    // Read transaction
     io.oRdEn      := io.iRdEn
     io.oRdAddr    := io.pAR.bAddr
     io.pAR.bReady := true.B
 
     io.pR.bValid := Mux(io.pAR.bValid && io.pAR.bReady, true.B, false.B)
     io.pR.bData  := io.iRdData
-    io.pR.bResp  := Mux(io.iRdData =/= DATA_ZERO,
-                        AXI4_RESP_OKEY,
-                        AXI4_RESP_SLVEER)
+    io.pR.bResp  := AXI4_RESP_OKEY
 
+    // Write transaction
     io.oWrEn      := io.iWrEn
     io.oWrAddr    := io.pAW.bAddr
     io.pAW.bReady := true.B

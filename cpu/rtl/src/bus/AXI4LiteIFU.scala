@@ -21,6 +21,7 @@ class AXI4LiteIFUM extends Module with ConfigInst {
     val rARValid = RegInit(false.B)
     val rARAddr  = RegInit(ADDR_ZERO)
     val rRValid  = RegInit(false.B)
+    // val rRdData  = RegInit(DATA_ZERO)
 
     val wARReady = Wire(Bool())
     val wRReady  = Wire(Bool())
@@ -29,10 +30,12 @@ class AXI4LiteIFUM extends Module with ConfigInst {
     wRReady  := true.B
 
     io.oRdData    := DATA_ZERO
+    // io.oRdData    := rRdData
     io.oRdResp    := AXI4_RESP_OKEY
     io.oRdFlag    := false.B
     io.pAR.bValid := rARValid
     io.pAR.bAddr  := rARAddr
+    // io.pAR.bAddr  := io.iRdAddr
     io.pR.bReady  := wRReady
 
     val sRdAddrValid :: sRdAddrShake :: sRdDataShake :: Nil = Enum(3)
@@ -65,7 +68,7 @@ class AXI4LiteIFUM extends Module with ConfigInst {
     }
     switch (rRdState) {
         is (sRdAddrValid) {
-            rARValid := io.iRdEn
+            rARValid := Mux(rARValid === false.B, io.iRdEn, true.B)
             rARAddr  := rARAddr
             rRValid  := false.B
         }
@@ -73,6 +76,8 @@ class AXI4LiteIFUM extends Module with ConfigInst {
             rARValid := false.B
             rARAddr  := io.iRdAddr
             rRValid  := io.pR.bValid
+
+            // rRdData    := io.pR.bData
         }
         is (sRdDataShake) {
             rARValid := false.B
