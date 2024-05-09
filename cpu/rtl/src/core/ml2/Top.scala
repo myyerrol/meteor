@@ -29,9 +29,9 @@ class Top extends Module with ConfigInst {
     io.pTrace.pBase.bPCEn        := mIDU.io.pCTR.oPCWrEn
     io.pTrace.pBase.bInst        := mIFU.io.pIFU.oInst
     io.pTrace.pGPRRd             <> mIDU.io.pGPRRd
-    io.pTrace.pMemInst.pRd.bEn   := mLSU.io.pLSU.oMemRdEn
+    io.pTrace.pMemInst.pRd.bEn   := mLSU.io.pLSU.oMemRdInstEn
     io.pTrace.pMemInst.pRd.bAddr := mLSU.io.pLSU.oMemRdAddrInst
-    io.pTrace.pMemData.pRd.bEn   := mLSU.io.pLSU.oMemRdEn
+    io.pTrace.pMemData.pRd.bEn   := mLSU.io.pLSU.oMemRdLoadEn
     io.pTrace.pMemData.pRd.bAddr := mLSU.io.pLSU.oMemRdAddrLoad
     io.pTrace.pMemData.pWr.bEn   := mLSU.io.pLSU.oMemWrEn
     io.pTrace.pMemData.pWr.bAddr := mLSU.io.pLSU.oMemWrAddr
@@ -77,14 +77,15 @@ class Top extends Module with ConfigInst {
     mEXU.io.iRS2Data  := mIDU.io.pIDU.oRS2Data
     mEXU.io.iImmData  := mIDU.io.pIDU.oImmData
 
-    mLSU.io.iMemRdEn   := mIDU.io.pCTR.oMemRdEn
-    mLSU.io.iMemRdSrc  := mIDU.io.pCTR.oMemRdSrc
-    mLSU.io.iMemWrEn   := mIDU.io.pCTR.oMemWrEn
-    mLSU.io.iMemByt    := mIDU.io.pCTR.oMemByt
-    mLSU.io.iPC        := mIFU.io.pIFU.oPC
-    mLSU.io.iALUOut    := mEXU.io.pEXU.oALUOut
-    mLSU.io.iMemWrData := mEXU.io.pEXU.oMemWrData
-    mLSU.io.iState     := mIDU.io.pCTR.oStateCurr
+    mLSU.io.iMemRdInstEn := mIDU.io.pCTR.oMemRdInstEn
+    mLSU.io.iMemRdLoadEn := mIDU.io.pCTR.oMemRdLoadEn
+    mLSU.io.iMemRdSrc    := mIDU.io.pCTR.oMemRdSrc
+    mLSU.io.iMemWrEn     := mIDU.io.pCTR.oMemWrEn
+    mLSU.io.iMemByt      := mIDU.io.pCTR.oMemByt
+    mLSU.io.iPC          := mIFU.io.pIFU.oPC
+    mLSU.io.iALUOut      := mEXU.io.pEXU.oALUOut
+    mLSU.io.iMemWrData   := mEXU.io.pEXU.oMemWrData
+    mLSU.io.iState       := mIDU.io.pCTR.oStateCurr
 
     mWBU.io.iInstName := mIDU.io.pCTR.oInstName
     mWBU.io.iMemByt   := mIDU.io.pCTR.oMemByt

@@ -6,7 +6,8 @@ import chisel3.util._
 import cpu.base._
 
 class LSUIO extends Bundle with ConfigIO {
-    val oMemRdEn       = Output(Bool())
+    val oMemRdInstEn   = Output(Bool())
+    val oMemRdLoadEn   = Output(Bool())
     val oMemRdAddrInst = Output(UInt(DATA_WIDTH.W))
     val oMemRdAddrLoad = Output(UInt(DATA_WIDTH.W))
     val oMemWrEn       = Output(Bool())

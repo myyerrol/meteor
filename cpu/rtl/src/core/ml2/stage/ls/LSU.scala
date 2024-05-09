@@ -11,21 +11,23 @@ import cpu.mem._
 class LSU extends Module with ConfigInst
                          with Build {
     val io = IO(new Bundle {
-        val iMemRdEn   = Input(Bool())
-        val iMemRdSrc  = Input(UInt(SIGS_WIDTH.W))
-        val iMemWrEn   = Input(Bool())
-        val iMemByt    = Input(UInt(SIGS_WIDTH.W))
+        val iMemRdInstEn = Input(Bool())
+        val iMemRdLoadEn = Input(Bool())
+        val iMemRdSrc    = Input(UInt(SIGS_WIDTH.W))
+        val iMemWrEn     = Input(Bool())
+        val iMemByt      = Input(UInt(SIGS_WIDTH.W))
 
-        val iPC        = Input(UInt(ADDR_WIDTH.W))
-        val iALUOut    = Input(UInt(DATA_WIDTH.W))
-        val iMemWrData = Input(UInt(DATA_WIDTH.W))
+        val iPC          = Input(UInt(ADDR_WIDTH.W))
+        val iALUOut      = Input(UInt(DATA_WIDTH.W))
+        val iMemWrData   = Input(UInt(DATA_WIDTH.W))
 
-        val iState     = Input(UInt(SIGS_WIDTH.W))
+        val iState       = Input(UInt(SIGS_WIDTH.W))
 
-        val pLSU       = new LSUIO
+        val pLSU         = new LSUIO
     })
 
-    io.pLSU.oMemRdEn       := io.iMemRdEn
+    io.pLSU.oMemRdInstEn   := io.iMemRdInstEn
+    io.pLSU.oMemRdLoadEn   := io.iMemRdLoadEn
     io.pLSU.oMemRdAddrInst := io.iPC
     io.pLSU.oMemRdAddrLoad := io.iALUOut
 
@@ -56,9 +58,9 @@ class LSU extends Module with ConfigInst
     mMRU.io.iData := DontCare
 
     val mMem = Module(new MemDualFakeBB)
-    mMem.io.pMemInst.pRd.bEn   := io.pLSU.oMemRdEn
+    mMem.io.pMemInst.pRd.bEn   := io.pLSU.oMemRdInstEn
     mMem.io.pMemInst.pRd.bAddr := io.pLSU.oMemRdAddrInst
-    mMem.io.pMemData.pRd.bEn   := io.pLSU.oMemRdEn
+    mMem.io.pMemData.pRd.bEn   := io.pLSU.oMemRdLoadEn
     mMem.io.pMemData.pRd.bAddr := io.pLSU.oMemRdAddrLoad
     mMem.io.pMemData.pWr.bEn   := io.pLSU.oMemWrEn
     mMem.io.pMemData.pWr.bAddr := io.pLSU.oMemWrAddr

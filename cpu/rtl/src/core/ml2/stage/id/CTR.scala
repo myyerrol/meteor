@@ -77,32 +77,33 @@ class CTR extends Module  with ConfigInstRV32I
 
     val rStateCurr = RegInit(STATE_IF)
 
-    val wPCWrEn    = WireInit(EN_FL)
-    val wPCWrSrc   = WireInit(PC_WR_SRC_X)
-    val wPCNextEn  = WireInit(EN_FL)
-    val wPCJumpEn  = WireInit(EN_FL)
-    val wMemRdEn   = WireInit(EN_FL)
-    val wMemRdSrc  = WireInit(MEM_RD_SRC_X)
-    val wMemWrEn   = WireInit(EN_FL)
-    val wMemByt    = WireInit(MEM_BYT_X)
-    val wIRWrEn    = WireInit(EN_FL)
-    val wGPRWrEn   = WireInit(EN_FL)
-    val wGPRWrSrc  = WireInit(REG_WR_SRC_X)
-    val wALUType   = WireInit(ALU_TYPE_X)
-    val wALURS1    = WireInit(ALU_RS1_X)
-    val wALURS2    = WireInit(ALU_RS2_X)
+    val wPCWrEn      = WireInit(EN_FL)
+    val wPCWrSrc     = WireInit(PC_WR_SRC_X)
+    val wPCNextEn    = WireInit(EN_FL)
+    val wPCJumpEn    = WireInit(EN_FL)
+    val wMemRdInstEn = WireInit(EN_FL)
+    val wMemRdLoadEn = WireInit(EN_FL)
+    val wMemRdSrc    = WireInit(MEM_RD_SRC_X)
+    val wMemWrEn     = WireInit(EN_FL)
+    val wMemByt      = WireInit(MEM_BYT_X)
+    val wIRWrEn      = WireInit(EN_FL)
+    val wGPRWrEn     = WireInit(EN_FL)
+    val wGPRWrSrc    = WireInit(REG_WR_SRC_X)
+    val wALUType     = WireInit(ALU_TYPE_X)
+    val wALURS1      = WireInit(ALU_RS1_X)
+    val wALURS2      = WireInit(ALU_RS2_X)
 
     switch (rStateCurr) {
         is (STATE_IF) {
             rStateCurr := STATE_ID
 
-            wPCNextEn := EN_TR
-            wMemRdEn  := EN_TR
-            wMemRdSrc := MEM_RD_SRC_PC
-            wIRWrEn   := EN_TR
-            wALUType  := ALU_TYPE_ADD
-            wALURS1   := ALU_RS1_PC
-            wALURS2   := ALU_RS2_4
+            wPCNextEn    := EN_TR
+            wMemRdInstEn := EN_TR
+            wMemRdSrc    := MEM_RD_SRC_PC
+            wIRWrEn      := EN_TR
+            wALUType     := ALU_TYPE_ADD
+            wALURS1      := ALU_RS1_PC
+            wALURS2      := ALU_RS2_4
         }
         is (STATE_ID) {
             rStateCurr := STATE_EX
@@ -307,8 +308,8 @@ class CTR extends Module  with ConfigInstRV32I
                        wInstName === INST_NAME_LW) {
                 rStateCurr := STATE_WB
 
-                wMemRdEn  := EN_TR
-                wMemRdSrc := MEM_RD_SRC_ALU
+                wMemRdLoadEn := EN_TR
+                wMemRdSrc    := MEM_RD_SRC_ALU
             }
             .elsewhen (wInstName === INST_NAME_SB ||
                        wInstName === INST_NAME_SH ||
@@ -358,20 +359,21 @@ class CTR extends Module  with ConfigInstRV32I
         }
     }
 
-    io.pCTR.oInstName  := wInstName
-    io.pCTR.oStateCurr := rStateCurr
-    io.pCTR.oPCWrEn    := wPCWrEn
-    io.pCTR.oPCWrSrc   := wPCWrSrc
-    io.pCTR.oPCNextEn  := wPCNextEn
-    io.pCTR.oPCJumpEn  := wPCJumpEn
-    io.pCTR.oMemRdEn   := wMemRdEn
-    io.pCTR.oMemRdSrc  := wMemRdSrc
-    io.pCTR.oMemWrEn   := wMemWrEn
-    io.pCTR.oMemByt    := wMemByt
-    io.pCTR.oIRWrEn    := wIRWrEn
-    io.pCTR.oGPRWrEn   := wGPRWrEn
-    io.pCTR.oGPRWrSrc  := wGPRWrSrc
-    io.pCTR.oALUType   := wALUType
-    io.pCTR.oALURS1    := wALURS1
-    io.pCTR.oALURS2    := wALURS2
+    io.pCTR.oInstName    := wInstName
+    io.pCTR.oStateCurr   := rStateCurr
+    io.pCTR.oPCWrEn      := wPCWrEn
+    io.pCTR.oPCWrSrc     := wPCWrSrc
+    io.pCTR.oPCNextEn    := wPCNextEn
+    io.pCTR.oPCJumpEn    := wPCJumpEn
+    io.pCTR.oMemRdInstEn := wMemRdInstEn
+    io.pCTR.oMemRdLoadEn := wMemRdLoadEn
+    io.pCTR.oMemRdSrc    := wMemRdSrc
+    io.pCTR.oMemWrEn     := wMemWrEn
+    io.pCTR.oMemByt      := wMemByt
+    io.pCTR.oIRWrEn      := wIRWrEn
+    io.pCTR.oGPRWrEn     := wGPRWrEn
+    io.pCTR.oGPRWrSrc    := wGPRWrSrc
+    io.pCTR.oALUType     := wALUType
+    io.pCTR.oALURS1      := wALURS1
+    io.pCTR.oALURS2      := wALURS2
 }
