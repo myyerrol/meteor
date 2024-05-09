@@ -12,8 +12,9 @@ class CTR extends Module  with ConfigInstRV32I
                           with ConfigInstRVPri
                           with Build {
     val io = IO(new Bundle {
-        val iPC   = Input(UInt(ADDR_WIDTH.W))
-        val iInst = Input(UInt(INST_WIDTH.W))
+        val iPC     = Input(UInt(ADDR_WIDTH.W))
+        val iInst   = Input(UInt(INST_WIDTH.W))
+        val iWaitEn = Input(Bool())
 
         val pCTR  = new CTRIO
     })
@@ -92,282 +93,287 @@ class CTR extends Module  with ConfigInstRV32I
     val wALURS2      = WireInit(ALU_RS2_X)
     val wEndPreFlag  = WireInit(EN_FL)
 
-    switch (rStateCurr) {
-        is (STATE_IF) {
-            rStateCurr := STATE_ID
+    when (io.iWaitEn) {
+        rStateCurr := rStateCurr
+    }
+    .otherwise {
+        switch (rStateCurr) {
+            is (STATE_IF) {
+                rStateCurr := STATE_ID
 
-            wPCNextEn    := EN_TR
-            wMemRdInstEn := EN_TR
-            wMemRdSrc    := MEM_RD_SRC_PC
-            wIRWrEn      := EN_TR
-            wALUType     := ALU_TYPE_ADD
-            wALURS1      := ALU_RS1_PC
-            wALURS2      := ALU_RS2_4
-            wEndPreFlag  := EN_TR
-        }
-        is (STATE_ID) {
-            rStateCurr := STATE_EX
+                wPCNextEn    := EN_TR
+                wMemRdInstEn := EN_TR
+                wMemRdSrc    := MEM_RD_SRC_PC
+                wIRWrEn      := EN_TR
+                wALUType     := ALU_TYPE_ADD
+                wALURS1      := ALU_RS1_PC
+                wALURS2      := ALU_RS2_4
+                wEndPreFlag  := EN_TR
+            }
+            is (STATE_ID) {
+                rStateCurr := STATE_EX
 
-            when (wInstName === INST_NAME_BEQ  ||
-                  wInstName === INST_NAME_BNE  ||
-                  wInstName === INST_NAME_BLT  ||
-                  wInstName === INST_NAME_BGE  ||
-                  wInstName === INST_NAME_BLTU ||
-                  wInstName === INST_NAME_BGEU) {
-                wPCJumpEn := EN_TR
-                wALUType  := ALU_TYPE_ADD
-                wALURS1   := ALU_RS1_PC
-                wALURS2   := ALU_RS2_IMM_B
+                when (wInstName === INST_NAME_BEQ  ||
+                    wInstName === INST_NAME_BNE  ||
+                    wInstName === INST_NAME_BLT  ||
+                    wInstName === INST_NAME_BGE  ||
+                    wInstName === INST_NAME_BLTU ||
+                    wInstName === INST_NAME_BGEU) {
+                    wPCJumpEn := EN_TR
+                    wALUType  := ALU_TYPE_ADD
+                    wALURS1   := ALU_RS1_PC
+                    wALURS2   := ALU_RS2_IMM_B
+                }
+                when (wInstName === INST_NAME_JAL) {
+                    wPCJumpEn := EN_TR
+                    wALUType  := ALU_TYPE_ADD
+                    wALURS1   := ALU_RS1_PC
+                    wALURS2   := ALU_RS2_IMM_J
+                }
             }
-            when (wInstName === INST_NAME_JAL) {
-                wPCJumpEn := EN_TR
-                wALUType  := ALU_TYPE_ADD
-                wALURS1   := ALU_RS1_PC
-                wALURS2   := ALU_RS2_IMM_J
-            }
-        }
-        is (STATE_EX) {
-            rStateCurr := STATE_WB
-
-            when (wInstName === INST_NAME_SLL   ||
-                  wInstName === INST_NAME_SLLI  ||
-                  wInstName === INST_NAME_SRL   ||
-                  wInstName === INST_NAME_SRLI  ||
-                  wInstName === INST_NAME_SRA   ||
-                  wInstName === INST_NAME_SRAI) {
-                wALUType := MuxLookup(wInstName, ALU_TYPE_X) (
-                    Seq(
-                        INST_NAME_SLL   -> ALU_TYPE_SLL,
-                        INST_NAME_SLLI  -> ALU_TYPE_SLL,
-                        INST_NAME_SRL   -> ALU_TYPE_SRL,
-                        INST_NAME_SRLI  -> ALU_TYPE_SRL,
-                        INST_NAME_SRA   -> ALU_TYPE_SRA,
-                        INST_NAME_SRAI  -> ALU_TYPE_SRA
-                    )
-                )
-                wALURS1  := ALU_RS1_GPR
-                wALURS2  := MuxLookup(wInstName, ALU_RS2_X) (
-                    Seq(
-                        INST_NAME_SLL   -> ALU_RS2_GPR,
-                        INST_NAME_SLLI  -> ALU_RS2_IMM_I,
-                        INST_NAME_SRL   -> ALU_RS2_GPR,
-                        INST_NAME_SRLI  -> ALU_RS2_IMM_I,
-                        INST_NAME_SRA   -> ALU_RS2_GPR,
-                        INST_NAME_SRAI  -> ALU_RS2_IMM_I
-                    )
-                )
-            }
-            .elsewhen (wInstName === INST_NAME_ADD   ||
-                       wInstName === INST_NAME_ADDI  ||
-                       wInstName === INST_NAME_SUB   ||
-                       wInstName === INST_NAME_LUI   ||
-                       wInstName === INST_NAME_AUIPC) {
-                wALUType := MuxLookup(wInstName, ALU_TYPE_X) (
-                    Seq(
-                        INST_NAME_ADD   -> ALU_TYPE_ADD,
-                        INST_NAME_ADDI  -> ALU_TYPE_ADD,
-                        INST_NAME_SUB   -> ALU_TYPE_SUB,
-                        INST_NAME_LUI   -> ALU_TYPE_ADD,
-                        INST_NAME_AUIPC -> ALU_TYPE_ADD
-                    )
-                )
-                wALURS1  := MuxLookup(wInstName, ALU_RS1_GPR) (
-                    Seq(
-                        INST_NAME_LUI   -> ALU_RS1_X,
-                        INST_NAME_AUIPC -> ALU_RS1_PC
-                    )
-                )
-                wALURS2  := MuxLookup(wInstName,ALU_RS2_X) (
-                    Seq(
-                        INST_NAME_ADD   -> ALU_RS2_GPR,
-                        INST_NAME_ADDI  -> ALU_RS2_IMM_I,
-                        INST_NAME_SUB   -> ALU_RS2_GPR,
-                        INST_NAME_LUI   -> ALU_RS2_IMM_U,
-                        INST_NAME_AUIPC -> ALU_RS2_IMM_U,
-                    )
-                )
-            }
-            .elsewhen (wInstName === INST_NAME_XOR  ||
-                       wInstName === INST_NAME_XORI ||
-                       wInstName === INST_NAME_OR   ||
-                       wInstName === INST_NAME_ORI  ||
-                       wInstName === INST_NAME_AND  ||
-                       wInstName === INST_NAME_ANDI) {
-                wALUType := MuxLookup(wInstName, ALU_TYPE_X) (
-                    Seq(
-                        INST_NAME_XOR  -> ALU_TYPE_XOR,
-                        INST_NAME_XORI -> ALU_TYPE_XOR,
-                        INST_NAME_OR   -> ALU_TYPE_OR,
-                        INST_NAME_ORI  -> ALU_TYPE_OR,
-                        INST_NAME_AND  -> ALU_TYPE_AND,
-                        INST_NAME_ANDI -> ALU_TYPE_AND
-                    )
-                )
-                wALURS1  := ALU_RS1_GPR
-                wALURS2  := MuxLookup(wInstName, ALU_RS2_X) (
-                    Seq(
-                        INST_NAME_XOR  -> ALU_RS2_GPR,
-                        INST_NAME_XORI -> ALU_RS2_IMM_I,
-                        INST_NAME_OR   -> ALU_RS2_GPR,
-                        INST_NAME_ORI  -> ALU_RS2_IMM_I,
-                        INST_NAME_AND  -> ALU_RS2_GPR,
-                        INST_NAME_ANDI -> ALU_RS2_IMM_I
-                    )
-                )
-            }
-            .elsewhen (wInstName === INST_NAME_SLT  ||
-                       wInstName === INST_NAME_SLTU ||
-                       wInstName === INST_NAME_SLTIU) {
-                wALUType := Mux(wInstName === INST_NAME_SLT,
-                                ALU_TYPE_SLT,
-                                ALU_TYPE_SLTU)
-                wALURS1  := ALU_RS1_GPR
-                wALURS2  := Mux(wInstName === INST_NAME_SLTIU,
-                                ALU_RS2_IMM_I,
-                                ALU_RS2_GPR)
-            }
-            .elsewhen (wInstName === INST_NAME_BEQ  ||
-                       wInstName === INST_NAME_BNE  ||
-                       wInstName === INST_NAME_BLT  ||
-                       wInstName === INST_NAME_BGE  ||
-                       wInstName === INST_NAME_BLTU ||
-                       wInstName === INST_NAME_BGEU) {
-                rStateCurr := STATE_IF
-
-                wPCWrEn  := EN_TR
-                wPCWrSrc := PC_WR_SRC_JUMP
-                wALUType := MuxLookup(wInstName, ALU_TYPE_X) (
-                    Seq(
-                        INST_NAME_BEQ  -> ALU_TYPE_BEQ,
-                        INST_NAME_BNE  -> ALU_TYPE_BNE,
-                        INST_NAME_BLT  -> ALU_TYPE_BLT,
-                        INST_NAME_BGE  -> ALU_TYPE_BGE,
-                        INST_NAME_BLTU -> ALU_TYPE_BLTU,
-                        INST_NAME_BGEU -> ALU_TYPE_BGEU
-                    )
-                )
-                wALURS1  := ALU_RS1_GPR
-                wALURS2  := ALU_RS2_GPR
-            }
-            .elsewhen (wInstName === INST_NAME_JAL) {
-                wALUType := ALU_TYPE_ADD
-                wALURS1  := ALU_RS1_PC
-                wALURS2  := ALU_RS2_4
-            }
-            .elsewhen (wInstName === INST_NAME_JALR) {
-                rStateCurr := STATE_LS
-
-                wPCJumpEn := EN_TR
-                wALUType  := ALU_TYPE_JALR
-                wALURS1   := ALU_RS1_GPR
-                wALURS2   := ALU_RS2_IMM_I
-            }
-            .elsewhen (wInstName === INST_NAME_LB  ||
-                       wInstName === INST_NAME_LH  ||
-                       wInstName === INST_NAME_LBU ||
-                       wInstName === INST_NAME_LHU ||
-                       wInstName === INST_NAME_LW) {
-                rStateCurr := STATE_LS
-
-                wALUType := ALU_TYPE_ADD
-                wALURS1  := ALU_RS1_GPR
-                wALURS2  := ALU_RS2_IMM_I
-            }
-            .elsewhen (wInstName === INST_NAME_SB ||
-                       wInstName === INST_NAME_SH ||
-                       wInstName === INST_NAME_SW) {
-                rStateCurr := STATE_LS
-
-                wALUType := ALU_TYPE_ADD
-                wALURS1  := ALU_RS1_GPR
-                wALURS2  := ALU_RS2_IMM_S
-            }
-            .elsewhen (wInstName === INST_NAME_MUL    ||
-                       wInstName === INST_NAME_MULH   ||
-                       wInstName === INST_NAME_MULHSU ||
-                       wInstName === INST_NAME_MULHU  ||
-                       wInstName === INST_NAME_DIV    ||
-                       wInstName === INST_NAME_DIVU   ||
-                       wInstName === INST_NAME_REM    ||
-                       wInstName === INST_NAME_REMU) {
-                wALUType := MuxLookup(wInstName, ALU_TYPE_X) (
-                    Seq(
-                        INST_NAME_MUL    -> ALU_TYPE_MUL,
-                        INST_NAME_MULH   -> ALU_TYPE_MULH,
-                        INST_NAME_MULHSU -> ALU_TYPE_MULHSU,
-                        INST_NAME_MULHU  -> ALU_TYPE_MULHU,
-                        INST_NAME_DIV    -> ALU_TYPE_DIV,
-                        INST_NAME_DIVU   -> ALU_TYPE_DIVU,
-                        INST_NAME_REM    -> ALU_TYPE_REM,
-                        INST_NAME_REMU   -> ALU_TYPE_REMU
-                    )
-                )
-                wALURS1  := ALU_RS1_GPR
-                wALURS2  := ALU_RS2_GPR
-            }
-        }
-        is (STATE_LS) {
-            when (wInstName === INST_NAME_JALR) {
+            is (STATE_EX) {
                 rStateCurr := STATE_WB
 
-                wALUType := ALU_TYPE_ADD
-                wALURS1  := ALU_RS1_PC
-                wALURS2  := ALU_RS2_4
-            }
-            .elsewhen (wInstName === INST_NAME_LB  ||
-                       wInstName === INST_NAME_LH  ||
-                       wInstName === INST_NAME_LBU ||
-                       wInstName === INST_NAME_LHU ||
-                       wInstName === INST_NAME_LW) {
-                rStateCurr := STATE_WB
+                when (wInstName === INST_NAME_SLL   ||
+                    wInstName === INST_NAME_SLLI  ||
+                    wInstName === INST_NAME_SRL   ||
+                    wInstName === INST_NAME_SRLI  ||
+                    wInstName === INST_NAME_SRA   ||
+                    wInstName === INST_NAME_SRAI) {
+                    wALUType := MuxLookup(wInstName, ALU_TYPE_X) (
+                        Seq(
+                            INST_NAME_SLL   -> ALU_TYPE_SLL,
+                            INST_NAME_SLLI  -> ALU_TYPE_SLL,
+                            INST_NAME_SRL   -> ALU_TYPE_SRL,
+                            INST_NAME_SRLI  -> ALU_TYPE_SRL,
+                            INST_NAME_SRA   -> ALU_TYPE_SRA,
+                            INST_NAME_SRAI  -> ALU_TYPE_SRA
+                        )
+                    )
+                    wALURS1  := ALU_RS1_GPR
+                    wALURS2  := MuxLookup(wInstName, ALU_RS2_X) (
+                        Seq(
+                            INST_NAME_SLL   -> ALU_RS2_GPR,
+                            INST_NAME_SLLI  -> ALU_RS2_IMM_I,
+                            INST_NAME_SRL   -> ALU_RS2_GPR,
+                            INST_NAME_SRLI  -> ALU_RS2_IMM_I,
+                            INST_NAME_SRA   -> ALU_RS2_GPR,
+                            INST_NAME_SRAI  -> ALU_RS2_IMM_I
+                        )
+                    )
+                }
+                .elsewhen (wInstName === INST_NAME_ADD   ||
+                        wInstName === INST_NAME_ADDI  ||
+                        wInstName === INST_NAME_SUB   ||
+                        wInstName === INST_NAME_LUI   ||
+                        wInstName === INST_NAME_AUIPC) {
+                    wALUType := MuxLookup(wInstName, ALU_TYPE_X) (
+                        Seq(
+                            INST_NAME_ADD   -> ALU_TYPE_ADD,
+                            INST_NAME_ADDI  -> ALU_TYPE_ADD,
+                            INST_NAME_SUB   -> ALU_TYPE_SUB,
+                            INST_NAME_LUI   -> ALU_TYPE_ADD,
+                            INST_NAME_AUIPC -> ALU_TYPE_ADD
+                        )
+                    )
+                    wALURS1  := MuxLookup(wInstName, ALU_RS1_GPR) (
+                        Seq(
+                            INST_NAME_LUI   -> ALU_RS1_X,
+                            INST_NAME_AUIPC -> ALU_RS1_PC
+                        )
+                    )
+                    wALURS2  := MuxLookup(wInstName,ALU_RS2_X) (
+                        Seq(
+                            INST_NAME_ADD   -> ALU_RS2_GPR,
+                            INST_NAME_ADDI  -> ALU_RS2_IMM_I,
+                            INST_NAME_SUB   -> ALU_RS2_GPR,
+                            INST_NAME_LUI   -> ALU_RS2_IMM_U,
+                            INST_NAME_AUIPC -> ALU_RS2_IMM_U,
+                        )
+                    )
+                }
+                .elsewhen (wInstName === INST_NAME_XOR  ||
+                        wInstName === INST_NAME_XORI ||
+                        wInstName === INST_NAME_OR   ||
+                        wInstName === INST_NAME_ORI  ||
+                        wInstName === INST_NAME_AND  ||
+                        wInstName === INST_NAME_ANDI) {
+                    wALUType := MuxLookup(wInstName, ALU_TYPE_X) (
+                        Seq(
+                            INST_NAME_XOR  -> ALU_TYPE_XOR,
+                            INST_NAME_XORI -> ALU_TYPE_XOR,
+                            INST_NAME_OR   -> ALU_TYPE_OR,
+                            INST_NAME_ORI  -> ALU_TYPE_OR,
+                            INST_NAME_AND  -> ALU_TYPE_AND,
+                            INST_NAME_ANDI -> ALU_TYPE_AND
+                        )
+                    )
+                    wALURS1  := ALU_RS1_GPR
+                    wALURS2  := MuxLookup(wInstName, ALU_RS2_X) (
+                        Seq(
+                            INST_NAME_XOR  -> ALU_RS2_GPR,
+                            INST_NAME_XORI -> ALU_RS2_IMM_I,
+                            INST_NAME_OR   -> ALU_RS2_GPR,
+                            INST_NAME_ORI  -> ALU_RS2_IMM_I,
+                            INST_NAME_AND  -> ALU_RS2_GPR,
+                            INST_NAME_ANDI -> ALU_RS2_IMM_I
+                        )
+                    )
+                }
+                .elsewhen (wInstName === INST_NAME_SLT  ||
+                        wInstName === INST_NAME_SLTU ||
+                        wInstName === INST_NAME_SLTIU) {
+                    wALUType := Mux(wInstName === INST_NAME_SLT,
+                                    ALU_TYPE_SLT,
+                                    ALU_TYPE_SLTU)
+                    wALURS1  := ALU_RS1_GPR
+                    wALURS2  := Mux(wInstName === INST_NAME_SLTIU,
+                                    ALU_RS2_IMM_I,
+                                    ALU_RS2_GPR)
+                }
+                .elsewhen (wInstName === INST_NAME_BEQ  ||
+                        wInstName === INST_NAME_BNE  ||
+                        wInstName === INST_NAME_BLT  ||
+                        wInstName === INST_NAME_BGE  ||
+                        wInstName === INST_NAME_BLTU ||
+                        wInstName === INST_NAME_BGEU) {
+                    rStateCurr := STATE_IF
 
-                wMemRdLoadEn := EN_TR
-                wMemRdSrc    := MEM_RD_SRC_ALU
+                    wPCWrEn  := EN_TR
+                    wPCWrSrc := PC_WR_SRC_JUMP
+                    wALUType := MuxLookup(wInstName, ALU_TYPE_X) (
+                        Seq(
+                            INST_NAME_BEQ  -> ALU_TYPE_BEQ,
+                            INST_NAME_BNE  -> ALU_TYPE_BNE,
+                            INST_NAME_BLT  -> ALU_TYPE_BLT,
+                            INST_NAME_BGE  -> ALU_TYPE_BGE,
+                            INST_NAME_BLTU -> ALU_TYPE_BLTU,
+                            INST_NAME_BGEU -> ALU_TYPE_BGEU
+                        )
+                    )
+                    wALURS1  := ALU_RS1_GPR
+                    wALURS2  := ALU_RS2_GPR
+                }
+                .elsewhen (wInstName === INST_NAME_JAL) {
+                    wALUType := ALU_TYPE_ADD
+                    wALURS1  := ALU_RS1_PC
+                    wALURS2  := ALU_RS2_4
+                }
+                .elsewhen (wInstName === INST_NAME_JALR) {
+                    rStateCurr := STATE_LS
+
+                    wPCJumpEn := EN_TR
+                    wALUType  := ALU_TYPE_JALR
+                    wALURS1   := ALU_RS1_GPR
+                    wALURS2   := ALU_RS2_IMM_I
+                }
+                .elsewhen (wInstName === INST_NAME_LB  ||
+                        wInstName === INST_NAME_LH  ||
+                        wInstName === INST_NAME_LBU ||
+                        wInstName === INST_NAME_LHU ||
+                        wInstName === INST_NAME_LW) {
+                    rStateCurr := STATE_LS
+
+                    wALUType := ALU_TYPE_ADD
+                    wALURS1  := ALU_RS1_GPR
+                    wALURS2  := ALU_RS2_IMM_I
+                }
+                .elsewhen (wInstName === INST_NAME_SB ||
+                        wInstName === INST_NAME_SH ||
+                        wInstName === INST_NAME_SW) {
+                    rStateCurr := STATE_LS
+
+                    wALUType := ALU_TYPE_ADD
+                    wALURS1  := ALU_RS1_GPR
+                    wALURS2  := ALU_RS2_IMM_S
+                }
+                .elsewhen (wInstName === INST_NAME_MUL    ||
+                        wInstName === INST_NAME_MULH   ||
+                        wInstName === INST_NAME_MULHSU ||
+                        wInstName === INST_NAME_MULHU  ||
+                        wInstName === INST_NAME_DIV    ||
+                        wInstName === INST_NAME_DIVU   ||
+                        wInstName === INST_NAME_REM    ||
+                        wInstName === INST_NAME_REMU) {
+                    wALUType := MuxLookup(wInstName, ALU_TYPE_X) (
+                        Seq(
+                            INST_NAME_MUL    -> ALU_TYPE_MUL,
+                            INST_NAME_MULH   -> ALU_TYPE_MULH,
+                            INST_NAME_MULHSU -> ALU_TYPE_MULHSU,
+                            INST_NAME_MULHU  -> ALU_TYPE_MULHU,
+                            INST_NAME_DIV    -> ALU_TYPE_DIV,
+                            INST_NAME_DIVU   -> ALU_TYPE_DIVU,
+                            INST_NAME_REM    -> ALU_TYPE_REM,
+                            INST_NAME_REMU   -> ALU_TYPE_REMU
+                        )
+                    )
+                    wALURS1  := ALU_RS1_GPR
+                    wALURS2  := ALU_RS2_GPR
+                }
             }
-            .elsewhen (wInstName === INST_NAME_SB ||
-                       wInstName === INST_NAME_SH ||
-                       wInstName === INST_NAME_SW) {
+            is (STATE_LS) {
+                when (wInstName === INST_NAME_JALR) {
+                    rStateCurr := STATE_WB
+
+                    wALUType := ALU_TYPE_ADD
+                    wALURS1  := ALU_RS1_PC
+                    wALURS2  := ALU_RS2_4
+                }
+                .elsewhen (wInstName === INST_NAME_LB  ||
+                        wInstName === INST_NAME_LH  ||
+                        wInstName === INST_NAME_LBU ||
+                        wInstName === INST_NAME_LHU ||
+                        wInstName === INST_NAME_LW) {
+                    rStateCurr := STATE_WB
+
+                    wMemRdLoadEn := EN_TR
+                    wMemRdSrc    := MEM_RD_SRC_ALU
+                }
+                .elsewhen (wInstName === INST_NAME_SB ||
+                        wInstName === INST_NAME_SH ||
+                        wInstName === INST_NAME_SW) {
+                    rStateCurr := STATE_IF
+
+                    wPCWrEn  := EN_TR
+                    wPCWrSrc := PC_WR_SRC_NEXT
+                    wMemWrEn := EN_TR
+                    wMemByt  := MuxLookup(wInstName, MEM_BYT_X) (
+                        Seq(
+                            INST_NAME_SB -> MEM_BYT_1_U,
+                            INST_NAME_SH -> MEM_BYT_2_U,
+                            INST_NAME_SW -> MEM_BYT_4_U
+                        )
+                    )
+                    wALURS2  := ALU_RS2_GPR
+                }
+            }
+            is (STATE_WB) {
                 rStateCurr := STATE_IF
 
-                wPCWrEn  := EN_TR
-                wPCWrSrc := PC_WR_SRC_NEXT
-                wMemWrEn := EN_TR
-                wMemByt  := MuxLookup(wInstName, MEM_BYT_X) (
-                    Seq(
-                        INST_NAME_SB -> MEM_BYT_1_U,
-                        INST_NAME_SH -> MEM_BYT_2_U,
-                        INST_NAME_SW -> MEM_BYT_4_U
+                wPCWrEn   := EN_TR
+                wPCWrSrc  := PC_WR_SRC_NEXT
+                wGPRWrEn  := EN_TR
+                wGPRWrSrc := REG_WR_SRC_ALU
+                when (wInstName === INST_NAME_JAL ||
+                    wInstName === INST_NAME_JALR) {
+                    wPCWrSrc := PC_WR_SRC_JUMP
+                }
+                .elsewhen (wInstName === INST_NAME_LB  ||
+                        wInstName === INST_NAME_LH  ||
+                        wInstName === INST_NAME_LBU ||
+                        wInstName === INST_NAME_LHU ||
+                        wInstName === INST_NAME_LW) {
+                    wMemByt := MuxLookup(wInstName, MEM_BYT_X) (
+                        Seq(
+                            INST_NAME_LB  -> MEM_BYT_1_S,
+                            INST_NAME_LH  -> MEM_BYT_2_S,
+                            INST_NAME_LBU -> MEM_BYT_1_U,
+                            INST_NAME_LHU -> MEM_BYT_2_U,
+                            INST_NAME_LW  -> MEM_BYT_4_S
+                        )
                     )
-                )
-                wALURS2  := ALU_RS2_GPR
-            }
-        }
-        is (STATE_WB) {
-            rStateCurr := STATE_IF
-
-            wPCWrEn   := EN_TR
-            wPCWrSrc  := PC_WR_SRC_NEXT
-            wGPRWrEn  := EN_TR
-            wGPRWrSrc := REG_WR_SRC_ALU
-            when (wInstName === INST_NAME_JAL ||
-                  wInstName === INST_NAME_JALR) {
-                wPCWrSrc := PC_WR_SRC_JUMP
-            }
-            .elsewhen (wInstName === INST_NAME_LB  ||
-                       wInstName === INST_NAME_LH  ||
-                       wInstName === INST_NAME_LBU ||
-                       wInstName === INST_NAME_LHU ||
-                       wInstName === INST_NAME_LW) {
-                wMemByt := MuxLookup(wInstName, MEM_BYT_X) (
-                    Seq(
-                        INST_NAME_LB  -> MEM_BYT_1_S,
-                        INST_NAME_LH  -> MEM_BYT_2_S,
-                        INST_NAME_LBU -> MEM_BYT_1_U,
-                        INST_NAME_LHU -> MEM_BYT_2_U,
-                        INST_NAME_LW  -> MEM_BYT_4_S
-                    )
-                )
-                wGPRWrSrc := REG_WR_SRC_MEM
+                    wGPRWrSrc := REG_WR_SRC_MEM
+                }
             }
         }
     }

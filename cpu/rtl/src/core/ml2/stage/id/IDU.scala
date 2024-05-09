@@ -13,14 +13,17 @@ class IDU extends Module with ConfigInst {
         val iInst      = Input(UInt(INST_WIDTH.W))
         val iGPRWrData = Input(UInt(DATA_WIDTH.W))
 
+        val iWaitEn    = Input(Bool())
+
         val pCTR       = new CTRIO
         val pGPRRd     = new GPRRdIO
         val pIDU       = new IDUIO
     })
 
     val mCTR = Module(new CTR)
-    mCTR.io.iPC   := io.iPC
-    mCTR.io.iInst := io.iInst
+    mCTR.io.iPC     := io.iPC
+    mCTR.io.iInst   := io.iInst
+    mCTR.io.iWaitEn := io.iWaitEn
 
     io.pCTR <> mCTR.io.pCTR
 

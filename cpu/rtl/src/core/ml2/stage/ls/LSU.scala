@@ -7,6 +7,7 @@ import cpu.base._
 import cpu.port.ml2._
 import cpu.temp._
 import cpu.mem._
+import cpu.bus._
 
 class LSU extends Module with ConfigInst
                          with Build {
@@ -22,6 +23,8 @@ class LSU extends Module with ConfigInst
         val iMemWrData   = Input(UInt(DATA_WIDTH.W))
 
         val iState       = Input(UInt(SIGS_WIDTH.W))
+
+        val oWaitEn      = Output(Bool())
 
         val pLSU         = new LSUIO
     })
@@ -56,6 +59,25 @@ class LSU extends Module with ConfigInst
     val mMRU = Module(new MRU)
     mMRU.io.iEn   := true.B
     mMRU.io.iData := DontCare
+
+    // if (MEM_TYPE.equals("axi4-lite")) {
+    //     val mAXI4LiteIFUM = Module(new AXI4LiteIFUM)
+    //     val mAXI4LiteIFUS = Module(new AXI4LiteIFUS)
+
+    //     val mMem = Module(new MemDualFakeBB)
+
+    //     mAXI4LiteIFUM.iRdEn   := io.pLSU.oMemRdInstEn
+    //     mAXI4LiteIFUM.iRdAddr := io.pLSU.oMemRdAddrInst
+    //     mAXI4LiteIFUM.pAR <> mAXI4LiteIFUS.pAR
+    //     mAXI4LiteIFUM.pR  <> mAXi4LiteIFUS.pR
+
+    //     mAXI4LiteIFUS.io.iRdData := mMem.io.pMemInst.pRd.bData
+
+    //     mMem.io.pMemInst.pRd.bEn   := mAXI4LiteIFUS.io.oRdEn
+    //     mMem.io.pMemInst.pRd.bAddr := mAXi4LiteIFUS.io.oRdAddr
+
+    //     io.pLSU.oMemRdDataInst := mAXI4LiteIFUM.io.oRdData
+    // }
 
     val mMem = Module(new MemDualFakeBB)
     mMem.io.pMemInst.pRd.bEn   := io.pLSU.oMemRdInstEn
