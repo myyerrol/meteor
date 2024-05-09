@@ -90,6 +90,7 @@ class CTR extends Module  with ConfigInstRV32I
     val wALUType     = WireInit(ALU_TYPE_X)
     val wALURS1      = WireInit(ALU_RS1_X)
     val wALURS2      = WireInit(ALU_RS2_X)
+    val wEndPreFlag  = WireInit(EN_FL)
 
     switch (rStateCurr) {
         is (STATE_IF) {
@@ -102,6 +103,7 @@ class CTR extends Module  with ConfigInstRV32I
             wALUType     := ALU_TYPE_ADD
             wALURS1      := ALU_RS1_PC
             wALURS2      := ALU_RS2_4
+            wEndPreFlag  := EN_TR
         }
         is (STATE_ID) {
             rStateCurr := STATE_EX
@@ -148,6 +150,7 @@ class CTR extends Module  with ConfigInstRV32I
                     Seq(
                         INST_NAME_SLL   -> ALU_RS2_GPR,
                         INST_NAME_SLLI  -> ALU_RS2_IMM_I,
+                        INST_NAME_SRL   -> ALU_RS2_GPR,
                         INST_NAME_SRLI  -> ALU_RS2_IMM_I,
                         INST_NAME_SRA   -> ALU_RS2_GPR,
                         INST_NAME_SRAI  -> ALU_RS2_IMM_I
@@ -231,9 +234,9 @@ class CTR extends Module  with ConfigInstRV32I
                        wInstName === INST_NAME_BGEU) {
                 rStateCurr := STATE_IF
 
-                wPCWrEn  := EN_TR
-                wPCWrSrc := PC_WR_SRC_JUMP
-                wALUType := MuxLookup(wInstName, ALU_TYPE_X) (
+                wPCWrEn     := EN_TR
+                wPCWrSrc    := PC_WR_SRC_JUMP
+                wALUType    := MuxLookup(wInstName, ALU_TYPE_X) (
                     Seq(
                         INST_NAME_BEQ  -> ALU_TYPE_BEQ,
                         INST_NAME_BNE  -> ALU_TYPE_BNE,
@@ -243,8 +246,9 @@ class CTR extends Module  with ConfigInstRV32I
                         INST_NAME_BGEU -> ALU_TYPE_BGEU
                     )
                 )
-                wALURS1  := ALU_RS1_GPR
-                wALURS2  := ALU_RS2_GPR
+                wALURS1     := ALU_RS1_GPR
+                wALURS2     := ALU_RS2_GPR
+                // wEndPreFlag := EN_TR
             }
             .elsewhen (wInstName === INST_NAME_JAL) {
                 wALUType := ALU_TYPE_ADD
@@ -326,26 +330,27 @@ class CTR extends Module  with ConfigInstRV32I
                        wInstName === INST_NAME_SW) {
                 rStateCurr := STATE_IF
 
-                wPCWrEn  := EN_TR
-                wPCWrSrc := PC_WR_SRC_NEXT
-                wMemWrEn := EN_TR
-                wMemByt  := MuxLookup(wInstName, MEM_BYT_X) (
+                wPCWrEn     := EN_TR
+                wPCWrSrc    := PC_WR_SRC_NEXT
+                wMemWrEn    := EN_TR
+                wMemByt     := MuxLookup(wInstName, MEM_BYT_X) (
                     Seq(
                         INST_NAME_SB -> MEM_BYT_1_U,
                         INST_NAME_SH -> MEM_BYT_2_U,
                         INST_NAME_SW -> MEM_BYT_4_U
                     )
                 )
-                wALURS2  := ALU_RS2_GPR
+                wALURS2     := ALU_RS2_GPR
+                // wEndPreFlag := EN_TR
             }
         }
         is (STATE_WB) {
             rStateCurr := STATE_IF
 
-            wPCWrEn   := EN_TR
-            wPCWrSrc  := PC_WR_SRC_NEXT
-            wGPRWrEn  := EN_TR
-            wGPRWrSrc := REG_WR_SRC_ALU
+            wPCWrEn     := EN_TR
+            wPCWrSrc    := PC_WR_SRC_NEXT
+            wGPRWrEn    := EN_TR
+            wGPRWrSrc   := REG_WR_SRC_ALU
             when (wInstName === INST_NAME_JAL ||
                   wInstName === INST_NAME_JALR) {
                 wPCWrSrc := PC_WR_SRC_JUMP
@@ -366,6 +371,7 @@ class CTR extends Module  with ConfigInstRV32I
                 )
                 wGPRWrSrc := REG_WR_SRC_MEM
             }
+            // wEndPreFlag := EN_TR
         }
     }
 
@@ -386,4 +392,5 @@ class CTR extends Module  with ConfigInstRV32I
     io.pCTR.oALUType     := wALUType
     io.pCTR.oALURS1      := wALURS1
     io.pCTR.oALURS2      := wALURS2
+    io.pCTR.oEndPreFlag  := wEndPreFlag
 }

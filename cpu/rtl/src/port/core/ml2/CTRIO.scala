@@ -23,4 +23,5 @@ class CTRIO extends Bundle with ConfigIO {
     val oALUType     = Output(UInt(SIGS_WIDTH.W))
     val oALURS1      = Output(UInt(SIGS_WIDTH.W))
     val oALURS2      = Output(UInt(SIGS_WIDTH.W))
+    val oEndPreFlag  = Output(Bool())
 }

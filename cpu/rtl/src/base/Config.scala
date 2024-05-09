@@ -28,6 +28,8 @@ trait ConfigIO {
     val AXRE_WIDTH = 4
     val AXUS_WIDTH = 4
     val AXLN_WIDTH = 8
+
+    val CSR_TYPE = 2
 }
 
 trait ConfigInst extends ConfigIO {
@@ -46,7 +48,6 @@ trait ConfigInst extends ConfigIO {
     val CSR_CODE_M_ECALL =    11.U
     val CSR_MSTATUS_INIT = "x00001800".U(ADDR_WIDTH.W)
 
-    val CSR_TYPE       = 2
     val CSR_TYPE_X     = 0.U(CSR_TYPE.W)
     val CSR_TYPE_ECALL = 1.U(CSR_TYPE.W)
     val CSR_TYPE_MRET  = 2.U(CSR_TYPE.W)

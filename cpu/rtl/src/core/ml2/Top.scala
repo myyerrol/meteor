@@ -20,9 +20,10 @@ class Top extends Module with ConfigInst {
     val mLSU = Module(new LSU)
     val mWBU = Module(new WBU)
 
-    io.pState.bEndFlag := false.B
-    io.pState.bEndData := mIDU.io.pIDU.oEndData
-    io.pState.bCSRType := CSR_TYPE_X
+    io.pState.bEndPreFlag := mIDU.io.pCTR.oEndPreFlag
+    io.pState.bEndAllFlag := false.B
+    io.pState.bEndAllData := mIDU.io.pIDU.oEndData
+    io.pState.bCSRType    := CSR_TYPE_X
 
     io.pTrace.pBase.bPC          := mIFU.io.pIFU.oPC
     io.pTrace.pBase.bPCNext      := mIFU.io.pIFU.oPCNext
@@ -48,10 +49,10 @@ class Top extends Module with ConfigInst {
         assert(false.B, "Invalid instruction at 0x%x", mIFU.io.pIFU.oPC)
     }
     .elsewhen (rInstName === INST_NAME_EBREAK) {
-        io.pState.bEndFlag := true.B
+        io.pState.bEndAllFlag := true.B
     }
     .otherwise {
-        io.pState.bEndFlag := false.B
+        io.pState.bEndAllFlag := false.B
     }
 
     mIFU.io.iInstName := mIDU.io.pCTR.oInstName

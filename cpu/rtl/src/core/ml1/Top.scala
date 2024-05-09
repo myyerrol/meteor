@@ -25,9 +25,10 @@ class Top extends Module with ConfigInst with Build {
     val mLSU = Module(new LSU)
     val mWBU = Module(new WBU)
 
-    io.pState.bEndFlag := false.B
-    io.pState.bEndData := mGPR.io.pGPRRd.bRdEData
-    io.pState.bCSRType := MuxLookup(mIDU.io.pIDUCtr.bInstName, CSR_TYPE_X) (
+    io.pState.bEndPreFlag := true.B
+    io.pState.bEndAllFlag := false.B
+    io.pState.bEndAllData := mGPR.io.pGPRRd.bRdEData
+    io.pState.bCSRType    := MuxLookup(mIDU.io.pIDUCtr.bInstName, CSR_TYPE_X) (
         Seq(
             INST_NAME_ECALL -> CSR_TYPE_ECALL,
             INST_NAME_MRET  -> CSR_TYPE_MRET
@@ -90,9 +91,9 @@ class Top extends Module with ConfigInst with Build {
         assert(false.B, "Invalid instruction at 0x%x", mIFU.io.pBase.bPC)
     }
     .elsewhen (mIDU.io.pIDUCtr.bInstName === INST_NAME_EBREAK) {
-        io.pState.bEndFlag := true.B
+        io.pState.bEndAllFlag := true.B
     }
     .otherwise {
-        io.pState.bEndFlag := false.B
+        io.pState.bEndAllFlag := false.B
     }
 }
