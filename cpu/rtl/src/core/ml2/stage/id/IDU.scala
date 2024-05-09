@@ -14,9 +14,7 @@ class IDU extends Module with ConfigInst {
         val iGPRWrData = Input(UInt(DATA_WIDTH.W))
 
         val pCTR       = new CTRIO
-        // val pGPRRS     = new GPRRSIO
         val pGPRRd     = new GPRRdIO
-        // val pGPRWr     = new GPRWrIO
         val pIDU       = new IDUIO
     })
 
@@ -31,7 +29,7 @@ class IDU extends Module with ConfigInst {
     val mGPR = Module(new GPR)
     val wRS1Addr = wInst(19, 15)
     val wRS2Addr = wInst(24, 20)
-    val wRDAddr  = wInst(11, 07)
+    val wRDAddr  = wInst(11,  7)
 
     mGPR.io.pGPRRS.bRS1Addr := wRS1Addr
     mGPR.io.pGPRRS.bRS2Addr := wRS2Addr
@@ -39,9 +37,7 @@ class IDU extends Module with ConfigInst {
     mGPR.io.pGPRWr.bWrAddr  := wRDAddr
     mGPR.io.pGPRWr.bWrData  := io.iGPRWrData
 
-    // io.pGPRRS <> mGPR.io.pGPRRS
     io.pGPRRd <> mGPR.io.pGPRRd
-    // io.pGPRWr <> mGPR.io.pGPRWr
 
     io.pIDU.oRS1Addr := wRS1Addr
     io.pIDU.oRS2Addr := wRS2Addr

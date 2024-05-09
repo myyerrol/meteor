@@ -34,20 +34,21 @@ class Top extends Module with ConfigInst with Build {
         )
     )
 
-    io.pTrace.pBase.bPC     := mIFU.io.pBase.bPC
-    io.pTrace.pBase.bPCNext := mIFU.io.pBase.bPCNext
-    io.pTrace.pBase.bPCEn   := mIFU.io.pBase.bPCEn
-    io.pTrace.pBase.bInst   := mMem.io.pMemInst.pRd.bData
-    io.pTrace.pGPRRd        <> mGPR.io.pGPRRd
-    io.pTrace.pGPRWr        <> mWBU.io.pGPRWrO
-    io.pTrace.pCSRRd        <> mCSR.io.pCSRRd
-    io.pTrace.pCSRWr        <> mWBU.io.pCSRWrO
-    io.pTrace.pMemInst      <> mMem.io.pMemInst
-    io.pTrace.pMemData      <> mLSU.io.pMemDataO
-    io.pTrace.pIDUCtr       <> mIDU.io.pIDUCtr
-    io.pTrace.pIDUData      <> mIDU.io.pIDUData
-    io.pTrace.pEXUJmp       <> mEXU.io.pEXUJmp
-    io.pTrace.pEXUOut       <> mEXU.io.pEXUOut
+    io.pTrace.pBase.bPC          := mIFU.io.pBase.bPC
+    io.pTrace.pBase.bPCNext      := mIFU.io.pBase.bPCNext
+    io.pTrace.pBase.bPCEn        := mIFU.io.pBase.bPCEn
+    io.pTrace.pBase.bInst        := mMem.io.pMemInst.pRd.bData
+    io.pTrace.pGPRRd             <> mGPR.io.pGPRRd
+    io.pTrace.pGPRWr             <> mWBU.io.pGPRWrO
+    io.pTrace.pCSRRd             <> mCSR.io.pCSRRd
+    io.pTrace.pCSRWr             <> mWBU.io.pCSRWrO
+    io.pTrace.pMemInst.pRd.bEn   := mMem.io.pMemInst.pRd.bEn
+    io.pTrace.pMemInst.pRd.bAddr := mMem.io.pMemInst.pRd.bAddr
+    io.pTrace.pMemData           <> mLSU.io.pMemDataO
+    io.pTrace.pIDUCtr            <> mIDU.io.pIDUCtr
+    io.pTrace.pIDUData           <> mIDU.io.pIDUData
+    io.pTrace.pEXUJmp            <> mEXU.io.pEXUJmp
+    io.pTrace.pEXUOut            <> mEXU.io.pEXUOut
 
     mGPR.io.pGPRRS <> mIDU.io.pGPRRS
     mGPR.io.pGPRWr <> mWBU.io.pGPRWrO

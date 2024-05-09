@@ -55,52 +55,28 @@ class LSU extends Module with ConfigInst
     mMRU.io.iEn   := true.B
     mMRU.io.iData := DontCare
 
-    if (MEM_TYPE.equals("direct")) {
-        val mMem = Module(new MemDualFakeBB)
-        mMem.io.pMemInst.pRd.bEn   := io.pLSU.oMemRdEn
-        mMem.io.pMemInst.pRd.bAddr := io.pLSU.oMemRdAddrInst
-        mMem.io.pMemData.pRd.bEn   := io.pLSU.oMemRdEn
-        mMem.io.pMemData.pRd.bAddr := io.pLSU.oMemRdAddrLoad
-        mMem.io.pMemData.pWr.bEn   := io.pLSU.oMemWrEn
-        mMem.io.pMemData.pWr.bAddr := io.pLSU.oMemWrAddr
-        mMem.io.pMemData.pWr.bData := io.pLSU.oMemWrData
-        mMem.io.pMemData.pWr.bMask := MuxLookup(
-            io.iMemByt,
-            VecInit(("b1111".U).asBools)) (
-            Seq(
-                MEM_BYT_1_U -> VecInit(false.B, false.B, false.B, true.B),
-                MEM_BYT_2_U -> VecInit(false.B, false.B, true.B,  true.B),
-                MEM_BYT_4_U -> VecInit(("b1111".U).asBools)
-            )
+    val mMem = Module(new MemDualFakeBB)
+    mMem.io.pMemInst.pRd.bEn   := io.pLSU.oMemRdEn
+    mMem.io.pMemInst.pRd.bAddr := io.pLSU.oMemRdAddrInst
+    mMem.io.pMemData.pRd.bEn   := io.pLSU.oMemRdEn
+    mMem.io.pMemData.pRd.bAddr := io.pLSU.oMemRdAddrLoad
+    mMem.io.pMemData.pWr.bEn   := io.pLSU.oMemWrEn
+    mMem.io.pMemData.pWr.bAddr := io.pLSU.oMemWrAddr
+    mMem.io.pMemData.pWr.bData := io.pLSU.oMemWrData
+    mMem.io.pMemData.pWr.bMask := MuxLookup(
+        io.iMemByt,
+        VecInit(("b1111".U).asBools)) (
+        Seq(
+            MEM_BYT_1_U -> VecInit(false.B, false.B, false.B, true.B),
+            MEM_BYT_2_U -> VecInit(false.B, false.B, true.B,  true.B),
+            MEM_BYT_4_U -> VecInit(("b1111".U).asBools)
         )
+    )
 
-        io.pLSU.oMemRdDataInst := mMem.io.pMemInst.pRd.bData
-        io.pLSU.oMemRdDataLoad := mMem.io.pMemData.pRd.bData
+    io.pLSU.oMemRdDataInst := mMem.io.pMemInst.pRd.bData
+    io.pLSU.oMemRdDataLoad := mMem.io.pMemData.pRd.bData
 
-        mMRU.io.iData := mMem.io.pMemData.pRd.bData
-
-        // val mMemDPIDirectComob = Module(new MemDPIDirectComb)
-        // mMemDPIDirectComob.io.iClock         := clock
-        // mMemDPIDirectComob.io.iReset         := reset
-        // mMemDPIDirectComob.io.iMemRdEn       := io.pLSU.oMemRdEn
-        // mMemDPIDirectComob.io.iMemRdAddrInst := io.pLSU.oMemRdAddrInst
-        // mMemDPIDirectComob.io.iMemRdAddrLoad := io.pLSU.oMemRdAddrLoad
-        // mMemDPIDirectComob.io.iMemWrEn       := io.pLSU.oMemWrEn
-        // mMemDPIDirectComob.io.iMemWrAddr     := io.pLSU.oMemWrAddr
-        // mMemDPIDirectComob.io.iMemWrData     := io.pLSU.oMemWrData
-        // mMemDPIDirectComob.io.iMemWrLen      := io.pLSU.oMemWrLen
-
-        // io.pLSU.oMemRdDataInst := mMemDPIDirectComob.io.oMemRdDataInst
-        // io.pLSU.oMemRdDataLoad := mMemDPIDirectComob.io.oMemRdDataLoad
-
-        // mMRU.io.iData := mMemDPIDirectComob.io.oMemRdDataLoad
-    }
-    else {
-        io.pLSU.oMemRdDataInst := DATA_ZERO
-        io.pLSU.oMemRdDataLoad := DATA_ZERO
-
-        mMRU.io.iData := DATA_ZERO
-    }
+    mMRU.io.iData := mMem.io.pMemData.pRd.bData
 
     io.pLSU.oMemRdData := mMRU.io.oData
 }

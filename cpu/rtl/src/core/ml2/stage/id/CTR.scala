@@ -73,10 +73,6 @@ class CTR extends Module  with ConfigInstRV32I
         )
     )
 
-    val mCountIFU   = Counter(4);
-    val mCountLSURd = Counter(4);
-    val mCountLSUWr = Counter(4);
-
     val wInstName = lInst(0)
 
     val rStateCurr = RegInit(STATE_IF)
@@ -98,37 +94,19 @@ class CTR extends Module  with ConfigInstRV32I
 
     switch (rStateCurr) {
         is (STATE_IF) {
+            rStateCurr := STATE_ID
+
             wPCNextEn := EN_TR
+            wMemRdEn  := EN_TR
             wMemRdSrc := MEM_RD_SRC_PC
             wIRWrEn   := EN_TR
             wALUType  := ALU_TYPE_ADD
             wALURS1   := ALU_RS1_PC
             wALURS2   := ALU_RS2_4
-
-            if (MEM_TYPE.equals("DPIAXI4Lite")) {
-                when (mCountIFU.value === 3.U) {
-                    mCountIFU.reset()
-                    rStateCurr := STATE_ID
-                    wMemRdEn   := EN_FL
-                }
-                .otherwise {
-                    when (mCountIFU.value === 0.U) {
-                        wMemRdEn := EN_TR
-                    }
-                    .otherwise {
-                        wMemRdEn := EN_FL
-                    }
-                    mCountIFU.inc()
-                    rStateCurr := STATE_IF
-                }
-            }
-            else {
-                wMemRdEn   := EN_TR
-                rStateCurr := STATE_ID
-            }
         }
         is (STATE_ID) {
             rStateCurr := STATE_EX
+
             when (wInstName === INST_NAME_BEQ  ||
                   wInstName === INST_NAME_BNE  ||
                   wInstName === INST_NAME_BLT  ||
@@ -149,6 +127,7 @@ class CTR extends Module  with ConfigInstRV32I
         }
         is (STATE_EX) {
             rStateCurr := STATE_WB
+
             when (wInstName === INST_NAME_SLL   ||
                   wInstName === INST_NAME_SLLI  ||
                   wInstName === INST_NAME_SRLI  ||
@@ -235,11 +214,13 @@ class CTR extends Module  with ConfigInstRV32I
             .elsewhen (wInstName === INST_NAME_SLT  ||
                        wInstName === INST_NAME_SLTU ||
                        wInstName === INST_NAME_SLTIU) {
-                wALUType := Mux(wInstName === INST_NAME_SLT, ALU_TYPE_SLT,
-                                                             ALU_TYPE_SLTU)
+                wALUType := Mux(wInstName === INST_NAME_SLT,
+                                ALU_TYPE_SLT,
+                                ALU_TYPE_SLTU)
                 wALURS1  := ALU_RS1_GPR
-                wALURS2  := Mux(wInstName === INST_NAME_SLTIU, ALU_RS2_IMM_I,
-                                                               ALU_RS2_GPR)
+                wALURS2  := Mux(wInstName === INST_NAME_SLTIU,
+                                ALU_RS2_IMM_I,
+                                ALU_RS2_GPR)
             }
             .elsewhen (wInstName === INST_NAME_BEQ  ||
                        wInstName === INST_NAME_BNE  ||
@@ -248,9 +229,10 @@ class CTR extends Module  with ConfigInstRV32I
                        wInstName === INST_NAME_BLTU ||
                        wInstName === INST_NAME_BGEU) {
                 rStateCurr := STATE_IF
-                wPCWrEn    := EN_TR
-                wPCWrSrc   := PC_WR_SRC_JUMP
-                wALUType   := MuxLookup(wInstName, ALU_TYPE_X) (
+
+                wPCWrEn  := EN_TR
+                wPCWrSrc := PC_WR_SRC_JUMP
+                wALUType := MuxLookup(wInstName, ALU_TYPE_X) (
                     Seq(
                         INST_NAME_BEQ  -> ALU_TYPE_BEQ,
                         INST_NAME_BNE  -> ALU_TYPE_BNE,
@@ -260,8 +242,8 @@ class CTR extends Module  with ConfigInstRV32I
                         INST_NAME_BGEU -> ALU_TYPE_BGEU
                     )
                 )
-                wALURS1    := ALU_RS1_GPR
-                wALURS2    := ALU_RS2_GPR
+                wALURS1  := ALU_RS1_GPR
+                wALURS2  := ALU_RS2_GPR
             }
             .elsewhen (wInstName === INST_NAME_JAL) {
                 wALUType := ALU_TYPE_ADD
@@ -270,10 +252,11 @@ class CTR extends Module  with ConfigInstRV32I
             }
             .elsewhen (wInstName === INST_NAME_JALR) {
                 rStateCurr := STATE_LS
-                wPCJumpEn  := EN_TR
-                wALUType   := ALU_TYPE_JALR
-                wALURS1    := ALU_RS1_GPR
-                wALURS2    := ALU_RS2_IMM_I
+
+                wPCJumpEn := EN_TR
+                wALUType  := ALU_TYPE_JALR
+                wALURS1   := ALU_RS1_GPR
+                wALURS2   := ALU_RS2_IMM_I
             }
             .elsewhen (wInstName === INST_NAME_LB  ||
                        wInstName === INST_NAME_LH  ||
@@ -281,17 +264,19 @@ class CTR extends Module  with ConfigInstRV32I
                        wInstName === INST_NAME_LHU ||
                        wInstName === INST_NAME_LW) {
                 rStateCurr := STATE_LS
-                wALUType   := ALU_TYPE_ADD
-                wALURS1    := ALU_RS1_GPR
-                wALURS2    := ALU_RS2_IMM_I
+
+                wALUType := ALU_TYPE_ADD
+                wALURS1  := ALU_RS1_GPR
+                wALURS2  := ALU_RS2_IMM_I
             }
             .elsewhen (wInstName === INST_NAME_SB ||
                        wInstName === INST_NAME_SH ||
                        wInstName === INST_NAME_SW) {
                 rStateCurr := STATE_LS
-                wALUType   := ALU_TYPE_ADD
-                wALURS1    := ALU_RS1_GPR
-                wALURS2    := ALU_RS2_IMM_S
+
+                wALUType := ALU_TYPE_ADD
+                wALURS1  := ALU_RS1_GPR
+                wALURS2  := ALU_RS2_IMM_S
             }
             .elsewhen (wInstName === INST_NAME_MUL  ||
                        wInstName === INST_NAME_DIVU ||
@@ -310,82 +295,46 @@ class CTR extends Module  with ConfigInstRV32I
         is (STATE_LS) {
             when (wInstName === INST_NAME_JALR) {
                 rStateCurr := STATE_WB
-                wALUType   := ALU_TYPE_ADD
-                wALURS1    := ALU_RS1_PC
-                wALURS2    := ALU_RS2_4
+
+                wALUType := ALU_TYPE_ADD
+                wALURS1  := ALU_RS1_PC
+                wALURS2  := ALU_RS2_4
             }
             .elsewhen (wInstName === INST_NAME_LB  ||
                        wInstName === INST_NAME_LH  ||
                        wInstName === INST_NAME_LBU ||
                        wInstName === INST_NAME_LHU ||
                        wInstName === INST_NAME_LW) {
-                wMemRdSrc := MEM_RD_SRC_ALU
+                rStateCurr := STATE_WB
 
-                if (MEM_TYPE.equals("DPIAXI4Lite")) {
-                    when (mCountLSURd.value === 3.U) {
-                        mCountLSURd.reset()
-                        rStateCurr := STATE_WB
-                        wMemRdEn   := EN_FL
-                    }
-                    .otherwise {
-                        when (mCountLSURd.value === 0.U) {
-                            wMemRdEn := EN_TR
-                        }
-                        .otherwise {
-                            wMemRdEn := EN_FL
-                        }
-                        mCountLSURd.inc()
-                        rStateCurr := STATE_LS
-                    }
-                }
-                else {
-                    rStateCurr := STATE_WB
-                    wMemRdEn   := EN_TR
-                }
+                wMemRdEn  := EN_TR
+                wMemRdSrc := MEM_RD_SRC_ALU
             }
             .elsewhen (wInstName === INST_NAME_SB ||
                        wInstName === INST_NAME_SH ||
                        wInstName === INST_NAME_SW) {
-                wPCWrEn := EN_TR
-                wPCWrSrc:= PC_WR_SRC_NEXT
-                wMemByt := MuxLookup(wInstName, MEM_BYT_X) (
+                rStateCurr := STATE_IF
+
+                wPCWrEn  := EN_TR
+                wPCWrSrc := PC_WR_SRC_NEXT
+                wMemWrEn := EN_TR
+                wMemByt  := MuxLookup(wInstName, MEM_BYT_X) (
                     Seq(
                         INST_NAME_SB -> MEM_BYT_1_U,
                         INST_NAME_SH -> MEM_BYT_2_U,
                         INST_NAME_SW -> MEM_BYT_4_U
                     )
                 )
-                wALURS2 := ALU_RS2_GPR
-
-                if (MEM_TYPE.equals("DPIAXI4Lite")) {
-                    when (mCountLSUWr.value === 3.U) {
-                        mCountLSUWr.reset()
-                        rStateCurr := STATE_IF
-                    }
-                    .otherwise {
-                        when (mCountLSUWr.value === 0.U) {
-                            wMemWrEn := EN_TR
-                        }
-                        .otherwise {
-                            wMemWrEn := EN_FL
-                        }
-                        mCountLSUWr.inc()
-                        rStateCurr := STATE_LS
-                    }
-                }
-                else {
-                    rStateCurr := STATE_IF
-                    wMemWrEn   := EN_TR
-                }
+                wALURS2  := ALU_RS2_GPR
             }
         }
         is (STATE_WB) {
             rStateCurr := STATE_IF
-            wPCWrEn    := EN_TR
-            wPCWrSrc   := PC_WR_SRC_NEXT
-            wGPRWrEn   := EN_TR
-            wGPRWrSrc  := REG_WR_SRC_ALU
 
+            wPCWrEn   := EN_TR
+            wPCWrSrc  := PC_WR_SRC_NEXT
+            wGPRWrEn  := EN_TR
+            wGPRWrSrc := REG_WR_SRC_ALU
             when (wInstName === INST_NAME_JAL ||
                   wInstName === INST_NAME_JALR) {
                 wPCWrSrc := PC_WR_SRC_JUMP

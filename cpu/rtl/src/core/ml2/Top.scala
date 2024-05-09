@@ -24,11 +24,24 @@ class Top extends Module with ConfigInst {
     io.pState.bEndData := mIDU.io.pIDU.oEndData
     io.pState.bCSRType := CSR_TYPE_X
 
-    io.pTrace.pCTR <> mIDU.io.pCTR
-    io.pTrace.pIDU <> mIDU.io.pIDU
-    io.pTrace.pEXU <> mEXU.io.pEXU
-    io.pTrace.pLSU <> mLSU.io.pLSU
-    io.pTrace.pWBU <> mWBU.io.pWBU
+    io.pTrace.pBase.bPC          := mIFU.io.pIFU.oPC
+    io.pTrace.pBase.bPCNext      := mIFU.io.pIFU.oPCNext
+    io.pTrace.pBase.bPCEn        := mIDU.io.pCTR.oPCWrEn
+    io.pTrace.pBase.bInst        := mIFU.io.pIFU.oInst
+    io.pTrace.pGPRRd             <> mIDU.io.pGPRRd
+    io.pTrace.pMemInst.pRd.bEn   := mLSU.io.pLSU.oMemRdEn
+    io.pTrace.pMemInst.pRd.bAddr := mLSU.io.pLSU.oMemRdAddrInst
+    io.pTrace.pMemData.pRd.bEn   := mLSU.io.pLSU.oMemRdEn
+    io.pTrace.pMemData.pRd.bAddr := mLSU.io.pLSU.oMemRdAddrLoad
+    io.pTrace.pMemData.pWr.bEn   := mLSU.io.pLSU.oMemWrEn
+    io.pTrace.pMemData.pWr.bAddr := mLSU.io.pLSU.oMemWrAddr
+    io.pTrace.pMemData.pWr.bData := mLSU.io.pLSU.oMemWrData
+    io.pTrace.pMemData.pWr.bMask := DontCare
+    io.pTrace.pCTR               <> mIDU.io.pCTR
+    io.pTrace.pIDU               <> mIDU.io.pIDU
+    io.pTrace.pEXU               <> mEXU.io.pEXU
+    io.pTrace.pLSU               <> mLSU.io.pLSU
+    io.pTrace.pWBU               <> mWBU.io.pWBU
 
     val rInstName = RegNext(mIDU.io.pCTR.oInstName, INST_NAME_X)
     when (rInstName === INST_NAME_X && mIDU.io.pCTR.oStateCurr === STATE_EX) {
