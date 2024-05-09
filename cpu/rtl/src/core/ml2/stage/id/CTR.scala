@@ -24,6 +24,7 @@ class CTR extends Module  with ConfigInstRV32I
         Array(
             INST_SLL    -> List(INST_NAME_SLL),
             INST_SLLI   -> List(INST_NAME_SLLI),
+            INST_SRL    -> List(INST_NAME_SRL),
             INST_SRLI   -> List(INST_NAME_SRLI),
             INST_SRA    -> List(INST_NAME_SRA),
             INST_SRAI   -> List(INST_NAME_SRAI),
@@ -128,6 +129,7 @@ class CTR extends Module  with ConfigInstRV32I
 
             when (wInstName === INST_NAME_SLL   ||
                   wInstName === INST_NAME_SLLI  ||
+                  wInstName === INST_NAME_SRL   ||
                   wInstName === INST_NAME_SRLI  ||
                   wInstName === INST_NAME_SRA   ||
                   wInstName === INST_NAME_SRAI) {
@@ -135,6 +137,7 @@ class CTR extends Module  with ConfigInstRV32I
                     Seq(
                         INST_NAME_SLL   -> ALU_TYPE_SLL,
                         INST_NAME_SLLI  -> ALU_TYPE_SLL,
+                        INST_NAME_SRL   -> ALU_TYPE_SRL,
                         INST_NAME_SRLI  -> ALU_TYPE_SRL,
                         INST_NAME_SRA   -> ALU_TYPE_SRA,
                         INST_NAME_SRAI  -> ALU_TYPE_SRA
