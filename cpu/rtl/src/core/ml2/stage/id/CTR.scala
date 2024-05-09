@@ -234,9 +234,9 @@ class CTR extends Module  with ConfigInstRV32I
                        wInstName === INST_NAME_BGEU) {
                 rStateCurr := STATE_IF
 
-                wPCWrEn     := EN_TR
-                wPCWrSrc    := PC_WR_SRC_JUMP
-                wALUType    := MuxLookup(wInstName, ALU_TYPE_X) (
+                wPCWrEn  := EN_TR
+                wPCWrSrc := PC_WR_SRC_JUMP
+                wALUType := MuxLookup(wInstName, ALU_TYPE_X) (
                     Seq(
                         INST_NAME_BEQ  -> ALU_TYPE_BEQ,
                         INST_NAME_BNE  -> ALU_TYPE_BNE,
@@ -246,9 +246,8 @@ class CTR extends Module  with ConfigInstRV32I
                         INST_NAME_BGEU -> ALU_TYPE_BGEU
                     )
                 )
-                wALURS1     := ALU_RS1_GPR
-                wALURS2     := ALU_RS2_GPR
-                // wEndPreFlag := EN_TR
+                wALURS1  := ALU_RS1_GPR
+                wALURS2  := ALU_RS2_GPR
             }
             .elsewhen (wInstName === INST_NAME_JAL) {
                 wALUType := ALU_TYPE_ADD
@@ -330,27 +329,26 @@ class CTR extends Module  with ConfigInstRV32I
                        wInstName === INST_NAME_SW) {
                 rStateCurr := STATE_IF
 
-                wPCWrEn     := EN_TR
-                wPCWrSrc    := PC_WR_SRC_NEXT
-                wMemWrEn    := EN_TR
-                wMemByt     := MuxLookup(wInstName, MEM_BYT_X) (
+                wPCWrEn  := EN_TR
+                wPCWrSrc := PC_WR_SRC_NEXT
+                wMemWrEn := EN_TR
+                wMemByt  := MuxLookup(wInstName, MEM_BYT_X) (
                     Seq(
                         INST_NAME_SB -> MEM_BYT_1_U,
                         INST_NAME_SH -> MEM_BYT_2_U,
                         INST_NAME_SW -> MEM_BYT_4_U
                     )
                 )
-                wALURS2     := ALU_RS2_GPR
-                // wEndPreFlag := EN_TR
+                wALURS2  := ALU_RS2_GPR
             }
         }
         is (STATE_WB) {
             rStateCurr := STATE_IF
 
-            wPCWrEn     := EN_TR
-            wPCWrSrc    := PC_WR_SRC_NEXT
-            wGPRWrEn    := EN_TR
-            wGPRWrSrc   := REG_WR_SRC_ALU
+            wPCWrEn   := EN_TR
+            wPCWrSrc  := PC_WR_SRC_NEXT
+            wGPRWrEn  := EN_TR
+            wGPRWrSrc := REG_WR_SRC_ALU
             when (wInstName === INST_NAME_JAL ||
                   wInstName === INST_NAME_JALR) {
                 wPCWrSrc := PC_WR_SRC_JUMP
@@ -360,7 +358,7 @@ class CTR extends Module  with ConfigInstRV32I
                        wInstName === INST_NAME_LBU ||
                        wInstName === INST_NAME_LHU ||
                        wInstName === INST_NAME_LW) {
-                wMemByt   := MuxLookup(wInstName, MEM_BYT_X) (
+                wMemByt := MuxLookup(wInstName, MEM_BYT_X) (
                     Seq(
                         INST_NAME_LB  -> MEM_BYT_1_S,
                         INST_NAME_LH  -> MEM_BYT_2_S,
@@ -371,7 +369,6 @@ class CTR extends Module  with ConfigInstRV32I
                 )
                 wGPRWrSrc := REG_WR_SRC_MEM
             }
-            // wEndPreFlag := EN_TR
         }
     }
 
