@@ -27,48 +27,45 @@ class CTR extends Module  with ConfigInstRV32I
             INST_SRLI   -> List(INST_NAME_SRLI),
             INST_SRA    -> List(INST_NAME_SRA),
             INST_SRAI   -> List(INST_NAME_SRAI),
-
             INST_ADD    -> List(INST_NAME_ADD),
             INST_ADDI   -> List(INST_NAME_ADDI),
             INST_SUB    -> List(INST_NAME_SUB),
             INST_LUI    -> List(INST_NAME_LUI),
             INST_AUIPC  -> List(INST_NAME_AUIPC),
-
             INST_XOR    -> List(INST_NAME_XOR),
             INST_XORI   -> List(INST_NAME_XORI),
             INST_OR     -> List(INST_NAME_OR),
             INST_ORI    -> List(INST_NAME_ORI),
             INST_AND    -> List(INST_NAME_AND),
             INST_ANDI   -> List(INST_NAME_ANDI),
-
             INST_SLT    -> List(INST_NAME_SLT),
             INST_SLTU   -> List(INST_NAME_SLTU),
             INST_SLTIU  -> List(INST_NAME_SLTIU),
-
             INST_BEQ    -> List(INST_NAME_BEQ),
             INST_BNE    -> List(INST_NAME_BNE),
             INST_BLT    -> List(INST_NAME_BLT),
             INST_BGE    -> List(INST_NAME_BGE),
             INST_BLTU   -> List(INST_NAME_BLTU),
             INST_BGEU   -> List(INST_NAME_BGEU),
-
             INST_JAL    -> List(INST_NAME_JAL),
             INST_JALR   -> List(INST_NAME_JALR),
-
             INST_EBREAK -> List(INST_NAME_EBREAK),
-
             INST_LB     -> List(INST_NAME_LB),
             INST_LH     -> List(INST_NAME_LH),
             INST_LBU    -> List(INST_NAME_LBU),
             INST_LHU    -> List(INST_NAME_LHU),
             INST_LW     -> List(INST_NAME_LW),
-
             INST_SB     -> List(INST_NAME_SB),
             INST_SH     -> List(INST_NAME_SH),
             INST_SW     -> List(INST_NAME_SW),
 
             INST_MUL    -> List(INST_NAME_MUL),
+            INST_MULH   -> List(INST_NAME_MULH),
+            INST_MULHSU -> List(INST_NAME_MULHSU),
+            INST_MULHU  -> List(INST_NAME_MULHU),
+            INST_DIV    -> List(INST_NAME_DIV),
             INST_DIVU   -> List(INST_NAME_DIVU),
+            INST_REM    -> List(INST_NAME_REM),
             INST_REMU   -> List(INST_NAME_REMU)
         )
     )
@@ -279,14 +276,24 @@ class CTR extends Module  with ConfigInstRV32I
                 wALURS1  := ALU_RS1_GPR
                 wALURS2  := ALU_RS2_IMM_S
             }
-            .elsewhen (wInstName === INST_NAME_MUL  ||
-                       wInstName === INST_NAME_DIVU ||
+            .elsewhen (wInstName === INST_NAME_MUL    ||
+                       wInstName === INST_NAME_MULH   ||
+                       wInstName === INST_NAME_MULHSU ||
+                       wInstName === INST_NAME_MULHU  ||
+                       wInstName === INST_NAME_DIV    ||
+                       wInstName === INST_NAME_DIVU   ||
+                       wInstName === INST_NAME_REM    ||
                        wInstName === INST_NAME_REMU) {
                 wALUType := MuxLookup(wInstName, ALU_TYPE_X) (
                     Seq(
-                        INST_NAME_MUL   -> ALU_TYPE_MUL,
-                        INST_NAME_DIVU  -> ALU_TYPE_DIVU,
-                        INST_NAME_REMU  -> ALU_TYPE_REMU
+                        INST_NAME_MUL    -> ALU_TYPE_MUL,
+                        INST_NAME_MULH   -> ALU_TYPE_MULH,
+                        INST_NAME_MULHSU -> ALU_TYPE_MULHSU,
+                        INST_NAME_MULHU  -> ALU_TYPE_MULHU,
+                        INST_NAME_DIV    -> ALU_TYPE_DIV,
+                        INST_NAME_DIVU   -> ALU_TYPE_DIVU,
+                        INST_NAME_REM    -> ALU_TYPE_REM,
+                        INST_NAME_REMU   -> ALU_TYPE_REMU
                     )
                 )
                 wALURS1  := ALU_RS1_GPR
