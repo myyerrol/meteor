@@ -9,5 +9,5 @@ class StateIO extends Bundle with ConfigIO {
     val bEndPreFlag = Output(Bool())
     val bEndAllFlag = Output(Bool())
     val bEndAllData = Output(UInt(DATA_WIDTH.W))
-    val bCSRType    = Output(UInt(2.W))
+    val bCSRType    = Output(UInt(CSR_TYPE.W))
 }
