@@ -19,6 +19,8 @@ trait ConfigIO {
     val CSRS_NUM = 1 << CSRS_WIDTH
     val MEMS_NUM = 1 << 16
 
+    val AXSM_WIDTH = 2
+
     val AXBT_WIDTH = 2
     val AXSZ_WIDTH = 3
     val AXID_WIDTH = 4

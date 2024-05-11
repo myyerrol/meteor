@@ -34,6 +34,12 @@ module MemDualFakeBB(
         end
     end
 
+    always @(pMemInst_pRd_bAddr, pMemInst_pRd_bEn) begin
+        $display("pMemInst_pRd_bEn: %d", pMemInst_pRd_bEn);
+        $display("pMemInst_pRd_bAddr: %x", pMemInst_pRd_bAddr);
+        $display("pMemInst_pRd_bData: %x\n", pMemInst_pRd_bData);
+    end
+
     always @(pMemData_pRd_bAddr) begin
         if (pMemData_pRd_bEn) begin
             pMemData_pRd_bData = readSimMemoryData(pMemData_pRd_bAddr, 4);

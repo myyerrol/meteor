@@ -13,6 +13,7 @@ class AXI4LiteIFUM extends Module with ConfigInst {
         val oRdData = Output(UInt(DATA_WIDTH.W))
         val oRdResp = Output(UInt(RESP_WIDTH.W))
         val oRdFlag = Output(Bool())
+        val oState  = Output(UInt(AXSM_WIDTH.W))
 
         val pAR     = new AXI4LiteARIO
         val pR      = new AXI4LiteRIO
@@ -21,7 +22,6 @@ class AXI4LiteIFUM extends Module with ConfigInst {
     val rARValid = RegInit(false.B)
     val rARAddr  = RegInit(ADDR_ZERO)
     val rRValid  = RegInit(false.B)
-    // val rRdData  = RegInit(DATA_ZERO)
 
     val wARReady = Wire(Bool())
     val wRReady  = Wire(Bool())
@@ -29,17 +29,17 @@ class AXI4LiteIFUM extends Module with ConfigInst {
     wARReady := io.pAR.bReady
     wRReady  := true.B
 
-    io.oRdData    := DATA_ZERO
-    // io.oRdData    := rRdData
-    io.oRdResp    := AXI4_RESP_OKEY
-    io.oRdFlag    := false.B
-    io.pAR.bValid := rARValid
-    io.pAR.bAddr  := rARAddr
-    // io.pAR.bAddr  := io.iRdAddr
-    io.pR.bReady  := wRReady
-
     val sRdAddrValid :: sRdAddrShake :: sRdDataShake :: Nil = Enum(3)
     val rRdState = RegInit(sRdAddrValid)
+
+    io.oRdData    := DATA_ZERO
+    io.oRdResp    := AXI4_RESP_OKEY
+    io.oRdFlag    := false.B
+    io.oState     := rRdState
+    io.pAR.bValid := rARValid
+    io.pAR.bAddr  := rARAddr
+    io.pR.bReady  := wRReady
+
     switch (rRdState) {
         is (sRdAddrValid) {
             when (rARValid) {
@@ -76,8 +76,6 @@ class AXI4LiteIFUM extends Module with ConfigInst {
             rARValid := false.B
             rARAddr  := io.iRdAddr
             rRValid  := io.pR.bValid
-
-            // rRdData    := io.pR.bData
         }
         is (sRdDataShake) {
             rARValid := false.B
@@ -93,7 +91,6 @@ class AXI4LiteIFUM extends Module with ConfigInst {
 
 class AXI4LiteIFUS extends Module with ConfigInst {
     val io = IO(new Bundle {
-        // val iRdEn   = Input(Bool())
         val iRdData = Input(UInt(DATA_WIDTH.W))
         val oRdEn   = Output(Bool())
         val oRdAddr = Output(UInt(ADDR_WIDTH.W))
@@ -102,7 +99,6 @@ class AXI4LiteIFUS extends Module with ConfigInst {
         val pR      = Flipped(new AXI4LiteRIO)
     })
 
-    // io.oRdEn      := io.iRdEn
     io.oRdEn      := Mux(io.pAR.bValid && io.pAR.bReady, true.B, false.B)
     io.oRdAddr    := io.pAR.bAddr
     io.pAR.bReady := true.B
