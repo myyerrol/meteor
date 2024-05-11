@@ -1,5 +1,5 @@
 CPU     ?= x
-CPU_LIST = ml1 ml2 ml3
+CPU_LIST = test ml1 ml2 ml3
 MEM     ?= x
 MEM_LIST = direct axi4-lite axi4
 
