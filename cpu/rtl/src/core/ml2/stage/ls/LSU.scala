@@ -79,6 +79,8 @@ class LSU extends Module with ConfigInst
     //     io.pLSU.oMemRdDataInst := mAXI4LiteIFUM.io.oRdData
     // }
 
+    io.oWaitEn := false.B
+
     val mMem = Module(new MemDualFakeBB)
     mMem.io.pMemInst.pRd.bEn   := io.pLSU.oMemRdInstEn
     mMem.io.pMemInst.pRd.bAddr := io.pLSU.oMemRdAddrInst
