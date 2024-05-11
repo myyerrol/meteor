@@ -19,13 +19,16 @@ class AXI4Lite extends Module with ConfigInst {
     val mAXI4LiteIFUS = Module(new AXI4LiteIFUS)
 
     val wRdEn = WireInit(true.B)
-    val rAddr = RegInit("x80000004".U(ADDR_WIDTH.W))
+    val rAddr = RegInit(ADDR_INIT)
 
     mAXI4LiteIFUM.io.iRdEn   := wRdEn
     mAXI4LiteIFUM.io.iRdAddr := rAddr
     mAXI4LiteIFUM.io.pAR     <> mAXI4LiteIFUS.io.pAR
     mAXI4LiteIFUM.io.pR      <> mAXI4LiteIFUS.io.pR
+    mAXI4LiteIFUS.io.iRdEn   := mAXI4LiteIFUM.io.oRdEn
     mAXI4LiteIFUS.io.iRdData := mMem.io.pMemInst.pRd.bData
+    mAXI4LiteIFUS.io.iState  := mAXI4LiteIFUM.io.oState
+    mAXI4LiteIFUS.io.iRValid := true.B
 
     mMem.io.pMemInst.pRd.bEn   := mAXI4LiteIFUS.io.oRdEn
     mMem.io.pMemInst.pRd.bAddr := mAXI4LiteIFUS.io.oRdAddr
@@ -35,21 +38,33 @@ class AXI4Lite extends Module with ConfigInst {
     val wRdResp = mAXI4LiteIFUM.io.oRdResp
     val wRdFlag = mAXI4LiteIFUM.io.oRdFlag
 
+    when (wRdFlag) {
+        rAddr := rAddr + 4.U
+    }
+
     io.pState.bEndPreFlag := DontCare
     io.pState.bEndAllFlag := DontCare
     io.pState.bEndAllData := DontCare
     io.pState.bCSRType    := DontCare
 
-    printf("AXI4Lite\n")
-    printf("State: %d\n", mAXI4LiteIFUM.io.oState)
-    printf("AR Valid: %d, Ready: %d, Addr: %x\n",
+    printf("AXI4Lite IFU Read\n")
+    printf("[axi]      state: %d\n", mAXI4LiteIFUM.io.oState)
+    printf("[axi] [ar] valid: %d, ready: %d, addr: %x\n",
            mAXI4LiteIFUM.io.pAR.bValid,
            mAXI4LiteIFUM.io.pAR.bReady,
            mAXI4LiteIFUM.io.pAR.bAddr)
-    printf("R  Valid: %d, Ready: %d, Data: %x, Resp: %d\n",
+    printf("[axi] [r]  valid: %d, ready: %d, data: %x, resp: %d\n",
            mAXI4LiteIFUM.io.pR.bValid,
            mAXI4LiteIFUM.io.pR.bReady,
            mAXI4LiteIFUM.io.pR.bData,
            mAXI4LiteIFUM.io.pR.bResp)
+    printf("------------------------------------------------------\n")
+    printf("[axi] [m] flag: %d, data: %x, resp: %d\n",
+           mAXI4LiteIFUM.io.oRdFlag,
+           mAXI4LiteIFUM.io.oRdData,
+           mAXI4LiteIFUM.io.oRdResp)
+    printf("[axi] [s] en:   %d, addr: %x\n",
+           mAXI4LiteIFUS.io.oRdEn,
+           mAXI4LiteIFUS.io.oRdAddr)
     printf("\n");
 }

@@ -34,7 +34,7 @@ module MemDualFakeBB(
         end
     end
 
-    always @(pMemInst_pRd_bAddr, pMemInst_pRd_bEn) begin
+    always @(pMemInst_pRd_bAddr, pMemInst_pRd_bEn, pMemInst_pRd_bData) begin
         $display("pMemInst_pRd_bEn: %d", pMemInst_pRd_bEn);
         $display("pMemInst_pRd_bAddr: %x", pMemInst_pRd_bAddr);
         $display("pMemInst_pRd_bData: %x\n", pMemInst_pRd_bData);
