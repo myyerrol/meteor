@@ -61,8 +61,8 @@ class LSU extends Module with ConfigInst
     mMRU.io.iData := DontCare
 
     // if (MEM_TYPE.equals("axi4-lite")) {
-    //     val mAXI4LiteIFUM = Module(new AXI4LiteIFUM)
-    //     val mAXI4LiteIFUS = Module(new AXI4LiteIFUS)
+    //     val mAXI4LiteIFUM = Module(new AXI4LiteRdM)
+    //     val mAXI4LiteIFUS = Module(new AXI4LiteRdS)
 
     //     val mMem = Module(new MemDualFakeBB)
 
