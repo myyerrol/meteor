@@ -6,12 +6,12 @@ import chisel3.util._
 import cpu.base._
 
 class AXI4LiteRdMIO extends Bundle with ConfigIO {
-    // Data come from customized moodule
+    // Data from/to customized moodule
     val iRdEn    = Input(Bool())
     val iRdAddr  = Input(UInt(ADDR_WIDTH.W))
-    // Data come from master machine
+    // Data from/to master machine
     val oRdEn    = Output(Bool())
-    // Data come from slave machine
+    // Data from/to slave machine
     val oRdFlag  = Output(Bool())
     val oRdData  = Output(UInt(DATA_WIDTH.W))
     val oRdResp  = Output(UInt(RESP_WIDTH.W))
@@ -22,10 +22,10 @@ class AXI4LiteRdMIO extends Bundle with ConfigIO {
 }
 
 class AXI4LiteRdSIO extends Bundle with ConfigIO {
-    // Data come from master machine
+    // Data from/to master machine
     val iRdEn    = Input(Bool())
     val iRdState = Input(UInt(AXSM_WIDTH.W))
-    // Data come from memory
+    // Data from/to memory
     val iRValid  = Input(Bool())
     val iRdData  = Input(UInt(DATA_WIDTH.W))
     val iRdResp  = Input(UInt(RESP_WIDTH.W))

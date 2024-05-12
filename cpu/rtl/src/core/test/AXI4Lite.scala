@@ -17,11 +17,12 @@ class AXI4Lite extends Module with ConfigInst {
 
     val mAXI4LiteIFU  = Module(new AXI4LiteRdM)
     val mAXI4LiteSRAM = Module(new AXI4LiteSRAM)
+    mAXI4LiteSRAM.io.pWrS := DontCare
 
     val wRdEn = WireInit(true.B)
     val rAddr = RegInit(ADDR_INIT)
 
-    val (cRValidNum, cRValidFlag) = Counter(mAXI4LiteSRAM.io.pRdS.oRdEn, 10)
+    val (cRValidNum, cRValidFlag) = Counter(mAXI4LiteSRAM.io.pRdS.oRdEn, 5)
 
     mAXI4LiteIFU.io.pRdM.iRdEn     := wRdEn
     mAXI4LiteIFU.io.pRdM.iRdAddr   := rAddr
@@ -48,7 +49,7 @@ class AXI4Lite extends Module with ConfigInst {
     io.pState.bEndAllData := DontCare
     io.pState.bCSRType    := DontCare
 
-    printf("AXI4Lite Read\n")
+    printf("AXI4Lite IFU\n")
     printf("[axi]      state: %d\n", mAXI4LiteIFU.io.pRdM.oRdState)
     printf("[axi] [ar] valid: %d, ready: %d, addr: %x\n",
            mAXI4LiteIFU.io.pRdM.pAR.bValid,

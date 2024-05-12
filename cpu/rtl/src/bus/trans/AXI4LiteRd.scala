@@ -21,12 +21,11 @@ class AXI4LiteRdM extends AXI4LiteState with ConfigInst {
 
     val rARValid = RegInit(false.B)
     val rARAddr  = RegInit(ADDR_ZERO)
-    val rRValid  = RegInit(false.B)
 
     io.pRdM.oRdEn      := false.B
+    io.pRdM.oRdFlag    := false.B
     io.pRdM.oRdData    := DATA_ZERO
     io.pRdM.oRdResp    := AXI4_RESP_OKEY
-    io.pRdM.oRdFlag    := false.B
     io.pRdM.oRdState   := rRdState
     io.pRdM.pAR.bValid := rARValid
     io.pRdM.pAR.bAddr  := rARAddr

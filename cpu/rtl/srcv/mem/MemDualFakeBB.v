@@ -1,7 +1,7 @@
 `include "../Config.v"
 
-`define DEBUG_MEM_INST
-// `define DEBUG_MEM_DATA
+// `define DEBUG_MEM_INST
+`define DEBUG_MEM_DATA
 
 module MemDualFakeBB(
     input  wire                       pMemInst_pRd_bEn,
