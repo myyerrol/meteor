@@ -67,7 +67,7 @@ class Top extends Module with ConfigInst {
     mIDU.io.iPC        := mIFU.io.pIFU.oPC
     mIDU.io.iInst      := mIFU.io.pIFU.oInst
     mIDU.io.iGPRWrData := mWBU.io.pWBU.oGPRWrData
-    mIDU.io.iWaitEn    := mLSU.io.oWaitEn
+    mIDU.io.iWaitFlag  := mLSU.io.oWaitFlag
 
     mEXU.io.iPCNextEn := mIDU.io.pCTR.oPCNextEn
     mEXU.io.iPCJumpEn := mIDU.io.pCTR.oPCJumpEn

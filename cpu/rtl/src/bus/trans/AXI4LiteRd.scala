@@ -76,6 +76,27 @@ class AXI4LiteRdM extends AXI4LiteState with ConfigInst {
             }
         }
     }
+
+    printf("AXI4Lite Read\n")
+    printf("[axi]      state: %d\n", io.pRdM.oRdState)
+    printf("[axi] [ar] valid: %d, ready: %d, addr: %x\n",
+           io.pRdM.pAR.bValid,
+           io.pRdM.pAR.bReady,
+           io.pRdM.pAR.bAddr)
+    printf("[axi] [r]  valid: %d, ready: %d, data: %x, resp: %d\n",
+           io.pRdM.pR.bValid,
+           io.pRdM.pR.bReady,
+           io.pRdM.pR.bData,
+           io.pRdM.pR.bResp)
+    printf("------------------------------------------------------\n")
+    printf("[axi] [m] flag: %d, data: %x, resp: %d\n",
+           io.pRdM.oRdFlag,
+           io.pRdM.oRdData,
+           io.pRdM.oRdResp)
+    printf("[axi] [s] en:   %d, addr: %x\n",
+           io.pRdM.oRdEn,
+           io.pRdM.pAR.bAddr)
+    printf("\n");
 }
 
 class AXI4LiteRdS extends AXI4LiteState with ConfigInst {
