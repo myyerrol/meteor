@@ -1,5 +1,8 @@
 `include "../Config.v"
 
+`define DEBUG_MEM_INST
+// `define DEBUG_MEM_DATA
+
 module MemDualFakeBB(
     input  wire                       pMemInst_pRd_bEn,
     input  wire [`ADDR_WIDTH - 1 : 0] pMemInst_pRd_bAddr,
@@ -34,12 +37,6 @@ module MemDualFakeBB(
         end
     end
 
-    always @(pMemInst_pRd_bAddr, pMemInst_pRd_bEn, pMemInst_pRd_bData) begin
-        $display("pMemInst_pRd_bEn: %d", pMemInst_pRd_bEn);
-        $display("pMemInst_pRd_bAddr: %x", pMemInst_pRd_bAddr);
-        $display("pMemInst_pRd_bData: %x\n", pMemInst_pRd_bData);
-    end
-
     always @(pMemData_pRd_bAddr) begin
         if (pMemData_pRd_bEn) begin
             pMemData_pRd_bData = readSimMemoryData(pMemData_pRd_bAddr, 4);
@@ -68,5 +65,32 @@ module MemDualFakeBB(
             endcase
         end
     end
+
+`ifdef DEBUG_MEM_INST
+    always @(pMemInst_pRd_bEn, pMemInst_pRd_bAddr, pMemInst_pRd_bData) begin
+        $display("Memory Inst");
+        $display("[inst] [rd] en: %d, addr: %x, data: %x\n",
+                 pMemInst_pRd_bEn,
+                 pMemInst_pRd_bAddr,
+                 pMemInst_pRd_bData);
+    end
+`endif
+
+`ifdef DEBUG_MEM_DATA
+    always @(pMemData_pRd_bEn, pMemData_pRd_bAddr, pMemData_pRd_bData,
+             pMemData_pWr_bEn, pMemData_pWr_bAddr, pMemData_pWr_bData,
+             pMemData_pWr_bMask) begin
+        $display("Memory Data");
+        $display("[data] [rd] en: %d, addr: %x, data: %x\n",
+                 pMemData_pRd_bEn,
+                 pMemData_pRd_bAddr,
+                 pMemData_pRd_bData);
+        $display("[data] [wr] en: %d, addr: %x, data: %x, mask: %b\n",
+                 pMemData_pWr_bEn,
+                 pMemData_pWr_bAddr,
+                 pMemData_pWr_bData,
+                 pMemData_pWr_bMask);
+    end
+`endif
 
 endmodule

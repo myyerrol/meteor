@@ -1,6 +1,6 @@
-CPU     ?= x
+CPU     ?= ml1
 CPU_LIST = test ml1 ml2 ml3
-MEM     ?= x
+MEM     ?= direct
 MEM_LIST = direct axi4-lite axi4
 
 ifeq ($(filter $(CPU_LIST), $(CPU)),)
@@ -164,6 +164,9 @@ gen: $(SRCVS_GEN)
 
 run: $(METEOR_BIN) $(DIFFTEST_REF_SO)
 	rm -rf $(BUILD_DIR)/wave.vcd
+	@echo $(CPUS)
+	@echo $(ARGS)
+	@echo $(IMG)
 	$(METEOR_EXEC)
 
 gdb: $(METEOR_BIN)
