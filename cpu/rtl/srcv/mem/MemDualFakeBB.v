@@ -1,7 +1,7 @@
 `include "../Config.v"
 
-// `define MEM_DBUG_INST
-`define MEM_DBUG_DATA
+`define MEM_DBUG_INST
+// `define MEM_DBUG_DATA
 `define MEM_TYPE_SYNC
 
 module MemDualFakeBB(
@@ -42,22 +42,22 @@ module MemDualFakeBB(
 `ifdef MEM_TYPE_SYNC
     always @(posedge iClock) begin
         if (iReset) begin
-            pMemInst_pRd_bData <= 0;
+            pMemInst_pRd_bData <= `DATA_WIDTH'b0;
         end
         else begin
             if (pMemInst_pRd_bEn) begin
-                pMemInst_pRd_bData = readSimInstData(pMemInst_pRd_bAddr, 4);
+                pMemInst_pRd_bData <= readSimInstData(pMemInst_pRd_bAddr, 4);
             end
         end
     end
 
     always @(posedge iClock) begin
         if (iReset) begin
-            pMemData_pRd_bData <= 0;
+            pMemData_pRd_bData <= `DATA_WIDTH'b0;
         end
         else begin
             if (pMemData_pRd_bEn) begin
-                pMemData_pRd_bData = readSimMemoryData(pMemData_pRd_bAddr, 4);
+                pMemData_pRd_bData <= readSimMemoryData(pMemData_pRd_bAddr, 4);
             end
         end
     end

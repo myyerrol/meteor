@@ -20,7 +20,6 @@ class AXI4LiteRdM extends AXI4LiteState with ConfigInst {
     wRReady  := true.B
 
     val rARValid = RegInit(false.B)
-    val rARAddr  = RegInit(ADDR_ZERO)
 
     io.pRdM.oRdEn      := false.B
     io.pRdM.oRdFlag    := false.B
@@ -28,7 +27,7 @@ class AXI4LiteRdM extends AXI4LiteState with ConfigInst {
     io.pRdM.oRdResp    := AXI4_RESP_OKEY
     io.pRdM.oRdState   := rRdState
     io.pRdM.pAR.bValid := rARValid
-    io.pRdM.pAR.bAddr  := rARAddr
+    io.pRdM.pAR.bAddr  := io.pRdM.iRdAddr
     io.pRdM.pR.bReady  := wRReady
 
     switch (rRdState) {
@@ -60,13 +59,11 @@ class AXI4LiteRdM extends AXI4LiteState with ConfigInst {
     switch (rRdState) {
         is (sRdAddrValid) {
             rARValid := Mux(!rARValid, io.pRdM.iRdEn, true.B)
-            rARAddr  := rARAddr
         }
         is (sRdAddrShake) {
             when (rARValid && wARReady) {
                 io.pRdM.oRdEn := true.B
                 rARValid      := false.B
-                rARAddr       := io.pRdM.iRdAddr
             }
         }
         is (sRdDataShake) {
@@ -75,8 +72,7 @@ class AXI4LiteRdM extends AXI4LiteState with ConfigInst {
                 io.pRdM.oRdFlag := true.B
                 io.pRdM.oRdData := io.pRdM.pR.bData
                 io.pRdM.oRdResp := io.pRdM.pR.bResp
-                rARValid   := rARValid
-                rARAddr    := rARAddr
+                rARValid        := rARValid
             }
         }
     }
