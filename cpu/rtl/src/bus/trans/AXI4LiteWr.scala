@@ -18,6 +18,7 @@ class AXI4LiteWrM extends AXI4LiteState with ConfigInst {
 
     wAWReady := io.pWrM.pAW.bReady
     wWReady  := io.pWrM.pW.bReady
+    wBValid  := io.pWrM.pB.bValid
     wBReady  := true.B
 
     val rAWValid = RegInit(false.B)

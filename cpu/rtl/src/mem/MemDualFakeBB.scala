@@ -8,6 +8,8 @@ import cpu.port._
 
 class MemDualFakeBB extends BlackBox {
     val io = IO(new Bundle {
+        val iClock   = Input(Clock())
+        val iReset   = Input(Reset())
         val pMemInst = new MemDualInstIO
         val pMemData = new MemDualDataIO
     })
