@@ -6,7 +6,7 @@ import chisel3.util._
 import cpu.base._
 import cpu.port._
 
-class AXI4LiteIFUM extends Module with ConfigInst {
+class AXI4LiteIFUM extends AXI4LiteState with ConfigInst {
     val io = IO(new Bundle {
         val iRdEn   = Input(Bool())
         val iRdAddr = Input(UInt(ADDR_WIDTH.W))
@@ -31,9 +31,6 @@ class AXI4LiteIFUM extends Module with ConfigInst {
     wARReady := io.pAR.bReady
     wRValid  := io.pR.bValid
     wRReady  := true.B
-
-    val sRdAddrValid :: sRdAddrShake :: sRdDataShake :: Nil = Enum(3)
-    val rRdState = RegInit(sRdAddrValid)
 
     io.oRdEn      := false.B
     io.oRdData    := DATA_ZERO
@@ -95,7 +92,7 @@ class AXI4LiteIFUM extends Module with ConfigInst {
     }
 }
 
-class AXI4LiteIFUS extends Module with ConfigInst {
+class AXI4LiteIFUS extends AXI4LiteState with ConfigInst {
     val io = IO(new Bundle {
         // Master
         val iRdEn   = Input(Bool())
@@ -118,20 +115,19 @@ class AXI4LiteIFUS extends Module with ConfigInst {
     val rARShake = RegInit(false.B)
     val rRValid  = RegInit(false.B)
 
+    // when (io.iState === 1.U && io.pAR.bValid && io.pAR.bReady) {
+    //     rRValid := true.B
+    // }
 
-
-    when (io.iState === 1.U && io.pAR.bValid && io.pAR.bReady) {
-        rRValid := true.B
-    }
-
-
-    // rARShake := Mux(io.iState === 1.U && io.pAR.bValid && io.pAR.bReady,
-    //                 true.B,
-    //                 rARShake)
-    // rRValid  := Mux(rARShake, io.iRValid, rRValid)
+    rARShake := Mux(io.iState === sRdAddrShake &&
+                    io.pAR.bValid && io.pAR.bReady,
+                    true.B,
+                    rARShake)
+    rRValid  := Mux(rARShake, io.iRValid, rRValid)
 
     when (io.pR.bValid && io.pR.bReady) {
-        rRValid := false.B
+        rARShake := false.B
+        rRValid  := false.B
     }
 
     io.pR.bValid := rRValid
