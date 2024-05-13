@@ -1,8 +1,5 @@
 `include "../Config.v"
-
-// `define MEM_DBUG_INST
-// `define MEM_DBUG_DATA
-`define MEM_TYPE_SYNC
+`include "../temp/Build.v"
 
 module MemDualFakeBB(
     input  wire                       iClock,
@@ -39,7 +36,7 @@ module MemDualFakeBB(
                                        pMemData_pWr_bMask_2,
                                        pMemData_pWr_bMask_3 };
 
-`ifdef MEM_TYPE_SYNC
+`ifdef MEM_TIME_SYNC
     always @(posedge iClock) begin
         if (iReset) begin
             pMemInst_pRd_bData <= `DATA_WIDTH'b0;
@@ -118,7 +115,7 @@ module MemDualFakeBB(
 `endif
 
 `ifdef MEM_DBUG_INST
-`ifdef MEM_TYPE_SYNC
+`ifdef MEM_TIME_SYNC
     always @(posedge iClock) begin
         if (iReset) begin
         end
@@ -142,7 +139,7 @@ module MemDualFakeBB(
 `endif
 
 `ifdef MEM_DBUG_DATA
-`ifdef MEM_TYPE_SYNC
+`ifdef MEM_TIME_SYNC
     always @(posedge iClock) begin
         if (iReset) begin
         end

@@ -101,41 +101,55 @@ SRCS = $(SRCVS_GEN) $(SRCVS) $(SRCCS)
 
 CONFIG = $(METEOR_ENV_HOME)/core/.config
 
-BUILD_PATH = $(SRCSS_DIR)/temp/Build.scala
-BUILD_INFO = "package cpu.temp\n\ntrait Build {\n    val CPU_TYPE = \"$(CPU)\"\n    val MEM_TYPE = \"$(MEM)\"\n}"
+TEMP_SRCSS_BUILD_PATH = $(SRCSS_DIR)/temp/Build.scala
+TEMP_SRCSS_BUILD_INFO = "package cpu.temp\n\ntrait Build {\n    val CPU_TYPE = \"$(CPU)\"\n    val MEM_TYPE = \"$(MEM)\"\n}"
 
-TOP_MAIN_PATH = $(SRCSS_DIR)/temp/TopMain.scala
-TOP_MAIN_INFO_L1 = "import circt.stage._\n"
-TOP_MAIN_INFO_L2 = "object TopMain extends App {"
-TOP_MAIN_INFO_L3 = "    def top = new cpu.core.${CPU_PREFIX}.Top();"
-TOP_MAIN_INFO_L4 = "    val gen = Seq(chisel3.stage.ChiselGeneratorAnnotation(() => top));"
-TOP_MAIN_INFO_L5 = "    (new ChiselStage).execute("
-TOP_MAIN_INFO_L6 = "        args,"
-TOP_MAIN_INFO_L7 = "        gen :+ CIRCTTargetAnnotation(CIRCTTarget.Verilog))"
-TOP_MAIN_INFO_L8 = "}"
+TEMP_SRCSS_TOPMAIN_PATH    = $(SRCSS_DIR)/temp/TopMain.scala
+TEMP_SRCSS_TOPMAIN_INFO_L1 = "import circt.stage._\n"
+TEMP_SRCSS_TOPMAIN_INFO_L2 = "object TopMain extends App {"
+TEMP_SRCSS_TOPMAIN_INFO_L3 = "    def top = new cpu.core.${CPU_PREFIX}.Top();"
+TEMP_SRCSS_TOPMAIN_INFO_L4 = "    val gen = Seq(chisel3.stage.ChiselGeneratorAnnotation(() => top));"
+TEMP_SRCSS_TOPMAIN_INFO_L5 = "    (new ChiselStage).execute("
+TEMP_SRCSS_TOPMAIN_INFO_L6 = "        args,"
+TEMP_SRCSS_TOPMAIN_INFO_L7 = "        gen :+ CIRCTTargetAnnotation(CIRCTTarget.Verilog))"
+TEMP_SRCSS_TOPMAIN_INFO_L8 = "}"
+
+MEM_TIME_TYPE ?= ASYNC
+ifeq ($(CPU), ml2)
+    ifeq ($(MEM), axi4-lite)
+        MEM_TIME_TYPE = SYNC
+    endif
+endif
+TEMP_SRCVS_BUILD_PATH = $(SRCVS_DIR)/temp/Build.v
+TEMP_SRCVS_BUILD_INFO = "// \`define MEM_DBUG_INST\n// \`define MEM_DBUG_DATA\n\`define MEM_TIME_$(MEM_TIME_TYPE)"
 
 ifeq ($(findstring $(MAKECMDGOALS), config|clean),)
-    ifeq ($(shell cat $(BUILD_PATH) | grep $(CPU)),)
+    ifeq ($(shell cat $(TEMP_SRCSS_BUILD_PATH) | grep $(CPU)),)
         $(shell rm -rf out)
         $(shell rm -rf test_run_dir)
+        $(shell rm -rf rtl/build)
+    endif
+    ifeq ($(shell cat $(TEMP_SRCSS_TOPMAIN_PATH) | grep $(MEM_TIME_TYPE)),)
         $(shell rm -rf rtl/build)
     endif
 endif
 
 $(SRCVS_GEN): $(SRCSS)
 	mkdir -p $(SRCSS_DIR)/temp
-	echo $(BUILD_INFO) > $(BUILD_PATH) &&             \
-	echo $(TOP_MAIN_INFO_L1)  > $(TOP_MAIN_PATH) &&   \
-	echo $(TOP_MAIN_INFO_L2) >> $(TOP_MAIN_PATH) &&   \
-	echo $(TOP_MAIN_INFO_L3) >> $(TOP_MAIN_PATH) &&   \
-	echo $(TOP_MAIN_INFO_L4) >> $(TOP_MAIN_PATH) &&   \
-	echo $(TOP_MAIN_INFO_L5) >> $(TOP_MAIN_PATH) &&   \
-	echo $(TOP_MAIN_INFO_L6) >> $(TOP_MAIN_PATH) &&   \
-	echo $(TOP_MAIN_INFO_L7) >> $(TOP_MAIN_PATH) &&   \
-	echo $(TOP_MAIN_INFO_L8) >> $(TOP_MAIN_PATH) &&   \
-	mkdir -p $(BUILD_DIR) &&                          \
+	echo $(TEMP_SRCSS_BUILD_INFO)       > $(TEMP_SRCSS_BUILD_PATH)   && \
+	echo $(TEMP_SRCSS_TOPMAIN_INFO_L1)  > $(TEMP_SRCSS_TOPMAIN_PATH) && \
+	echo $(TEMP_SRCSS_TOPMAIN_INFO_L2) >> $(TEMP_SRCSS_TOPMAIN_PATH) && \
+	echo $(TEMP_SRCSS_TOPMAIN_INFO_L3) >> $(TEMP_SRCSS_TOPMAIN_PATH) && \
+	echo $(TEMP_SRCSS_TOPMAIN_INFO_L4) >> $(TEMP_SRCSS_TOPMAIN_PATH) && \
+	echo $(TEMP_SRCSS_TOPMAIN_INFO_L5) >> $(TEMP_SRCSS_TOPMAIN_PATH) && \
+	echo $(TEMP_SRCSS_TOPMAIN_INFO_L6) >> $(TEMP_SRCSS_TOPMAIN_PATH) && \
+	echo $(TEMP_SRCSS_TOPMAIN_INFO_L7) >> $(TEMP_SRCSS_TOPMAIN_PATH) && \
+	echo $(TEMP_SRCSS_TOPMAIN_INFO_L8) >> $(TEMP_SRCSS_TOPMAIN_PATH) && \
+	mkdir -p $(BUILD_DIR) &&                                            \
 	mill -i rtl.runMain TopMain -td $(BUILD_DIR)
 $(METEOR_BIN): $(INCS) $(SRCS) $(CONFIG)
+	mkdir -p $(SRCVS_DIR)/temp
+	echo $(TEMP_SRCVS_BUILD_INFO) > $(TEMP_SRCVS_BUILD_PATH)
 	@rm -rf $(OBJ_DIR)
 	$(VERILATOR) $(VERILATOR_CFLAGS)            \
 	--top-module $(CFG_CFLAGS_TOP_NAME) $(SRCS) \
