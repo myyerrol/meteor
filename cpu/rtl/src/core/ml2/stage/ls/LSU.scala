@@ -12,6 +12,7 @@ import cpu.bus._
 class LSU extends Module with ConfigInst
                          with Build {
     val io = IO(new Bundle {
+        val iInstName    = Input(UInt(SIGS_WIDTH.W))
         val iMemRdInstEn = Input(Bool())
         val iMemRdLoadEn = Input(Bool())
         val iMemRdSrc    = Input(UInt(SIGS_WIDTH.W))
@@ -24,19 +25,34 @@ class LSU extends Module with ConfigInst
 
         val iState       = Input(UInt(SIGS_WIDTH.W))
 
-        val oWaitFlag    = Output(Bool())
+        val oWaitRdFlag  = Output(Bool())
+        val oWaitWrFlag  = Output(Bool())
 
         val pLSU         = new LSUIO
     })
 
+    val rMemAddr = RegInit(ADDR_ZERO)
+
     io.pLSU.oMemRdInstEn   := io.iMemRdInstEn
     io.pLSU.oMemRdLoadEn   := io.iMemRdLoadEn
     io.pLSU.oMemRdAddrInst := io.iPC
-    io.pLSU.oMemRdAddrLoad := io.iALUOut
+    // io.pLSU.oMemRdAddrLoad := io.iALUOut
+    io.pLSU.oMemRdAddrLoad := rMemAddr
+
+    when (io.iState === STATE_LS) {
+        rMemAddr := Mux(
+            rMemAddr === ADDR_ZERO,
+            Mux((io.iMemRdLoadEn || io.iMemWrEn), io.iALUOut, rMemAddr),
+            rMemAddr)
+    }
+    .otherwise {
+        rMemAddr := ADDR_ZERO
+    }
 
     when (io.iMemWrEn) {
         io.pLSU.oMemWrEn   := true.B
-        io.pLSU.oMemWrAddr := io.iALUOut
+        // io.pLSU.oMemWrAddr := io.iALUOut
+        io.pLSU.oMemWrAddr := rMemAddr
         io.pLSU.oMemWrData := io.iMemWrData
         io.pLSU.oMemWrLen  := MuxLookup(io.iMemByt, 1.U(BYTE_WIDTH.W)) (
             Seq(
@@ -48,7 +64,7 @@ class LSU extends Module with ConfigInst
     }
     .otherwise {
         io.pLSU.oMemWrEn   := false.B
-        io.pLSU.oMemWrAddr := DATA_ZERO
+        io.pLSU.oMemWrAddr := ADDR_ZERO
         io.pLSU.oMemWrData := DATA_ZERO
         io.pLSU.oMemWrLen  := 1.U(BYTE_WIDTH.W)
     }
@@ -64,7 +80,8 @@ class LSU extends Module with ConfigInst
     mMem.io.iClock := clock
     mMem.io.iReset := reset
 
-    io.oWaitFlag := false.B
+    io.oWaitRdFlag := false.B
+    io.oWaitWrFlag := false.B
 
     val wMemWrMask = MuxLookup(
         io.iMemByt,
@@ -87,11 +104,9 @@ class LSU extends Module with ConfigInst
         mMem.io.pMemData.pWr.bMask := wMemWrMask
     }
     else if (MEM_TYPE.equals("axi4-lite")) {
-        val mAXI4LiteIFU     = Module(new AXI4LiteIFU)
-        val mAXI4LiteLSU     = Module(new AXI4LiteLSU)
-        val mAXI4LiteSRAM    = Module(new AXI4LiteSRAM)
-        mAXI4LiteLSU.io.pWrM  := DontCare
-        mAXI4LiteSRAM.io.pWrS := DontCare
+        val mAXI4LiteIFU  = Module(new AXI4LiteIFU)
+        val mAXI4LiteLSU  = Module(new AXI4LiteLSU)
+        val mAXI4LiteSRAM = Module(new AXI4LiteSRAM)
 
         mAXI4LiteIFU.io.pRdM.iRdEn      := io.pLSU.oMemRdInstEn
         mAXI4LiteIFU.io.pRdM.iRdAddr    := io.pLSU.oMemRdAddrInst
@@ -129,6 +144,8 @@ class LSU extends Module with ConfigInst
             mAXI4LiteSRAM.io.pRdS.iRValid    := true.B
             mAXI4LiteSRAM.io.pRdS.iRdData    := mMem.io.pMemInst.pRd.bData
             mAXI4LiteSRAM.io.pRdS.iRdResp    := AXI4_RESP_OKEY
+
+            io.oWaitRdFlag := ~mAXI4LiteIFU.io.pRdM.oRdFlag
         }
         .otherwise {
             mAXI4LiteSRAM.io.pRdS.pAR.bValid := mAXI4LiteLSU.io.pRdM.pAR.bValid
@@ -139,17 +156,27 @@ class LSU extends Module with ConfigInst
             mAXI4LiteSRAM.io.pRdS.iRValid    := true.B
             mAXI4LiteSRAM.io.pRdS.iRdData    := mMem.io.pMemData.pRd.bData
             mAXI4LiteSRAM.io.pRdS.iRdResp    := AXI4_RESP_OKEY
+
+            io.oWaitRdFlag := ~mAXI4LiteLSU.io.pRdM.oRdFlag
+            io.oWaitWrFlag := ~mAXI4LiteLSU.io.pWrM.oWrFlag
         }
 
-        mMem.io.pMemInst.pRd.bEn   := mAXI4LiteSRAM.io.pRdS.oRdEn
-        mMem.io.pMemInst.pRd.bAddr := mAXI4LiteSRAM.io.pRdS.oRdAddr
-        mMem.io.pMemData           := DontCare
+        mMem.io.pMemInst.pRd.bEn   := Mux(io.iState === STATE_IF,
+                                          mAXI4LiteSRAM.io.pRdS.oRdEn,
+                                          false.B)
+        mMem.io.pMemInst.pRd.bAddr := Mux(io.iState === STATE_IF,
+                                          mAXI4LiteSRAM.io.pRdS.oRdAddr,
+                                          DATA_ZERO)
+        mMem.io.pMemData.pRd.bEn   := Mux(io.iState === STATE_LS,
+                                          mAXI4LiteSRAM.io.pRdS.oRdEn,
+                                          false.B)
+        mMem.io.pMemData.pRd.bAddr := Mux(io.iState === STATE_LS,
+                                          mAXI4LiteSRAM.io.pRdS.oRdAddr,
+                                          DATA_ZERO)
         mMem.io.pMemData.pWr.bEn   := mAXI4LiteSRAM.io.pWrS.oWrEn
         mMem.io.pMemData.pWr.bAddr := mAXI4LiteSRAM.io.pWrS.oWrAddr
         mMem.io.pMemData.pWr.bData := mAXI4LiteSRAM.io.pWrS.oWrData
         mMem.io.pMemData.pWr.bMask := mAXI4LiteSRAM.io.pWrS.oWrStrb
-
-        io.oWaitFlag := ~mAXI4LiteIFU.io.pRdM.oRdFlag
     }
 
     io.pLSU.oMemRdDataInst := mMem.io.pMemInst.pRd.bData

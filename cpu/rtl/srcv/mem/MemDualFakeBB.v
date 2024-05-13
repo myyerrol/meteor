@@ -1,6 +1,6 @@
 `include "../Config.v"
 
-`define MEM_DBUG_INST
+// `define MEM_DBUG_INST
 // `define MEM_DBUG_DATA
 `define MEM_TYPE_SYNC
 

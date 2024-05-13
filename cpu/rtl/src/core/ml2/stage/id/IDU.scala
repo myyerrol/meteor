@@ -9,21 +9,23 @@ import cpu.port.ml2._
 
 class IDU extends Module with ConfigInst {
     val io = IO(new Bundle {
-        val iPC        = Input(UInt(ADDR_WIDTH.W))
-        val iInst      = Input(UInt(INST_WIDTH.W))
-        val iGPRWrData = Input(UInt(DATA_WIDTH.W))
+        val iPC         = Input(UInt(ADDR_WIDTH.W))
+        val iInst       = Input(UInt(INST_WIDTH.W))
+        val iGPRWrData  = Input(UInt(DATA_WIDTH.W))
 
-        val iWaitFlag  = Input(Bool())
+        val iWaitRdFlag = Input(Bool())
+        val iWaitWrFlag = Input(Bool())
 
-        val pCTR       = new CTRIO
-        val pGPRRd     = new GPRRdIO
-        val pIDU       = new IDUIO
+        val pCTR        = new CTRIO
+        val pGPRRd      = new GPRRdIO
+        val pIDU        = new IDUIO
     })
 
     val mCTR = Module(new CTR)
-    mCTR.io.iPC       := io.iPC
-    mCTR.io.iInst     := io.iInst
-    mCTR.io.iWaitFlag := io.iWaitFlag
+    mCTR.io.iPC         := io.iPC
+    mCTR.io.iInst       := io.iInst
+    mCTR.io.iWaitRdFlag := io.iWaitRdFlag
+    mCTR.io.iWaitWrFlag := io.iWaitWrFlag
 
     io.pCTR <> mCTR.io.pCTR
 

@@ -64,10 +64,11 @@ class Top extends Module with ConfigInst {
     mIFU.io.iALUZero  := mEXU.io.pEXU.oALUZero
     mIFU.io.iInst     := mLSU.io.pLSU.oMemRdDataInst
 
-    mIDU.io.iPC        := mIFU.io.pIFU.oPC
-    mIDU.io.iInst      := mIFU.io.pIFU.oInst
-    mIDU.io.iGPRWrData := mWBU.io.pWBU.oGPRWrData
-    mIDU.io.iWaitFlag  := mLSU.io.oWaitFlag
+    mIDU.io.iPC         := mIFU.io.pIFU.oPC
+    mIDU.io.iInst       := mIFU.io.pIFU.oInst
+    mIDU.io.iGPRWrData  := mWBU.io.pWBU.oGPRWrData
+    mIDU.io.iWaitRdFlag := mLSU.io.oWaitRdFlag
+    mIDU.io.iWaitWrFlag := mLSU.io.oWaitWrFlag
 
     mEXU.io.iPCNextEn := mIDU.io.pCTR.oPCNextEn
     mEXU.io.iPCJumpEn := mIDU.io.pCTR.oPCJumpEn
@@ -79,6 +80,7 @@ class Top extends Module with ConfigInst {
     mEXU.io.iRS2Data  := mIDU.io.pIDU.oRS2Data
     mEXU.io.iImmData  := mIDU.io.pIDU.oImmData
 
+    mLSU.io.iInstName    := mIDU.io.pCTR.oInstName
     mLSU.io.iMemRdInstEn := mIDU.io.pCTR.oMemRdInstEn
     mLSU.io.iMemRdLoadEn := mIDU.io.pCTR.oMemRdLoadEn
     mLSU.io.iMemRdSrc    := mIDU.io.pCTR.oMemRdSrc

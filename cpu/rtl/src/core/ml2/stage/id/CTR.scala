@@ -12,9 +12,10 @@ class CTR extends Module  with ConfigInstRV32I
                           with ConfigInstRVPri
                           with Build {
     val io = IO(new Bundle {
-        val iPC       = Input(UInt(ADDR_WIDTH.W))
-        val iInst     = Input(UInt(INST_WIDTH.W))
-        val iWaitFlag = Input(Bool())
+        val iPC         = Input(UInt(ADDR_WIDTH.W))
+        val iInst       = Input(UInt(INST_WIDTH.W))
+        val iWaitRdFlag = Input(Bool())
+        val iWaitWrFlag = Input(Bool())
 
         val pCTR  = new CTRIO
     })
@@ -95,8 +96,7 @@ class CTR extends Module  with ConfigInstRV32I
 
     switch (rStateCurr) {
         is (STATE_IF) {
-            // rStateCurr := STATE_ID
-            rStateCurr := Mux(io.iWaitFlag, rStateCurr, STATE_ID)
+            rStateCurr := Mux(io.iWaitRdFlag, rStateCurr, STATE_ID)
 
             wPCNextEn    := EN_TR
             wMemRdInstEn := EN_TR
@@ -106,18 +106,16 @@ class CTR extends Module  with ConfigInstRV32I
             wALURS1      := ALU_RS1_PC
             wALURS2      := ALU_RS2_4
             wEndPreFlag  := EN_TR
-
-
         }
         is (STATE_ID) {
             rStateCurr := STATE_EX
 
             when (wInstName === INST_NAME_BEQ  ||
-                wInstName === INST_NAME_BNE  ||
-                wInstName === INST_NAME_BLT  ||
-                wInstName === INST_NAME_BGE  ||
-                wInstName === INST_NAME_BLTU ||
-                wInstName === INST_NAME_BGEU) {
+                  wInstName === INST_NAME_BNE  ||
+                  wInstName === INST_NAME_BLT  ||
+                  wInstName === INST_NAME_BGE  ||
+                  wInstName === INST_NAME_BLTU ||
+                  wInstName === INST_NAME_BGEU) {
                 wPCJumpEn := EN_TR
                 wALUType  := ALU_TYPE_ADD
                 wALURS1   := ALU_RS1_PC
@@ -134,11 +132,11 @@ class CTR extends Module  with ConfigInstRV32I
             rStateCurr := STATE_WB
 
             when (wInstName === INST_NAME_SLL   ||
-                wInstName === INST_NAME_SLLI  ||
-                wInstName === INST_NAME_SRL   ||
-                wInstName === INST_NAME_SRLI  ||
-                wInstName === INST_NAME_SRA   ||
-                wInstName === INST_NAME_SRAI) {
+                  wInstName === INST_NAME_SLLI  ||
+                  wInstName === INST_NAME_SRL   ||
+                  wInstName === INST_NAME_SRLI  ||
+                  wInstName === INST_NAME_SRA   ||
+                  wInstName === INST_NAME_SRAI) {
                 wALUType := MuxLookup(wInstName, ALU_TYPE_X) (
                     Seq(
                         INST_NAME_SLL   -> ALU_TYPE_SLL,
@@ -162,10 +160,10 @@ class CTR extends Module  with ConfigInstRV32I
                 )
             }
             .elsewhen (wInstName === INST_NAME_ADD   ||
-                    wInstName === INST_NAME_ADDI  ||
-                    wInstName === INST_NAME_SUB   ||
-                    wInstName === INST_NAME_LUI   ||
-                    wInstName === INST_NAME_AUIPC) {
+                       wInstName === INST_NAME_ADDI  ||
+                       wInstName === INST_NAME_SUB   ||
+                       wInstName === INST_NAME_LUI   ||
+                       wInstName === INST_NAME_AUIPC) {
                 wALUType := MuxLookup(wInstName, ALU_TYPE_X) (
                     Seq(
                         INST_NAME_ADD   -> ALU_TYPE_ADD,
@@ -192,11 +190,11 @@ class CTR extends Module  with ConfigInstRV32I
                 )
             }
             .elsewhen (wInstName === INST_NAME_XOR  ||
-                    wInstName === INST_NAME_XORI ||
-                    wInstName === INST_NAME_OR   ||
-                    wInstName === INST_NAME_ORI  ||
-                    wInstName === INST_NAME_AND  ||
-                    wInstName === INST_NAME_ANDI) {
+                       wInstName === INST_NAME_XORI ||
+                       wInstName === INST_NAME_OR   ||
+                       wInstName === INST_NAME_ORI  ||
+                       wInstName === INST_NAME_AND  ||
+                       wInstName === INST_NAME_ANDI) {
                 wALUType := MuxLookup(wInstName, ALU_TYPE_X) (
                     Seq(
                         INST_NAME_XOR  -> ALU_TYPE_XOR,
@@ -220,8 +218,8 @@ class CTR extends Module  with ConfigInstRV32I
                 )
             }
             .elsewhen (wInstName === INST_NAME_SLT  ||
-                    wInstName === INST_NAME_SLTU ||
-                    wInstName === INST_NAME_SLTIU) {
+                       wInstName === INST_NAME_SLTU ||
+                       wInstName === INST_NAME_SLTIU) {
                 wALUType := Mux(wInstName === INST_NAME_SLT,
                                 ALU_TYPE_SLT,
                                 ALU_TYPE_SLTU)
@@ -231,11 +229,11 @@ class CTR extends Module  with ConfigInstRV32I
                                 ALU_RS2_GPR)
             }
             .elsewhen (wInstName === INST_NAME_BEQ  ||
-                    wInstName === INST_NAME_BNE  ||
-                    wInstName === INST_NAME_BLT  ||
-                    wInstName === INST_NAME_BGE  ||
-                    wInstName === INST_NAME_BLTU ||
-                    wInstName === INST_NAME_BGEU) {
+                       wInstName === INST_NAME_BNE  ||
+                       wInstName === INST_NAME_BLT  ||
+                       wInstName === INST_NAME_BGE  ||
+                       wInstName === INST_NAME_BLTU ||
+                       wInstName === INST_NAME_BGEU) {
                 rStateCurr := STATE_IF
 
                 wPCWrEn  := EN_TR
@@ -267,10 +265,10 @@ class CTR extends Module  with ConfigInstRV32I
                 wALURS2   := ALU_RS2_IMM_I
             }
             .elsewhen (wInstName === INST_NAME_LB  ||
-                    wInstName === INST_NAME_LH  ||
-                    wInstName === INST_NAME_LBU ||
-                    wInstName === INST_NAME_LHU ||
-                    wInstName === INST_NAME_LW) {
+                       wInstName === INST_NAME_LH  ||
+                       wInstName === INST_NAME_LBU ||
+                       wInstName === INST_NAME_LHU ||
+                       wInstName === INST_NAME_LW) {
                 rStateCurr := STATE_LS
 
                 wALUType := ALU_TYPE_ADD
@@ -278,8 +276,8 @@ class CTR extends Module  with ConfigInstRV32I
                 wALURS2  := ALU_RS2_IMM_I
             }
             .elsewhen (wInstName === INST_NAME_SB ||
-                    wInstName === INST_NAME_SH ||
-                    wInstName === INST_NAME_SW) {
+                       wInstName === INST_NAME_SH ||
+                       wInstName === INST_NAME_SW) {
                 rStateCurr := STATE_LS
 
                 wALUType := ALU_TYPE_ADD
@@ -287,13 +285,13 @@ class CTR extends Module  with ConfigInstRV32I
                 wALURS2  := ALU_RS2_IMM_S
             }
             .elsewhen (wInstName === INST_NAME_MUL    ||
-                    wInstName === INST_NAME_MULH   ||
-                    wInstName === INST_NAME_MULHSU ||
-                    wInstName === INST_NAME_MULHU  ||
-                    wInstName === INST_NAME_DIV    ||
-                    wInstName === INST_NAME_DIVU   ||
-                    wInstName === INST_NAME_REM    ||
-                    wInstName === INST_NAME_REMU) {
+                       wInstName === INST_NAME_MULH   ||
+                       wInstName === INST_NAME_MULHSU ||
+                       wInstName === INST_NAME_MULHU  ||
+                       wInstName === INST_NAME_DIV    ||
+                       wInstName === INST_NAME_DIVU   ||
+                       wInstName === INST_NAME_REM    ||
+                       wInstName === INST_NAME_REMU) {
                 wALUType := MuxLookup(wInstName, ALU_TYPE_X) (
                     Seq(
                         INST_NAME_MUL    -> ALU_TYPE_MUL,
@@ -319,19 +317,19 @@ class CTR extends Module  with ConfigInstRV32I
                 wALURS2  := ALU_RS2_4
             }
             .elsewhen (wInstName === INST_NAME_LB  ||
-                    wInstName === INST_NAME_LH  ||
-                    wInstName === INST_NAME_LBU ||
-                    wInstName === INST_NAME_LHU ||
-                    wInstName === INST_NAME_LW) {
-                rStateCurr := STATE_WB
+                       wInstName === INST_NAME_LH  ||
+                       wInstName === INST_NAME_LBU ||
+                       wInstName === INST_NAME_LHU ||
+                       wInstName === INST_NAME_LW) {
+                rStateCurr := Mux(io.iWaitRdFlag, rStateCurr, STATE_WB)
 
                 wMemRdLoadEn := EN_TR
                 wMemRdSrc    := MEM_RD_SRC_ALU
             }
             .elsewhen (wInstName === INST_NAME_SB ||
-                    wInstName === INST_NAME_SH ||
-                    wInstName === INST_NAME_SW) {
-                rStateCurr := STATE_IF
+                       wInstName === INST_NAME_SH ||
+                       wInstName === INST_NAME_SW) {
+                rStateCurr := Mux(io.iWaitWrFlag, rStateCurr, STATE_IF)
 
                 wPCWrEn  := EN_TR
                 wPCWrSrc := PC_WR_SRC_NEXT

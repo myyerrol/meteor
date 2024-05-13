@@ -85,38 +85,8 @@ class AXI4Lite extends Module with ConfigInst {
         rAddr := rAddr + 4.U
     }
 
-    // io.pState.bEndPreFlag := DontCare
-    // io.pState.bEndAllFlag := DontCare
-    // io.pState.bEndAllData := DontCare
-    // io.pState.bCSRType    := DontCare
-
-    // printf("AXI4Lite Write\n")
-    // printf("[axi]      state: %d\n", mAXI4LiteWrM.io.pWrM.oWrState)
-    // printf("[axi] [aw] valid: %d, ready: %d, addr: %x\n",
-    //        mAXI4LiteWrM.io.pWrM.pAW.bValid,
-    //        mAXI4LiteWrM.io.pWrM.pAW.bReady,
-    //        mAXI4LiteWrM.io.pWrM.pAW.bAddr)
-    // printf("[axi] [w]  valid: %d, ready: %d, data: %x, ",
-    //        mAXI4LiteWrM.io.pWrM.pW.bValid,
-    //        mAXI4LiteWrM.io.pWrM.pW.bReady,
-    //        mAXI4LiteWrM.io.pWrM.pW.bData)
-    // printf(p"strb: ${mAXI4LiteWrM.io.pWrM.pW.bStrb}\n")
-    // printf("[axi] [b]  valid: %d, ready: %d, resp: %d\n",
-    //        mAXI4LiteWrM.io.pWrM.pB.bValid,
-    //        mAXI4LiteWrM.io.pWrM.pB.bReady,
-    //        mAXI4LiteWrM.io.pWrM.pB.bResp)
-    // printf("------------------------------------------------------\n")
-    // printf("[axi] [m] flag: %d, resp: %d\n",
-    //        mAXI4LiteWrM.io.pWrM.oWrFlag,
-    //        mAXI4LiteWrM.io.pWrM.oWrResp)
-    // printf("[axi] [s] en:   %d, addr: %x, data: %x, ",
-    //        mAXI4LiteWrS.io.pWrS.oWrEn,
-    //        mAXI4LiteWrS.io.pWrS.oWrAddr,
-    //        mAXI4LiteWrS.io.pWrS.oWrData)
-    // printf(p"strb: ${mAXI4LiteWrS.io.pWrS.oWrStrb}\n")
-    // printf("------------------------------------------------------\n")
-    // printf("[axi] [t] bvalid num: %d, bvalid flag: %d\n",
-    //        cBValidNum,
-    //        cBValidFlag)
-    // printf("\n");
+    io.pState.bEndPreFlag := DontCare
+    io.pState.bEndAllFlag := DontCare
+    io.pState.bEndAllData := DontCare
+    io.pState.bCSRType    := DontCare
 }
