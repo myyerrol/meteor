@@ -56,6 +56,8 @@ class Top extends Module with ConfigInst with Build {
     mCSR.io.pCSRRd <> mIDU.io.pCSRRd
     mCSR.io.pCSRWr <> mWBU.io.pCSRWrO
 
+    mMem.io.iClock             := clock
+    mMem.io.iReset             := reset
     mMem.io.pMemInst.pRd.bEn   := true.B
     mMem.io.pMemInst.pRd.bAddr := mIFU.io.pBase.bPC
     mMem.io.pMemData           <> mLSU.io.pMemDataO
