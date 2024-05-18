@@ -2,7 +2,7 @@
     <img alt="Logo" src=".img/logo.png" width="200">
 </p>
 <h1>
-    <p align="center"></p>
+    <p align="center">An Open Source RISC-V Processors written by Chisel</p>
 </h1>
 <p align="center">
     <a title="License" target="_blank" href="https://github.com/myyerrol/meteor/blob/master/LICENSE">
