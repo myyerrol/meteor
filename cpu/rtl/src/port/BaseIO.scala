@@ -9,5 +9,5 @@ class BaseIO extends Bundle with ConfigIO {
     val bPC     = Output(UInt(ADDR_WIDTH.W))
     val bPCNext = Output(UInt(ADDR_WIDTH.W))
     val bPCEn   = Output(Bool())
-    val bInst   = Output(UInt(DATA_WIDTH.W))
+    val bInst   = Output(UInt(INST_WIDTH.W))
 }
