@@ -6,6 +6,7 @@ out/
 temp/
 test_run_dir/
 .bloop
+.metals
 
 env/
 ip/
