@@ -8,4 +8,3 @@ import cpu.base._
 class SpecIO(vStage: String) extends Bundle with ConfigIO {
 
 }
-
