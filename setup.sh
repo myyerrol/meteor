@@ -11,7 +11,7 @@ if [ ! -d ${PATH_ENV} ]; then
     rm -rf ${PATH_ENV}
     git clone git@github.com:memdsl/blackhole.git ${PATH_ENV}
 else
-    echo "Updating common scripts..."
+    echo "Updating env..."
     cd ${PATH_ENV}
     git pull origin main
     cd ${PATH_ROOT}
